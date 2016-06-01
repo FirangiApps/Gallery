@@ -62,7 +62,7 @@
     </style>
     <style name="DialogPickerTheme" parent="Theme.Gallery">
     </style>
-    <style name="Theme.ProxyLauncher" parent="@android:Theme.Translucent.NoTitleBar">
+    <style name="Theme.ProxyLauncher" parent="@android:style/Theme.Translucent.NoTitleBar">
     </style>
     <bool name="picker_is_dialog">false</bool>
     <color name="darker_transparent">#C1000000</color>
@@ -310,7 +310,7 @@
         <item name="android:background">@drawable/bg_pressed</item>
     </style>
 
-    <style name="AppTheme" parent="android:Theme.Material.Light">
+    <style name="AppTheme" parent="Theme.AppCompat.Light">
         <item name="android:windowDrawsSystemBarBackgrounds">true</item>
         <item name="android:windowBackground">@android:color/black</item>
         <item name="android:statusBarColor">@android:color/transparent</item>

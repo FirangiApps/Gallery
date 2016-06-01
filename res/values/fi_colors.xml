@@ -1,5 +1,4 @@
 <?xml version="1.0" encoding="utf-8"?>
-
 <!-- Copyright (C) 2012 The Android Open Source Project
 
      Licensed under the Apache License, Version 2.0 (the "License");
@@ -14,24 +13,20 @@
      See the License for the specific language governing permissions and
      limitations under the License.
 -->
+<resources>
 
-<merge xmlns:android="http://schemas.android.com/apk/res/android">
+    <color name="colorPrimary">#FFF</color>
+    <color name="colorPrimaryDark">#BBB</color>
+    <color name="colorAccent">#33b5e5</color>
 
-    <RelativeLayout
-        android:id="@+id/gl_parent_layout"
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:layout_marginBottom="56dp">
+    <color name="colorWhite">#fafafa</color>
+    <color name="colorBlack">#212121</color>
 
-        <com.android.gallery3d.ui.GLRootView
-            android:id="@+id/gl_root_view"
-            android:layout_width="match_parent"
-            android:layout_height="match_parent" />
-    </RelativeLayout>
+    <color name="light_black">#424242</color>
 
-    <View
-        android:id="@+id/gl_root_cover"
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:background="#fafafa" />
-</merge>
+    <color name="black_transparent_1">#1a000000</color>
+    <color name="black_transparent_2">#26000000</color>
+    <color name="black_transparent_3">#75000000</color>
+    <color name="black_transparent_4">#8A000000</color>
+    <color name="black_transparent_5">#C1000000</color>
+</resources>

@@ -6,6 +6,8 @@ LOCAL_MODULE_TAGS := optional
 
 LOCAL_JAVA_LIBRARIES := telephony-common
 
+LOCAL_STATIC_ANDROID_LIBRARIES := $(ANDROID_SUPPORT_DESIGN_TARGETS)
+
 LOCAL_STATIC_JAVA_LIBRARIES := android-support-v13
 LOCAL_STATIC_JAVA_LIBRARIES += org.codeaurora.gallery.common
 LOCAL_STATIC_JAVA_LIBRARIES += xmp_toolkit
@@ -61,3 +63,4 @@ ifeq ($(strip $(LOCAL_PACKAGE_OVERRIDES)),)
 include $(call all-makefiles-under, $(LOCAL_PATH))
 
 endif
+
