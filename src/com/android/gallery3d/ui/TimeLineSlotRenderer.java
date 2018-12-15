@@ -31,35 +31,23 @@ public class TimeLineSlotRenderer extends AbstractSlotRenderer {
 
     @SuppressWarnings("unused")
     private static final String TAG = "AlbumView";
-
-    private final int mPlaceholderColor;
     private static final int CACHE_SIZE = 96;
-
-    private TimeLineSlidingWindow mDataWindow;
+    private final int mPlaceholderColor;
     private final AbstractGalleryActivity mActivity;
     private final ColorTexture mWaitLoadingTexture;
     private final TimeLineSlotView mSlotView;
     private final SelectionManager mSelectionManager;
-
+    private final LabelSpec mLabelSpec;
+    private TimeLineSlidingWindow mDataWindow;
     private int mPressedIndex = -1;
     private boolean mAnimatePressedUp;
     private Path mHighlightItemPath = null;
     private boolean mInSelectionMode;
-
     private AlbumSlotRenderer.SlotFilter mSlotFilter;
-    private final LabelSpec mLabelSpec;
 
-    public static class LabelSpec {
-
-        public int timeLineTitleHeight;
-        public int timeLineTitleFontSize;
-        public int timeLineTitleTextColor;
-        public int timeLineNumberTextColor;
-        public int timeLineTitleBackgroundColor;
-}
     public TimeLineSlotRenderer(AbstractGalleryActivity activity, TimeLineSlotView slotView,
-                                    SelectionManager selectionManager, LabelSpec labelSpec,
-                                    int placeholderColor) {
+                                SelectionManager selectionManager, LabelSpec labelSpec,
+                                int placeholderColor) {
         super(activity);
         mActivity = activity;
         mSlotView = slotView;
@@ -69,6 +57,13 @@ public class TimeLineSlotRenderer extends AbstractSlotRenderer {
         mWaitLoadingTexture = new ColorTexture(mPlaceholderColor);
         mWaitLoadingTexture.setSize(1, 1);
 
+    }
+
+    protected static Texture checkContentTexture(Texture texture) {
+        return (texture instanceof TiledTexture)
+                && !((TiledTexture) texture).isReady()
+                ? null
+                : texture;
     }
 
     public void setPressedIndex(int index) {
@@ -89,15 +84,8 @@ public class TimeLineSlotRenderer extends AbstractSlotRenderer {
         mSlotView.invalidate();
     }
 
-    protected static Texture checkContentTexture(Texture texture) {
-        return (texture instanceof TiledTexture)
-                && !((TiledTexture) texture).isReady()
-                ? null
-                : texture;
-    }
-
     protected int renderOverlay(GLCanvas canvas, int index,
-            TimeLineSlidingWindow.AlbumEntry entry, int width, int height) {
+                                TimeLineSlidingWindow.AlbumEntry entry, int width, int height) {
         int renderRequestFlags = 0;
         if (mPressedIndex == index) {
             if (mAnimatePressedUp) {
@@ -117,19 +105,6 @@ public class TimeLineSlotRenderer extends AbstractSlotRenderer {
             drawSelectedFrame(canvas, width, height);
         }
         return renderRequestFlags;
-    }
-
-    protected class MyDataModelListener implements TimeLineSlidingWindow.Listener {
-        @Override
-        public void onContentChanged() {
-            mSlotView.invalidate();
-        }
-
-        @Override
-        public void onSizeChanged(int[] size) {
-            mSlotView.setSlotCount(size);
-            mSlotView.invalidate();
-        }
     }
 
     public void resume() {
@@ -198,5 +173,27 @@ public class TimeLineSlotRenderer extends AbstractSlotRenderer {
             renderRequestFlags |= renderOverlay(canvas, index, entry, width, height);
         }
         return renderRequestFlags;
+    }
+
+    public static class LabelSpec {
+
+        public int timeLineTitleHeight;
+        public int timeLineTitleFontSize;
+        public int timeLineTitleTextColor;
+        public int timeLineNumberTextColor;
+        public int timeLineTitleBackgroundColor;
+    }
+
+    protected class MyDataModelListener implements TimeLineSlidingWindow.Listener {
+        @Override
+        public void onContentChanged() {
+            mSlotView.invalidate();
+        }
+
+        @Override
+        public void onSizeChanged(int[] size) {
+            mSlotView.setSlotCount(size);
+            mSlotView.invalidate();
+        }
     }
 }

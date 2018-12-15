@@ -8,9 +8,8 @@ import com.android.gallery3d.glrenderer.RawTexture;
 import com.android.gallery3d.ui.GLRoot.OnGLIdleListener;
 
 public class PreparePageFadeoutTexture implements OnGLIdleListener {
-    private static final long TIMEOUT = 200;
     public static final String KEY_FADE_TEXTURE = "fade_texture";
-
+    private static final long TIMEOUT = 200;
     private RawTexture mTexture;
     private ConditionVariable mResultReady = new ConditionVariable(false);
     private boolean mCancelled = false;
@@ -28,7 +27,27 @@ public class PreparePageFadeoutTexture implements OnGLIdleListener {
             return;
         }
         mTexture = new RawTexture(w, h, true);
-        mRootPane =  rootPane;
+        mRootPane = rootPane;
+    }
+
+    public static void prepareFadeOutTexture(AbstractGalleryActivity activity,
+                                             GLView rootPane) {
+        PreparePageFadeoutTexture task = new PreparePageFadeoutTexture(rootPane);
+        if (task.isCancelled()) return;
+        GLRoot root = activity.getGLRoot();
+        RawTexture texture = null;
+        root.lockRenderThread();
+        try {
+            root.addOnGLIdleListener(task);
+            texture = task.get();
+        } finally {
+            root.unlockRenderThread();
+        }
+
+        if (texture == null) {
+            return;
+        }
+        activity.getTransitionStore().put(KEY_FADE_TEXTURE, texture);
     }
 
     public boolean isCancelled() {
@@ -61,25 +80,5 @@ public class PreparePageFadeoutTexture implements OnGLIdleListener {
         }
         mResultReady.open();
         return false;
-    }
-
-    public static void prepareFadeOutTexture(AbstractGalleryActivity activity,
-            GLView rootPane) {
-        PreparePageFadeoutTexture task = new PreparePageFadeoutTexture(rootPane);
-        if (task.isCancelled()) return;
-        GLRoot root = activity.getGLRoot();
-        RawTexture texture = null;
-        root.lockRenderThread();
-        try {
-            root.addOnGLIdleListener(task);
-            texture = task.get();
-        } finally {
-            root.unlockRenderThread();
-        }
-
-        if (texture == null) {
-            return;
-        }
-        activity.getTransitionStore().put(KEY_FADE_TEXTURE, texture);
     }
 }

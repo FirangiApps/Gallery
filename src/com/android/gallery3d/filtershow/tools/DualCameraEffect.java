@@ -35,8 +35,6 @@ import android.util.Log;
 import android.util.Size;
 
 public class DualCameraEffect {
-    private static final String TAG = "DualCameraEffect";
-
     // following constants should be consistent with jni code
     public static final int INPUT = 0;
     public static final int REFOCUS_CIRCLE = 1;
@@ -52,8 +50,10 @@ public class DualCameraEffect {
     public static final int BLACKBOARD = 11;
     public static final int POSTERIZE = 12;
     public static final int NEGATIVE = 13;
-
     public static final float DEFAULT_BRIGHTNESS_INTENSITY = 1.0f;
+    private static final String TAG = "DualCameraEffect";
+    private static boolean loaded;
+    private static DualCameraEffect instance;
 
     static {
         try {
@@ -66,14 +66,12 @@ public class DualCameraEffect {
         }
     }
 
-    private static boolean loaded;
-    private static DualCameraEffect instance;
-
     private int[] mRoi;
     private int mWidth;
     private int mHeight;
 
-    private DualCameraEffect() {}
+    private DualCameraEffect() {
+    }
 
     public static boolean isSupported() {
         return loaded;
@@ -87,7 +85,7 @@ public class DualCameraEffect {
     }
 
     public boolean initialize(Bitmap primary, Bitmap depthMap, int[] roi, int width, int height,
-            float brIntensity) {
+                              float brIntensity) {
         boolean ok = init(primary, depthMap, roi, width, height, brIntensity);
         if (ok) {
             mRoi = roi;
@@ -107,12 +105,12 @@ public class DualCameraEffect {
     }
 
     native private boolean init(Bitmap primary, Bitmap depthMap, int[] roi, int width, int height,
-            float brIntensity);
+                                float brIntensity);
 
     native public void release();
 
     native public boolean render(int effect, int focusPointX, int focusPointY, Bitmap out,
-            float intensity);
+                                 float intensity);
 
     public boolean render(int effect, int focusPointX, int focusPointY, Bitmap out) {
         return render(effect, focusPointX, focusPointY, out, 0);

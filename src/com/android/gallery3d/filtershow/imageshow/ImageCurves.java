@@ -33,7 +33,6 @@ import android.widget.Button;
 import android.widget.LinearLayout;
 import android.widget.PopupMenu;
 
-import org.codeaurora.gallery.R;
 import com.android.gallery3d.filtershow.FilterShowActivity;
 import com.android.gallery3d.filtershow.editors.Editor;
 import com.android.gallery3d.filtershow.editors.EditorCurves;
@@ -41,6 +40,8 @@ import com.android.gallery3d.filtershow.filters.FilterCurvesRepresentation;
 import com.android.gallery3d.filtershow.filters.FiltersManager;
 import com.android.gallery3d.filtershow.filters.ImageFilterCurves;
 import com.android.gallery3d.filtershow.pipeline.ImagePreset;
+
+import org.codeaurora.gallery.R;
 
 import java.util.HashMap;
 
@@ -50,19 +51,17 @@ public class ImageCurves extends ImageShow {
     Paint gPaint = new Paint();
     Path gPathSpline = new Path();
     HashMap<Integer, String> mIdStrLut;
-
+    int[] redHistogram = new int[256];
+    int[] greenHistogram = new int[256];
+    int[] blueHistogram = new int[256];
+    Path gHistoPath = new Path();
+    boolean mDoingTouchMove = false;
     private int mCurrentCurveIndex = Spline.RGB;
     private boolean mDidAddPoint = false;
     private boolean mDidDelete = false;
     private ControlPoint mCurrentControlPoint = null;
     private int mCurrentPick = -1;
     private ImagePreset mLastPreset = null;
-    int[] redHistogram = new int[256];
-    int[] greenHistogram = new int[256];
-    int[] blueHistogram = new int[256];
-    Path gHistoPath = new Path();
-
-    boolean mDoingTouchMove = false;
     private EditorCurves mEditorCurves;
     private FilterCurvesRepresentation mFilterCurvesRepresentation;
 
@@ -89,12 +88,12 @@ public class ImageCurves extends ImageShow {
     }
 
     private void showPopupMenu(LinearLayout accessoryViewList) {
-        final Button button = (Button) accessoryViewList.findViewById(
+        final Button button = accessoryViewList.findViewById(
                 R.id.applyEffect);
         if (button == null) {
             return;
         }
-        if (mIdStrLut == null){
+        if (mIdStrLut == null) {
             mIdStrLut = new HashMap<Integer, String>();
             mIdStrLut.put(R.id.curve_menu_rgb,
                     getContext().getString(R.string.curves_channel_rgb));
@@ -117,18 +116,18 @@ public class ImageCurves extends ImageShow {
         });
         Editor.hackFixStrings(popupMenu.getMenu());
         popupMenu.show();
-        ((FilterShowActivity)getContext()).onShowMenu(popupMenu);
+        ((FilterShowActivity) getContext()).onShowMenu(popupMenu);
     }
 
     @Override
     public void openUtilityPanel(final LinearLayout accessoryViewList) {
         Context context = accessoryViewList.getContext();
-        Button view = (Button) accessoryViewList.findViewById(R.id.applyEffect);
+        Button view = accessoryViewList.findViewById(R.id.applyEffect);
         view.setText(context.getString(R.string.curves_channel_rgb));
         view.setVisibility(View.VISIBLE);
 
         view.setOnClickListener(new OnClickListener() {
-                @Override
+            @Override
             public void onClick(View arg0) {
                 showPopupMenu(accessoryViewList);
             }
@@ -332,38 +331,6 @@ public class ImageCurves extends ImageShow {
         }
     }
 
-    class ComputeHistogramTask extends AsyncTask<Bitmap, Void, int[]> {
-        @Override
-        protected int[] doInBackground(Bitmap... params) {
-            int[] histo = new int[256 * 3];
-            Bitmap bitmap = params[0];
-            int w = bitmap.getWidth();
-            int h = bitmap.getHeight();
-            int[] pixels = new int[w * h];
-            bitmap.getPixels(pixels, 0, w, 0, 0, w, h);
-            for (int i = 0; i < w; i++) {
-                for (int j = 0; j < h; j++) {
-                    int index = j * w + i;
-                    int r = Color.red(pixels[index]);
-                    int g = Color.green(pixels[index]);
-                    int b = Color.blue(pixels[index]);
-                    histo[r]++;
-                    histo[256 + g]++;
-                    histo[512 + b]++;
-                }
-            }
-            return histo;
-        }
-
-        @Override
-        protected void onPostExecute(int[] result) {
-            System.arraycopy(result, 0, redHistogram, 0, 256);
-            System.arraycopy(result, 256, greenHistogram, 0, 256);
-            System.arraycopy(result, 512, blueHistogram, 0, 256);
-            invalidate();
-        }
-    }
-
     private void drawHistogram(Canvas canvas, int[] histogram, int color, PorterDuff.Mode mode) {
         int max = 0;
         for (int i = 0; i < histogram.length; i++) {
@@ -442,5 +409,37 @@ public class ImageCurves extends ImageShow {
 
     public void setFilterDrawRepresentation(FilterCurvesRepresentation drawRep) {
         mFilterCurvesRepresentation = drawRep;
+    }
+
+    class ComputeHistogramTask extends AsyncTask<Bitmap, Void, int[]> {
+        @Override
+        protected int[] doInBackground(Bitmap... params) {
+            int[] histo = new int[256 * 3];
+            Bitmap bitmap = params[0];
+            int w = bitmap.getWidth();
+            int h = bitmap.getHeight();
+            int[] pixels = new int[w * h];
+            bitmap.getPixels(pixels, 0, w, 0, 0, w, h);
+            for (int i = 0; i < w; i++) {
+                for (int j = 0; j < h; j++) {
+                    int index = j * w + i;
+                    int r = Color.red(pixels[index]);
+                    int g = Color.green(pixels[index]);
+                    int b = Color.blue(pixels[index]);
+                    histo[r]++;
+                    histo[256 + g]++;
+                    histo[512 + b]++;
+                }
+            }
+            return histo;
+        }
+
+        @Override
+        protected void onPostExecute(int[] result) {
+            System.arraycopy(result, 0, redHistogram, 0, 256);
+            System.arraycopy(result, 256, greenHistogram, 0, 256);
+            System.arraycopy(result, 512, blueHistogram, 0, 256);
+            invalidate();
+        }
     }
 }

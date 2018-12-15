@@ -46,13 +46,12 @@ import java.util.concurrent.TimeUnit;
 
 public class ImageLoaderConfig {
 
-    private final String TAG = "ImageLoaderConfig";
+    public static final int DEFAULT_THREAD_POOL_SIZE = 4;
+    public static final int DEFAULT_THREAD_PRIORITY = Thread.NORM_PRIORITY - 2;
     private static final String URI_AND_SIZE_SEPARATOR = "_";
     private static final String WIDTH_AND_HEIGHT_SEPARATOR = "x";
     final Resources resources;
-
-    public static final int DEFAULT_THREAD_POOL_SIZE = 4;
-    public static final int DEFAULT_THREAD_PRIORITY = Thread.NORM_PRIORITY - 2;
+    private final String TAG = "ImageLoaderConfig";
     public Context context;
 
     public Executor taskExecutor = null;
@@ -60,16 +59,34 @@ public class ImageLoaderConfig {
 
     public int threadPoolSize = DEFAULT_THREAD_POOL_SIZE;
     public int threadPriority = DEFAULT_THREAD_PRIORITY;
-
+    public ImageLoaderOptions defaultOptions = null;
     private LinkedHashMap<String, Bitmap> imageCacheMap;
     private int icmMaxSize;
     private int icmSize;
-    public ImageLoaderOptions defaultOptions = null;
 
     public ImageLoaderConfig(Context context) {
         this.context = context.getApplicationContext();
         resources = context.getResources();
         initEmptyFieldsWithDefaultValues();
+    }
+
+    public static String generateKey(String imageUri, int w, int h) {
+        return new StringBuilder(imageUri).append(URI_AND_SIZE_SEPARATOR).append(w)
+                .append(WIDTH_AND_HEIGHT_SEPARATOR).append(h).toString();
+    }
+
+    public static Executor createExecutor(int threadPoolSize, int threadPriority) {
+        BlockingQueue<Runnable> taskQueue = new LinkedBlockingQueue<Runnable>();
+        return new ThreadPoolExecutor(threadPoolSize, threadPoolSize, 0L, TimeUnit.MILLISECONDS,
+                taskQueue, new ThreadFactoryImpl(threadPriority));
+    }
+
+    public static Handler defineHandler(ImageLoaderOptions options) {
+        Handler handler = options.getHandler();
+        if (handler == null && Looper.myLooper() == Looper.getMainLooper()) {
+            handler = new Handler();
+        }
+        return handler;
     }
 
     public void cacheMapSizePercentage(int availableMemoryPercent) {
@@ -166,7 +183,6 @@ public class ImageLoaderConfig {
         return value.getRowBytes() * value.getHeight();
     }
 
-
     public int defineHeightForImage(ImageViewImpl imageView) {
         int height = imageView.getHeight();
         if (height <= 0)
@@ -179,24 +195,5 @@ public class ImageLoaderConfig {
         if (width <= 0)
             width = resources.getDisplayMetrics().widthPixels;
         return width;
-    }
-
-    public static String generateKey(String imageUri, int w, int h) {
-        return new StringBuilder(imageUri).append(URI_AND_SIZE_SEPARATOR).append(w)
-                .append(WIDTH_AND_HEIGHT_SEPARATOR).append(h).toString();
-    }
-
-    public static Executor createExecutor(int threadPoolSize, int threadPriority) {
-        BlockingQueue<Runnable> taskQueue = new LinkedBlockingQueue<Runnable>();
-        return new ThreadPoolExecutor(threadPoolSize, threadPoolSize, 0L, TimeUnit.MILLISECONDS,
-                taskQueue, new ThreadFactoryImpl(threadPriority));
-    }
-
-    public static Handler defineHandler(ImageLoaderOptions options) {
-        Handler handler = options.getHandler();
-        if (handler == null && Looper.myLooper() == Looper.getMainLooper()) {
-            handler = new Handler();
-        }
-        return handler;
     }
 }

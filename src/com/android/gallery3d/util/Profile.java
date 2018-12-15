@@ -35,6 +35,50 @@ public class Profile {
     @SuppressWarnings("unused")
     private static final String TAG = "Profile";
     private static final int NS_PER_MS = 1000000;
+    // This is a watchdog thread which dumps stacks of other threads periodically.
+    private static Watchdog sWatchdog = new Watchdog();
+
+    // Enable profiling for the calling thread. Periodically (every cycleTimeInMs
+    // milliseconds) sample the stack trace of the calling thread.
+    public static void enable(int cycleTimeInMs) {
+        Thread t = Thread.currentThread();
+        sWatchdog.addWatchEntry(t, cycleTimeInMs);
+    }
+
+    // Disable profiling for the calling thread.
+    public static void disable() {
+        sWatchdog.removeWatchEntry(Thread.currentThread());
+    }
+
+    // Disable profiling for all threads.
+    public static void disableAll() {
+        sWatchdog.removeAllWatchEntries();
+    }
+
+    // Dump the profiling data to a file.
+    public static void dumpToFile(String filename) {
+        sWatchdog.dumpToFile(filename);
+    }
+
+    // Reset the collected profiling data.
+    public static void reset() {
+        sWatchdog.reset();
+    }
+
+    // Hold the future samples coming from current thread until commit() or
+    // drop() is called, and those samples are recorded or ignored as a result.
+    // This must called after enable() to be effective.
+    public static void hold() {
+        sWatchdog.hold(Thread.currentThread());
+    }
+
+    public static void commit() {
+        sWatchdog.commit(Thread.currentThread());
+    }
+
+    public static void drop() {
+        sWatchdog.drop(Thread.currentThread());
+    }
 
     // This is a watchdog entry for one thread.
     // For every cycleTime period, we dump the stack of the thread.
@@ -49,13 +93,12 @@ public class Profile {
         ArrayList<String[]> holdingStacks = new ArrayList<String[]>();
     }
 
-    // This is a watchdog thread which dumps stacks of other threads periodically.
-    private static Watchdog sWatchdog = new Watchdog();
-
     private static class Watchdog {
         private ArrayList<WatchEntry> mList = new ArrayList<WatchEntry>();
         private HandlerThread mHandlerThread;
         private Handler mHandler;
+        private Random mRandom = new Random();
+        private ProfileData mProfileData = new ProfileData();
         private Runnable mProcessRunnable = new Runnable() {
             @Override
             public void run() {
@@ -64,8 +107,6 @@ public class Profile {
                 }
             }
         };
-        private Random mRandom = new Random();
-        private ProfileData mProfileData = new ProfileData();
 
         public Watchdog() {
             mHandlerThread = new HandlerThread("Watchdog Handler",
@@ -180,47 +221,5 @@ public class Profile {
             entry.isHolding = false;
             entry.holdingStacks.clear();
         }
-    }
-
-    // Enable profiling for the calling thread. Periodically (every cycleTimeInMs
-    // milliseconds) sample the stack trace of the calling thread.
-    public static void enable(int cycleTimeInMs) {
-        Thread t = Thread.currentThread();
-        sWatchdog.addWatchEntry(t, cycleTimeInMs);
-    }
-
-    // Disable profiling for the calling thread.
-    public static void disable() {
-        sWatchdog.removeWatchEntry(Thread.currentThread());
-    }
-
-    // Disable profiling for all threads.
-    public static void disableAll() {
-        sWatchdog.removeAllWatchEntries();
-    }
-
-    // Dump the profiling data to a file.
-    public static void dumpToFile(String filename) {
-        sWatchdog.dumpToFile(filename);
-    }
-
-    // Reset the collected profiling data.
-    public static void reset() {
-        sWatchdog.reset();
-    }
-
-    // Hold the future samples coming from current thread until commit() or
-    // drop() is called, and those samples are recorded or ignored as a result.
-    // This must called after enable() to be effective.
-    public static void hold() {
-        sWatchdog.hold(Thread.currentThread());
-    }
-
-    public static void commit() {
-        sWatchdog.commit(Thread.currentThread());
-    }
-
-    public static void drop() {
-        sWatchdog.drop(Thread.currentThread());
     }
 }

@@ -28,35 +28,20 @@ import android.widget.PopupMenu;
 import android.widget.SeekBar;
 import android.widget.TextView;
 
-import org.codeaurora.gallery.R;
 import com.android.gallery3d.filtershow.FilterShowActivity;
 import com.android.gallery3d.filtershow.controller.BasicParameterInt;
 import com.android.gallery3d.filtershow.controller.Parameter;
-import com.android.gallery3d.filtershow.filters.FilterVignetteRepresentation;
 import com.android.gallery3d.filtershow.filters.FilterRepresentation;
+import com.android.gallery3d.filtershow.filters.FilterVignetteRepresentation;
 import com.android.gallery3d.filtershow.imageshow.ImageVignette;
+
+import org.codeaurora.gallery.R;
 
 public class EditorVignette extends ParametricEditor {
     public static final int ID = R.id.vignetteEditor;
     private static final String LOGTAG = "EditorVignettePlanet";
-    ImageVignette mImageVignette;
-
-    private SeekBar mVignetteBar;
-    private SeekBar mExposureBar;
-    private SeekBar mSaturationBar;
-    private SeekBar mContrastBar;
-    private SeekBar mFalloffBar;
-
-
-    private TextView mVignetteValue;
-    private TextView mExposureValue;
-    private TextView mSaturationValue;
-    private TextView mContrastValue;
-    private TextView mFalloffValue;
-
-    private SwapButton mButton;
     private final Handler mHandler = new Handler();
-
+    ImageVignette mImageVignette;
     int[] mMenuStrings = {
             R.string.vignette_main,
             R.string.vignette_exposure,
@@ -64,8 +49,18 @@ public class EditorVignette extends ParametricEditor {
             R.string.vignette_contrast,
             R.string.vignette_falloff,
     };
-
     String mCurrentlyEditing = null;
+    private SeekBar mVignetteBar;
+    private SeekBar mExposureBar;
+    private SeekBar mSaturationBar;
+    private SeekBar mContrastBar;
+    private SeekBar mFalloffBar;
+    private TextView mVignetteValue;
+    private TextView mExposureValue;
+    private TextView mSaturationValue;
+    private TextView mContrastValue;
+    private TextView mFalloffValue;
+    private SwapButton mButton;
 
 
     public EditorVignette() {
@@ -98,21 +93,21 @@ public class EditorVignette extends ParametricEditor {
             FilterVignetteRepresentation rep =
                     (FilterVignetteRepresentation) getLocalRepresentation();
             int min;
-            int []mode = {
+            int[] mode = {
                     FilterVignetteRepresentation.MODE_VIGNETTE,
                     FilterVignetteRepresentation.MODE_EXPOSURE,
                     FilterVignetteRepresentation.MODE_SATURATION,
                     FilterVignetteRepresentation.MODE_CONTRAST,
                     FilterVignetteRepresentation.MODE_FALLOFF
             };
-            SeekBar []sliders = {
+            SeekBar[] sliders = {
                     mVignetteBar,
                     mExposureBar,
                     mSaturationBar,
                     mContrastBar,
                     mFalloffBar
             };
-            TextView []label = {
+            TextView[] label = {
                     mVignetteValue,
                     mExposureValue,
                     mSaturationValue,
@@ -120,7 +115,7 @@ public class EditorVignette extends ParametricEditor {
                     mFalloffValue
             };
             for (int i = 0; i < mode.length; i++) {
-                BasicParameterInt p = (BasicParameterInt) rep.getFilterParameter(mode[i]);
+                BasicParameterInt p = rep.getFilterParameter(mode[i]);
                 int value = p.getValue();
                 sliders[i].setMax(p.getMaximum() - p.getMinimum());
                 sliders[i].setProgress(value - p.getMinimum());
@@ -132,7 +127,6 @@ public class EditorVignette extends ParametricEditor {
             updateText();
         }
     }
-
 
 
     @Override
@@ -153,7 +147,7 @@ public class EditorVignette extends ParametricEditor {
 
     @Override
     public void openUtilityPanel(final LinearLayout accessoryViewList) {
-        mButton = (SwapButton) accessoryViewList.findViewById(R.id.applyEffect);
+        mButton = accessoryViewList.findViewById(R.id.applyEffect);
         mButton.setText(mContext.getString(R.string.vignette_main));
 
         if (useCompact(mContext)) {
@@ -173,7 +167,7 @@ public class EditorVignette extends ParametricEditor {
                 @Override
                 public void onClick(View arg0) {
                     popupMenu.show();
-                    ((FilterShowActivity)mContext).onShowMenu(popupMenu);
+                    ((FilterShowActivity) mContext).onShowMenu(popupMenu);
                 }
             });
             mButton.setListener(this);
@@ -205,26 +199,26 @@ public class EditorVignette extends ParametricEditor {
         group.removeAllViews();
         group.addView(controls);
 
-        mVignetteBar = (SeekBar) controls.findViewById(R.id.mainVignetteSeekbar);
+        mVignetteBar = controls.findViewById(R.id.mainVignetteSeekbar);
         mVignetteBar.setMax(200);
         mVignetteBar.setOnSeekBarChangeListener(this);
-        mVignetteValue = (TextView) controls.findViewById(R.id.mainVignetteValue);
-        mExposureBar = (SeekBar) controls.findViewById(R.id.exposureSeekBar);
+        mVignetteValue = controls.findViewById(R.id.mainVignetteValue);
+        mExposureBar = controls.findViewById(R.id.exposureSeekBar);
         mExposureBar.setMax(200);
         mExposureBar.setOnSeekBarChangeListener(this);
-        mExposureValue = (TextView) controls.findViewById(R.id.exposureValue);
-        mSaturationBar = (SeekBar) controls.findViewById(R.id.saturationSeekBar);
+        mExposureValue = controls.findViewById(R.id.exposureValue);
+        mSaturationBar = controls.findViewById(R.id.saturationSeekBar);
         mSaturationBar.setMax(200);
         mSaturationBar.setOnSeekBarChangeListener(this);
-        mSaturationValue = (TextView) controls.findViewById(R.id.saturationValue);
-        mContrastBar = (SeekBar) controls.findViewById(R.id.contrastSeekBar);
+        mSaturationValue = controls.findViewById(R.id.saturationValue);
+        mContrastBar = controls.findViewById(R.id.contrastSeekBar);
         mContrastBar.setMax(200);
         mContrastBar.setOnSeekBarChangeListener(this);
-        mContrastValue = (TextView) controls.findViewById(R.id.contrastValue);
-        mFalloffBar = (SeekBar) controls.findViewById(R.id.falloffSeekBar);
+        mContrastValue = controls.findViewById(R.id.contrastValue);
+        mFalloffBar = controls.findViewById(R.id.falloffSeekBar);
         mFalloffBar.setMax(200);
         mFalloffBar.setOnSeekBarChangeListener(this);
-        mFalloffValue = (TextView) controls.findViewById(R.id.falloffValue);
+        mFalloffValue = controls.findViewById(R.id.falloffValue);
     }
 
     public int getParameterIndex(int id) {
@@ -307,7 +301,7 @@ public class EditorVignette extends ParametricEditor {
     public void onProgressChanged(SeekBar sbar, int progress, boolean arg2) {
         FilterVignetteRepresentation rep = getVignetteRep();
         int value = progress;
-        BasicParameterInt  p;
+        BasicParameterInt p;
         switch (sbar.getId()) {
             case R.id.mainVignetteSeekbar:
                 rep.setParameterMode(FilterVignetteRepresentation.MODE_VIGNETTE);

@@ -29,19 +29,20 @@
 
 package com.android.gallery3d.filtershow.filters;
 
-import java.io.IOException;
-
 import android.net.Uri;
 import android.util.JsonReader;
 import android.util.JsonWriter;
 
-import org.codeaurora.gallery.R;
 import com.android.gallery3d.filtershow.editors.EditorTruePortraitFusion;
+
+import org.codeaurora.gallery.R;
+
+import java.io.IOException;
 
 
 public class FilterTruePortraitFusionRepresentation extends FilterRepresentation implements FilterFusionRepresentation {
-    private static final String LOGTAG = "FilterTruePortraitFusionRepresentation";
     public static final String SERIALIZATION_NAME = "TP_FUSION";
+    private static final String LOGTAG = "FilterTruePortraitFusionRepresentation";
     private static final String SERIAL_UNDERLAY_IMAGE = "image";
 
     private String mUri = "";
@@ -87,28 +88,9 @@ public class FilterTruePortraitFusionRepresentation extends FilterRepresentation
         }
         if (representation instanceof FilterTruePortraitFusionRepresentation) {
             FilterTruePortraitFusionRepresentation fusion = (FilterTruePortraitFusionRepresentation) representation;
-            if (fusion.mUri.equals(mUri)) {
-                return true;
-            }
+            return fusion.mUri.equals(mUri);
         }
         return false;
-    }
-
-    @Override
-    public void setUnderlay(Uri uri) {
-        if(uri != null) {
-            mUri = uri.toString();
-        } else {
-            mUri = "";
-        }
-    }
-
-    @Override
-    public void setUnderlay(String uri) {
-        if(uri != null)
-            mUri = uri;
-        else
-            mUri = "";
     }
 
     @Override
@@ -119,6 +101,23 @@ public class FilterTruePortraitFusionRepresentation extends FilterRepresentation
     @Override
     public String getUnderlay() {
         return mUri;
+    }
+
+    @Override
+    public void setUnderlay(Uri uri) {
+        if (uri != null) {
+            mUri = uri.toString();
+        } else {
+            mUri = "";
+        }
+    }
+
+    @Override
+    public void setUnderlay(String uri) {
+        if (uri != null)
+            mUri = uri;
+        else
+            mUri = "";
     }
 
     @Override

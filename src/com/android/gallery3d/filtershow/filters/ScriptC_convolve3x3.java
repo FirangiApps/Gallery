@@ -20,31 +20,28 @@
  */
 
 package com.android.gallery3d.filtershow.filters;
-import android.renderscript.*;
+
 import android.content.res.Resources;
+import android.renderscript.Allocation;
+import android.renderscript.Element;
+import android.renderscript.FieldPacker;
+import android.renderscript.RSRuntimeException;
+import android.renderscript.RenderScript;
+import android.renderscript.Script;
+import android.renderscript.ScriptC;
+import android.renderscript.Type;
 
 /**
  * @hide
  */
 public class ScriptC_convolve3x3 extends ScriptC {
     private static final String __rs_resource_name = "convolve3x3";
-    // Constructor
-    public  ScriptC_convolve3x3(RenderScript rs) {
-        this(rs,
-             rs.getApplicationContext().getResources(),
-             rs.getApplicationContext().getResources().getIdentifier(
-                 __rs_resource_name, "raw",
-                 rs.getApplicationContext().getPackageName()));
-    }
-
-    public  ScriptC_convolve3x3(RenderScript rs, Resources resources, int id) {
-        super(rs, resources, id);
-        __I32 = Element.I32(rs);
-        __ALLOCATION = Element.ALLOCATION(rs);
-        __F32 = Element.F32(rs);
-        __U8_4 = Element.U8_4(rs);
-    }
-
+    private final static int mExportVarIdx_gWidth = 0;
+    private final static int mExportVarIdx_gHeight = 1;
+    private final static int mExportVarIdx_gPixels = 2;
+    private final static int mExportVarIdx_gIn = 3;
+    private final static int mExportVarIdx_gCoeffs = 4;
+    private final static int mExportForEachIdx_root = 0;
     private Element __ALLOCATION;
     private Element __F32;
     private Element __I32;
@@ -52,38 +49,55 @@ public class ScriptC_convolve3x3 extends ScriptC {
     private FieldPacker __rs_fp_ALLOCATION;
     private FieldPacker __rs_fp_F32;
     private FieldPacker __rs_fp_I32;
-    private final static int mExportVarIdx_gWidth = 0;
     private int mExportVar_gWidth;
-    public synchronized void set_gWidth(int v) {
-        setVar(mExportVarIdx_gWidth, v);
-        mExportVar_gWidth = v;
+    private int mExportVar_gHeight;
+    private Allocation mExportVar_gPixels;
+    private Allocation mExportVar_gIn;
+    private float[] mExportVar_gCoeffs;
+
+    // Constructor
+    public ScriptC_convolve3x3(RenderScript rs) {
+        this(rs,
+                rs.getApplicationContext().getResources(),
+                rs.getApplicationContext().getResources().getIdentifier(
+                        __rs_resource_name, "raw",
+                        rs.getApplicationContext().getPackageName()));
+    }
+
+    public ScriptC_convolve3x3(RenderScript rs, Resources resources, int id) {
+        super(rs, resources, id);
+        __I32 = Element.I32(rs);
+        __ALLOCATION = Element.ALLOCATION(rs);
+        __F32 = Element.F32(rs);
+        __U8_4 = Element.U8_4(rs);
     }
 
     public int get_gWidth() {
         return mExportVar_gWidth;
     }
 
-    public Script.FieldID getFieldID_gWidth() {
-        return createFieldID(mExportVarIdx_gWidth, null);
+    public synchronized void set_gWidth(int v) {
+        setVar(mExportVarIdx_gWidth, v);
+        mExportVar_gWidth = v;
     }
 
-    private final static int mExportVarIdx_gHeight = 1;
-    private int mExportVar_gHeight;
-    public synchronized void set_gHeight(int v) {
-        setVar(mExportVarIdx_gHeight, v);
-        mExportVar_gHeight = v;
+    public Script.FieldID getFieldID_gWidth() {
+        return createFieldID(mExportVarIdx_gWidth, null);
     }
 
     public int get_gHeight() {
         return mExportVar_gHeight;
     }
 
+    public synchronized void set_gHeight(int v) {
+        setVar(mExportVarIdx_gHeight, v);
+        mExportVar_gHeight = v;
+    }
+
     public Script.FieldID getFieldID_gHeight() {
         return createFieldID(mExportVarIdx_gHeight, null);
     }
 
-    private final static int mExportVarIdx_gPixels = 2;
-    private Allocation mExportVar_gPixels;
     public void bind_gPixels(Allocation v) {
         mExportVar_gPixels = v;
         if (v == null) bindAllocation(null, mExportVarIdx_gPixels);
@@ -94,23 +108,23 @@ public class ScriptC_convolve3x3 extends ScriptC {
         return mExportVar_gPixels;
     }
 
-    private final static int mExportVarIdx_gIn = 3;
-    private Allocation mExportVar_gIn;
+    public Allocation get_gIn() {
+        return mExportVar_gIn;
+    }
+
     public synchronized void set_gIn(Allocation v) {
         setVar(mExportVarIdx_gIn, v);
         mExportVar_gIn = v;
-    }
-
-    public Allocation get_gIn() {
-        return mExportVar_gIn;
     }
 
     public Script.FieldID getFieldID_gIn() {
         return createFieldID(mExportVarIdx_gIn, null);
     }
 
-    private final static int mExportVarIdx_gCoeffs = 4;
-    private float[] mExportVar_gCoeffs;
+    public float[] get_gCoeffs() {
+        return mExportVar_gCoeffs;
+    }
+
     public synchronized void set_gCoeffs(float[] v) {
         mExportVar_gCoeffs = v;
         FieldPacker fp = new FieldPacker(36);
@@ -118,20 +132,15 @@ public class ScriptC_convolve3x3 extends ScriptC {
             fp.addF32(v[ct1]);
         }
 
-        int []__dimArr = new int[1];
+        int[] __dimArr = new int[1];
         __dimArr[0] = 9;
         setVar(mExportVarIdx_gCoeffs, fp, __F32, __dimArr);
-    }
-
-    public float[] get_gCoeffs() {
-        return mExportVar_gCoeffs;
     }
 
     public Script.FieldID getFieldID_gCoeffs() {
         return createFieldID(mExportVarIdx_gCoeffs, null);
     }
 
-    private final static int mExportForEachIdx_root = 0;
     public Script.KernelID getKernelID_root() {
         return createKernelID(mExportForEachIdx_root, 31, null, null);
     }
@@ -153,11 +162,11 @@ public class ScriptC_convolve3x3 extends ScriptC {
         t0 = ain.getType();
         t1 = aout.getType();
         if ((t0.getCount() != t1.getCount()) ||
-            (t0.getX() != t1.getX()) ||
-            (t0.getY() != t1.getY()) ||
-            (t0.getZ() != t1.getZ()) ||
-            (t0.hasFaces()   != t1.hasFaces()) ||
-            (t0.hasMipmaps() != t1.hasMipmaps())) {
+                (t0.getX() != t1.getX()) ||
+                (t0.getY() != t1.getY()) ||
+                (t0.getZ() != t1.getZ()) ||
+                (t0.hasFaces() != t1.hasFaces()) ||
+                (t0.hasMipmaps() != t1.hasMipmaps())) {
             throw new RSRuntimeException("Dimension mismatch between parameters ain and aout!");
         }
 

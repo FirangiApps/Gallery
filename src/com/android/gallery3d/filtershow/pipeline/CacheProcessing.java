@@ -32,102 +32,6 @@ public class CacheProcessing {
     private static final boolean NO_CACHING = false;
     private Vector<CacheStep> mSteps = new Vector<CacheStep>();
 
-    static class CacheStep {
-        ArrayList<FilterRepresentation> representations;
-        Bitmap cache;
-
-        public CacheStep() {
-            representations = new ArrayList<FilterRepresentation>();
-        }
-
-        public void add(FilterRepresentation representation) {
-            representations.add(representation);
-        }
-
-        public boolean canMergeWith(FilterRepresentation representation) {
-            for (FilterRepresentation rep : representations) {
-                if (!rep.canMergeWith(representation)) {
-                    return false;
-                }
-            }
-            return true;
-        }
-
-        public boolean equals(CacheStep step) {
-            if (representations.size() != step.representations.size()) {
-                return false;
-            }
-            for (int i = 0; i < representations.size(); i++) {
-                FilterRepresentation r1 = representations.get(i);
-                FilterRepresentation r2 = step.representations.get(i);
-                if (!r1.equals(r2)) {
-                    return false;
-                }
-            }
-            return true;
-        }
-
-        public static Vector<CacheStep> buildSteps(Vector<FilterRepresentation> filters) {
-            Vector<CacheStep> steps = new Vector<CacheStep>();
-            CacheStep step = new CacheStep();
-            for (int i = 0; i < filters.size(); i++) {
-                FilterRepresentation representation = filters.elementAt(i);
-                if (step.canMergeWith(representation)) {
-                    step.add(representation.copy());
-                } else {
-                    steps.add(step);
-                    step = new CacheStep();
-                    step.add(representation.copy());
-                }
-            }
-            steps.add(step);
-            return steps;
-        }
-
-        public String getName() {
-            if (representations.size() > 0) {
-                return representations.get(0).getName();
-            }
-            return "EMPTY";
-        }
-
-        public Bitmap apply(FilterEnvironment environment, Bitmap cacheBitmap) {
-            boolean onlyGeometry = true;
-            Bitmap source = cacheBitmap;
-            for (FilterRepresentation representation : representations) {
-                if (representation.getFilterType() != FilterRepresentation.TYPE_GEOMETRY) {
-                    onlyGeometry = false;
-                    break;
-                }
-            }
-            if (onlyGeometry) {
-                ArrayList<FilterRepresentation> geometry = new ArrayList<FilterRepresentation>();
-                for (FilterRepresentation representation : representations) {
-                    geometry.add(representation);
-                }
-                if (DEBUG) {
-                    Log.v(LOGTAG, "Apply geometry to bitmap " + cacheBitmap);
-                }
-                cacheBitmap = GeometryMathUtils.applyGeometryRepresentations(geometry, cacheBitmap);
-            } else {
-                for (FilterRepresentation representation : representations) {
-                    if (DEBUG) {
-                        Log.v(LOGTAG, "Apply " + representation.getSerializationName()
-                                + " to bitmap " + cacheBitmap);
-                    }
-                    cacheBitmap = environment.applyRepresentation(representation, cacheBitmap);
-                }
-            }
-            if (cacheBitmap != source) {
-                environment.cache(source);
-            }
-            if (DEBUG) {
-                Log.v(LOGTAG, "Apply returns bitmap " + cacheBitmap);
-            }
-            return cacheBitmap;
-        }
-    }
-
     public Bitmap process(Bitmap originalBitmap,
                           Vector<FilterRepresentation> filters,
                           FilterEnvironment environment) {
@@ -301,6 +205,102 @@ public class CacheProcessing {
             }
         }
         Log.v(LOGTAG, "nb bitmaps in cache: " + nbBitmapsCached + " / " + mSteps.size());
+    }
+
+    static class CacheStep {
+        ArrayList<FilterRepresentation> representations;
+        Bitmap cache;
+
+        public CacheStep() {
+            representations = new ArrayList<FilterRepresentation>();
+        }
+
+        public static Vector<CacheStep> buildSteps(Vector<FilterRepresentation> filters) {
+            Vector<CacheStep> steps = new Vector<CacheStep>();
+            CacheStep step = new CacheStep();
+            for (int i = 0; i < filters.size(); i++) {
+                FilterRepresentation representation = filters.elementAt(i);
+                if (step.canMergeWith(representation)) {
+                    step.add(representation.copy());
+                } else {
+                    steps.add(step);
+                    step = new CacheStep();
+                    step.add(representation.copy());
+                }
+            }
+            steps.add(step);
+            return steps;
+        }
+
+        public void add(FilterRepresentation representation) {
+            representations.add(representation);
+        }
+
+        public boolean canMergeWith(FilterRepresentation representation) {
+            for (FilterRepresentation rep : representations) {
+                if (!rep.canMergeWith(representation)) {
+                    return false;
+                }
+            }
+            return true;
+        }
+
+        public boolean equals(CacheStep step) {
+            if (representations.size() != step.representations.size()) {
+                return false;
+            }
+            for (int i = 0; i < representations.size(); i++) {
+                FilterRepresentation r1 = representations.get(i);
+                FilterRepresentation r2 = step.representations.get(i);
+                if (!r1.equals(r2)) {
+                    return false;
+                }
+            }
+            return true;
+        }
+
+        public String getName() {
+            if (representations.size() > 0) {
+                return representations.get(0).getName();
+            }
+            return "EMPTY";
+        }
+
+        public Bitmap apply(FilterEnvironment environment, Bitmap cacheBitmap) {
+            boolean onlyGeometry = true;
+            Bitmap source = cacheBitmap;
+            for (FilterRepresentation representation : representations) {
+                if (representation.getFilterType() != FilterRepresentation.TYPE_GEOMETRY) {
+                    onlyGeometry = false;
+                    break;
+                }
+            }
+            if (onlyGeometry) {
+                ArrayList<FilterRepresentation> geometry = new ArrayList<FilterRepresentation>();
+                for (FilterRepresentation representation : representations) {
+                    geometry.add(representation);
+                }
+                if (DEBUG) {
+                    Log.v(LOGTAG, "Apply geometry to bitmap " + cacheBitmap);
+                }
+                cacheBitmap = GeometryMathUtils.applyGeometryRepresentations(geometry, cacheBitmap);
+            } else {
+                for (FilterRepresentation representation : representations) {
+                    if (DEBUG) {
+                        Log.v(LOGTAG, "Apply " + representation.getSerializationName()
+                                + " to bitmap " + cacheBitmap);
+                    }
+                    cacheBitmap = environment.applyRepresentation(representation, cacheBitmap);
+                }
+            }
+            if (cacheBitmap != source) {
+                environment.cache(source);
+            }
+            if (DEBUG) {
+                Log.v(LOGTAG, "Apply returns bitmap " + cacheBitmap);
+            }
+            return cacheBitmap;
+        }
     }
 
 }

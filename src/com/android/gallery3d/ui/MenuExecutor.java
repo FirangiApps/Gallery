@@ -24,7 +24,6 @@ import android.content.DialogInterface;
 import android.content.DialogInterface.OnCancelListener;
 import android.content.DialogInterface.OnClickListener;
 import android.content.Intent;
-//import android.drm.DrmHelper;
 import android.content.pm.PackageManager;
 import android.content.pm.ResolveInfo;
 import android.net.Uri;
@@ -34,65 +33,42 @@ import android.support.v4.print.PrintHelper;
 import android.view.Menu;
 import android.view.MenuItem;
 
-import org.codeaurora.gallery.R;
 import com.android.gallery3d.app.AbstractGalleryActivity;
 import com.android.gallery3d.common.Utils;
 import com.android.gallery3d.data.DataManager;
 import com.android.gallery3d.data.MediaItem;
 import com.android.gallery3d.data.MediaObject;
 import com.android.gallery3d.data.Path;
-import com.android.gallery3d.filtershow.crop.CropActivity;
 import com.android.gallery3d.util.Future;
 import com.android.gallery3d.util.GalleryUtils;
 import com.android.gallery3d.util.ThreadPool.Job;
 import com.android.gallery3d.util.ThreadPool.JobContext;
 
+import org.codeaurora.gallery.R;
+
 import java.util.ArrayList;
 import java.util.List;
 
-public class MenuExecutor {
-    private static final String TAG = "MenuExecutor";
+//import android.drm.DrmHelper;
 
+public class MenuExecutor {
+    public static final int EXECUTION_RESULT_SUCCESS = 1;
+    public static final int EXECUTION_RESULT_FAIL = 2;
+    public static final int EXECUTION_RESULT_CANCEL = 3;
+    private static final String TAG = "MenuExecutor";
     private static final int MSG_TASK_COMPLETE = 1;
     private static final int MSG_TASK_UPDATE = 2;
     private static final int MSG_TASK_START = 3;
     private static final int MSG_DO_SHARE = 4;
-
-    public static final int EXECUTION_RESULT_SUCCESS = 1;
-    public static final int EXECUTION_RESULT_FAIL = 2;
-    public static final int EXECUTION_RESULT_CANCEL = 3;
-
+    private final AbstractGalleryActivity mActivity;
+    private final SelectionManager mSelectionManager;
+    private final Handler mHandler;
     private ProgressDialog mDialog;
     private Future<?> mTask;
     // wait the operation to finish when we want to stop it.
     private boolean mWaitOnStop;
     private boolean mPaused;
     private boolean isLeaving = false;
-
-    private final AbstractGalleryActivity mActivity;
-    private final SelectionManager mSelectionManager;
-    private final Handler mHandler;
-
-    private static ProgressDialog createProgressDialog(
-            Context context, int titleId, int progressMax) {
-        ProgressDialog dialog = new ProgressDialog(context);
-        dialog.setTitle(titleId);
-        dialog.setMax(progressMax);
-        dialog.setCancelable(false);
-        dialog.setIndeterminate(false);
-        if (progressMax > 1) {
-            dialog.setProgressStyle(ProgressDialog.STYLE_HORIZONTAL);
-        }
-        return dialog;
-    }
-
-    public interface ProgressListener {
-        public void onConfirmDialogShown();
-        public void onConfirmDialogDismissed(boolean confirmed);
-        public void onProgressStart();
-        public void onProgressUpdate(int index);
-        public void onProgressComplete(int result);
-    }
 
     public MenuExecutor(
             AbstractGalleryActivity activity, SelectionManager selectionManager) {
@@ -127,12 +103,83 @@ public class MenuExecutor {
                         break;
                     }
                     case MSG_DO_SHARE: {
-                        ((Activity) mActivity).startActivity((Intent) message.obj);
+                        mActivity.startActivity((Intent) message.obj);
                         break;
                     }
                 }
             }
         };
+    }
+
+    private static ProgressDialog createProgressDialog(
+            Context context, int titleId, int progressMax) {
+        ProgressDialog dialog = new ProgressDialog(context);
+        dialog.setTitle(titleId);
+        dialog.setMax(progressMax);
+        dialog.setCancelable(false);
+        dialog.setIndeterminate(false);
+        if (progressMax > 1) {
+            dialog.setProgressStyle(ProgressDialog.STYLE_HORIZONTAL);
+        }
+        return dialog;
+    }
+
+    public static void updateMenuOperation(Menu menu, int supported) {
+        boolean supportDelete = (supported & MediaObject.SUPPORT_DELETE) != 0;
+        boolean supportRotate = (supported & MediaObject.SUPPORT_ROTATE) != 0;
+        boolean supportCrop = (supported & MediaObject.SUPPORT_CROP) != 0;
+        boolean supportTrim = (supported & MediaObject.SUPPORT_TRIM) != 0;
+        boolean supportMute = (supported & MediaObject.SUPPORT_MUTE) != 0;
+        boolean supportShare = (supported & MediaObject.SUPPORT_SHARE) != 0;
+        boolean supportSetAs = (supported & MediaObject.SUPPORT_SETAS) != 0;
+        boolean supportShowOnMap = (supported & MediaObject.SUPPORT_SHOW_ON_MAP) != 0;
+        boolean supportCache = (supported & MediaObject.SUPPORT_CACHE) != 0;
+        boolean supportEdit = (supported & MediaObject.SUPPORT_EDIT) != 0;
+        boolean supportInfo = (supported & MediaObject.SUPPORT_INFO) != 0;
+        boolean supportPrint = (supported & MediaObject.SUPPORT_PRINT) != 0;
+        supportPrint &= PrintHelper.systemSupportsPrint();
+        boolean supportDrmInfo = (supported & MediaObject.SUPPORT_DRM_INFO) != 0;
+        setMenuItemVisible(menu, R.id.action_delete, supportDelete);
+        //setMenuItemVisible(menu, R.id.action_rotate_ccw, supportRotate);
+        //setMenuItemVisible(menu, R.id.action_rotate_cw, supportRotate);
+        //setMenuItemVisible(menu, R.id.action_crop, supportCrop);
+        setMenuItemVisible(menu, R.id.action_trim, supportTrim);
+        setMenuItemVisible(menu, R.id.action_mute, supportMute);
+        // Hide panorama until call to updateMenuForPanorama corrects it
+        setMenuItemVisible(menu, R.id.action_share_panorama, false);
+        setMenuItemVisible(menu, R.id.action_share, supportShare);
+        setMenuItemVisible(menu, R.id.action_setas, supportSetAs);
+        setMenuItemVisible(menu, R.id.action_show_on_map, supportShowOnMap);
+        setMenuItemVisible(menu, R.id.action_edit, supportEdit);
+        // setMenuItemVisible(menu, R.id.action_simple_edit, supportEdit);
+        setMenuItemVisible(menu, R.id.action_details, supportInfo);
+        setMenuItemVisible(menu, R.id.print, supportPrint);
+        setMenuItemVisible(menu, R.id.action_drm_info, supportDrmInfo);
+    }
+
+    public static void updateMenuForPanorama(Menu menu, boolean shareAsPanorama360,
+                                             boolean disablePanorama360Options) {
+        setMenuItemVisible(menu, R.id.action_share_panorama, shareAsPanorama360);
+        if (disablePanorama360Options) {
+            //setMenuItemVisible(menu, R.id.action_rotate_ccw, false);
+            //setMenuItemVisible(menu, R.id.action_rotate_cw, false);
+        }
+    }
+
+    private static void setMenuItemVisible(Menu menu, int itemId, boolean visible) {
+        MenuItem item = menu.findItem(itemId);
+        if (item != null) item.setVisible(visible);
+    }
+
+    public static String getMimeType(int type) {
+        switch (type) {
+            case MediaObject.MEDIA_TYPE_IMAGE:
+                return GalleryUtils.MIME_TYPE_IMAGE;
+            case MediaObject.MEDIA_TYPE_VIDEO:
+                return GalleryUtils.MIME_TYPE_VIDEO;
+            default:
+                return GalleryUtils.MIME_TYPE_ALL;
+        }
     }
 
     private void stopTaskAndDismissDialog() {
@@ -171,58 +218,11 @@ public class MenuExecutor {
         mHandler.sendMessage(mHandler.obtainMessage(MSG_TASK_COMPLETE, result, 0, listener));
     }
 
-    public static void updateMenuOperation(Menu menu, int supported) {
-        boolean supportDelete = (supported & MediaObject.SUPPORT_DELETE) != 0;
-        boolean supportRotate = (supported & MediaObject.SUPPORT_ROTATE) != 0;
-        boolean supportCrop = (supported & MediaObject.SUPPORT_CROP) != 0;
-        boolean supportTrim = (supported & MediaObject.SUPPORT_TRIM) != 0;
-        boolean supportMute = (supported & MediaObject.SUPPORT_MUTE) != 0;
-        boolean supportShare = (supported & MediaObject.SUPPORT_SHARE) != 0;
-        boolean supportSetAs = (supported & MediaObject.SUPPORT_SETAS) != 0;
-        boolean supportShowOnMap = (supported & MediaObject.SUPPORT_SHOW_ON_MAP) != 0;
-        boolean supportCache = (supported & MediaObject.SUPPORT_CACHE) != 0;
-        boolean supportEdit = (supported & MediaObject.SUPPORT_EDIT) != 0;
-        boolean supportInfo = (supported & MediaObject.SUPPORT_INFO) != 0;
-        boolean supportPrint = (supported & MediaObject.SUPPORT_PRINT) != 0;
-        supportPrint &= PrintHelper.systemSupportsPrint();
-        boolean supportDrmInfo = (supported & MediaObject.SUPPORT_DRM_INFO) != 0;
-        setMenuItemVisible(menu, R.id.action_delete, supportDelete);
-        //setMenuItemVisible(menu, R.id.action_rotate_ccw, supportRotate);
-        //setMenuItemVisible(menu, R.id.action_rotate_cw, supportRotate);
-        //setMenuItemVisible(menu, R.id.action_crop, supportCrop);
-        setMenuItemVisible(menu, R.id.action_trim, supportTrim);
-        setMenuItemVisible(menu, R.id.action_mute, supportMute);
-        // Hide panorama until call to updateMenuForPanorama corrects it
-        setMenuItemVisible(menu, R.id.action_share_panorama, false);
-        setMenuItemVisible(menu, R.id.action_share, supportShare);
-        setMenuItemVisible(menu, R.id.action_setas, supportSetAs);
-        setMenuItemVisible(menu, R.id.action_show_on_map, supportShowOnMap);
-        setMenuItemVisible(menu, R.id.action_edit, supportEdit);
-        // setMenuItemVisible(menu, R.id.action_simple_edit, supportEdit);
-        setMenuItemVisible(menu, R.id.action_details, supportInfo);
-        setMenuItemVisible(menu, R.id.print, supportPrint);
-        setMenuItemVisible(menu, R.id.action_drm_info, supportDrmInfo);
-    }
-
-    public static void updateMenuForPanorama(Menu menu, boolean shareAsPanorama360,
-            boolean disablePanorama360Options) {
-        setMenuItemVisible(menu, R.id.action_share_panorama, shareAsPanorama360);
-        if (disablePanorama360Options) {
-            //setMenuItemVisible(menu, R.id.action_rotate_ccw, false);
-            //setMenuItemVisible(menu, R.id.action_rotate_cw, false);
-        }
-    }
-
-    private static void setMenuItemVisible(Menu menu, int itemId, boolean visible) {
-        MenuItem item = menu.findItem(itemId);
-        if (item != null) item.setVisible(visible);
-    }
-
     private Path getSingleSelectedPath() {
         ArrayList<Path> ids = mSelectionManager.getSelected(true);
         if (ids.size() != 1)
             return null;
-         return ids.get(0);
+        return ids.get(0);
     }
 
     private Intent getIntentBySingleSelectedPath(String action) {
@@ -234,12 +234,12 @@ public class MenuExecutor {
         return new Intent(action).setDataAndType(manager.getContentUri(path), mimeType);
     }
 
-    public void setLeaving(boolean leaving) {
-        isLeaving = leaving;
-    }
-
     public boolean isLeaving() {
         return isLeaving;
+    }
+
+    public void setLeaving(boolean leaving) {
+        isLeaving = leaving;
     }
 
     private void onMenuClicked(int action, ProgressListener listener) {
@@ -247,7 +247,7 @@ public class MenuExecutor {
     }
 
     public void onMenuClicked(int action, ProgressListener listener,
-            boolean waitOnStop, boolean showDialog) {
+                              boolean waitOnStop, boolean showDialog) {
         int title;
         switch (action) {
             case R.id.action_select_all:
@@ -336,46 +336,13 @@ public class MenuExecutor {
         startAction(action, title, listener, waitOnStop, showDialog);
     }
 
-    private class ConfirmDialogListener implements OnClickListener, OnCancelListener {
-        private final int mActionId;
-        private final ProgressListener mListener;
-
-        public ConfirmDialogListener(int actionId, ProgressListener listener) {
-            mActionId = actionId;
-            mListener = listener;
-        }
-
-        @Override
-        public void onClick(DialogInterface dialog, int which) {
-            if (which == DialogInterface.BUTTON_POSITIVE) {
-                if (mListener != null) {
-                    mListener.onConfirmDialogDismissed(true);
-                }
-                onMenuClicked(mActionId, mListener);
-            } else {
-                if (mListener != null) {
-                    mListener.onConfirmDialogDismissed(false);
-                }
-            }
-        }
-
-        @Override
-        public void onCancel(DialogInterface dialog) {
-            if (mListener != null) {
-                mListener.onConfirmDialogDismissed(false);
-            }
-        }
-    }
-
     public void onMenuClicked(MenuItem menuItem, String confirmMsg,
-            final ProgressListener listener) {
+                              final ProgressListener listener) {
         final int action;
         if (menuItem == null) {
             action = R.id.photopage_bottom_control_delete;
-        }
-        else
-        {
-           action = menuItem.getItemId();
+        } else {
+            action = menuItem.getItemId();
         }
 
         if (confirmMsg != null) {
@@ -397,7 +364,7 @@ public class MenuExecutor {
     }
 
     public void startAction(int action, int title, ProgressListener listener,
-            boolean waitOnStop, boolean showDialog) {
+                            boolean waitOnStop, boolean showDialog) {
         ArrayList<Path> ids = mSelectionManager.getSelected(false);
         stopTaskAndDismissDialog();
 
@@ -420,16 +387,6 @@ public class MenuExecutor {
         MediaOperation operation = new MediaOperation(action, ids, null);
         mTask = mActivity.getBatchServiceThreadPoolIfAvailable().submit(operation, null);
         mWaitOnStop = false;
-    }
-
-    public static String getMimeType(int type) {
-        switch (type) {
-            case MediaObject.MEDIA_TYPE_IMAGE :
-                return GalleryUtils.MIME_TYPE_IMAGE;
-            case MediaObject.MEDIA_TYPE_VIDEO :
-                return GalleryUtils.MIME_TYPE_VIDEO;
-            default: return GalleryUtils.MIME_TYPE_ALL;
-        }
     }
 
     private boolean execute(
@@ -464,7 +421,7 @@ public class MenuExecutor {
             }
             case R.id.action_show_on_map: {
                 MediaItem item = (MediaItem) manager.getMediaObject(path);
-                double latlng[] = new double[2];
+                double[] latlng = new double[2];
                 item.getLatLong(latlng);
                 if (GalleryUtils.isValidLocation(latlng[0], latlng[1])) {
                     GalleryUtils.showOnMap(mActivity, latlng[0], latlng[1]);
@@ -479,13 +436,56 @@ public class MenuExecutor {
         return result;
     }
 
+    public interface ProgressListener {
+        void onConfirmDialogShown();
+
+        void onConfirmDialogDismissed(boolean confirmed);
+
+        void onProgressStart();
+
+        void onProgressUpdate(int index);
+
+        void onProgressComplete(int result);
+    }
+
+    private class ConfirmDialogListener implements OnClickListener, OnCancelListener {
+        private final int mActionId;
+        private final ProgressListener mListener;
+
+        public ConfirmDialogListener(int actionId, ProgressListener listener) {
+            mActionId = actionId;
+            mListener = listener;
+        }
+
+        @Override
+        public void onClick(DialogInterface dialog, int which) {
+            if (which == DialogInterface.BUTTON_POSITIVE) {
+                if (mListener != null) {
+                    mListener.onConfirmDialogDismissed(true);
+                }
+                onMenuClicked(mActionId, mListener);
+            } else {
+                if (mListener != null) {
+                    mListener.onConfirmDialogDismissed(false);
+                }
+            }
+        }
+
+        @Override
+        public void onCancel(DialogInterface dialog) {
+            if (mListener != null) {
+                mListener.onConfirmDialogDismissed(false);
+            }
+        }
+    }
+
     private class MediaOperation implements Job<Void> {
         private final ArrayList<Path> mItems;
         private final int mOperation;
         private final ProgressListener mListener;
 
         public MediaOperation(int operation, ArrayList<Path> items,
-                ProgressListener listener) {
+                              ProgressListener listener) {
             mOperation = operation;
             mItems = items;
             mListener = listener;
@@ -512,7 +512,7 @@ public class MenuExecutor {
                 Log.e(TAG, "failed to execute operation " + mOperation
                         + " : " + th);
             } finally {
-               onProgressComplete(result, mListener);
+                onProgressComplete(result, mListener);
             }
             return null;
         }

@@ -64,14 +64,14 @@ public class BlockingGLTextureView extends TextureView
 
     @Override
     public void onSurfaceTextureAvailable(SurfaceTexture surface, int width,
-            int height) {
+                                          int height) {
         mRenderThread.setSurface(surface);
         mRenderThread.setSize(width, height);
     }
 
     @Override
     public void onSurfaceTextureSizeChanged(SurfaceTexture surface, int width,
-            int height) {
+                                            int height) {
         mRenderThread.setSize(width, height);
     }
 
@@ -111,6 +111,32 @@ public class BlockingGLTextureView extends TextureView
         EGLConfig mEglConfig;
         EGLContext mEglContext;
 
+        private static int[] getConfig() {
+            return new int[]{
+                    EGL10.EGL_RENDERABLE_TYPE, EGL_OPENGL_ES2_BIT,
+                    EGL10.EGL_RED_SIZE, 8,
+                    EGL10.EGL_GREEN_SIZE, 8,
+                    EGL10.EGL_BLUE_SIZE, 8,
+                    EGL10.EGL_ALPHA_SIZE, 8,
+                    EGL10.EGL_DEPTH_SIZE, 0,
+                    EGL10.EGL_STENCIL_SIZE, 0,
+                    EGL10.EGL_NONE
+            };
+        }
+
+        public static void throwEglException(String function, int error) {
+            String message = formatEglError(function, error);
+            throw new RuntimeException(message);
+        }
+
+        public static void logEglErrorAsWarning(String tag, String function, int error) {
+            Log.w(tag, formatEglError(function, error));
+        }
+
+        public static String formatEglError(String function, int error) {
+            return function + " failed: " + error;
+        }
+
         private EGLConfig chooseEglConfig() {
             int[] configsCount = new int[1];
             EGLConfig[] configs = new EGLConfig[1];
@@ -124,21 +150,8 @@ public class BlockingGLTextureView extends TextureView
             return null;
         }
 
-        private static int[] getConfig() {
-            return new int[] {
-                    EGL10.EGL_RENDERABLE_TYPE, EGL_OPENGL_ES2_BIT,
-                    EGL10.EGL_RED_SIZE, 8,
-                    EGL10.EGL_GREEN_SIZE, 8,
-                    EGL10.EGL_BLUE_SIZE, 8,
-                    EGL10.EGL_ALPHA_SIZE, 8,
-                    EGL10.EGL_DEPTH_SIZE, 0,
-                    EGL10.EGL_STENCIL_SIZE, 0,
-                    EGL10.EGL_NONE
-            };
-        }
-
         EGLContext createContext(EGL10 egl, EGLDisplay eglDisplay, EGLConfig eglConfig) {
-            int[] attribList = { EGL_CONTEXT_CLIENT_VERSION, 2, EGL10.EGL_NONE };
+            int[] attribList = {EGL_CONTEXT_CLIENT_VERSION, 2, EGL10.EGL_NONE};
             return egl.eglCreateContext(eglDisplay, eglConfig, EGL10.EGL_NO_CONTEXT, attribList);
         }
 
@@ -170,9 +183,9 @@ public class BlockingGLTextureView extends TextureView
             mEglConfig = chooseEglConfig();
 
             /*
-            * Create an EGL context. We want to do this as rarely as we can, because an
-            * EGL context is a somewhat heavy object.
-            */
+             * Create an EGL context. We want to do this as rarely as we can, because an
+             * EGL context is a somewhat heavy object.
+             */
             mEglContext = createContext(mEgl, mEglDisplay, mEglConfig);
 
             if (mEglContext == null || mEglContext == EGL10.EGL_NO_CONTEXT) {
@@ -251,6 +264,7 @@ public class BlockingGLTextureView extends TextureView
 
         /**
          * Display the current render surface.
+         *
          * @return the EGL error code from eglSwapBuffers.
          */
         public int swap() {
@@ -287,19 +301,6 @@ public class BlockingGLTextureView extends TextureView
 
         private void throwEglException(String function) {
             throwEglException(function, mEgl.eglGetError());
-        }
-
-        public static void throwEglException(String function, int error) {
-            String message = formatEglError(function, error);
-            throw new RuntimeException(message);
-        }
-
-        public static void logEglErrorAsWarning(String tag, String function, int error) {
-            Log.w(tag, formatEglError(function, error));
-        }
-
-        public static String formatEglError(String function, int error) {
-            return function + " failed: " + error;
         }
 
     }
@@ -394,24 +395,24 @@ public class BlockingGLTextureView extends TextureView
 
         private void handleMessageLocked(int what) {
             switch (what) {
-            case CHANGE_SURFACE:
-                if (mEglHelper.createSurface(mSurface)) {
-                    mGL = mEglHelper.createGL();
-                    mRenderer.onSurfaceCreated(mGL, mEglHelper.mEglConfig);
-                }
-                break;
-            case RESIZE_SURFACE:
-                mRenderer.onSurfaceChanged(mGL, mWidth, mHeight);
-                break;
-            case RENDER:
-                mRenderer.onDrawFrame(mGL);
-                mEglHelper.swap();
-                break;
-            case FINISH:
-                mEglHelper.destroySurface();
-                mEglHelper.finish();
-                mFinished = true;
-                break;
+                case CHANGE_SURFACE:
+                    if (mEglHelper.createSurface(mSurface)) {
+                        mGL = mEglHelper.createGL();
+                        mRenderer.onSurfaceCreated(mGL, mEglHelper.mEglConfig);
+                    }
+                    break;
+                case RESIZE_SURFACE:
+                    mRenderer.onSurfaceChanged(mGL, mWidth, mHeight);
+                    break;
+                case RENDER:
+                    mRenderer.onDrawFrame(mGL);
+                    mEglHelper.swap();
+                    break;
+                case FINISH:
+                    mEglHelper.destroySurface();
+                    mEglHelper.finish();
+                    mFinished = true;
+                    break;
             }
         }
 

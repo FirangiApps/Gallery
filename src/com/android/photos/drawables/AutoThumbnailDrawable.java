@@ -40,22 +40,102 @@ public abstract class AutoThumbnailDrawable<T> extends Drawable {
     private static ExecutorService sThreadPool = Executors.newSingleThreadExecutor();
     private static GalleryBitmapPool sBitmapPool = GalleryBitmapPool.getInstance();
     private static byte[] sTempStorage = new byte[64 * 1024];
-
+    protected T mData;
     // UI thread only
     private Paint mPaint = new Paint();
     private Matrix mDrawMatrix = new Matrix();
-
     // Decoder thread only
     private BitmapFactory.Options mOptions = new BitmapFactory.Options();
-
     // Shared, guarded by mLock
     private Object mLock = new Object();
     private Bitmap mBitmap;
-    protected T mData;
     private boolean mIsQueued;
     private int mImageWidth, mImageHeight;
     private Rect mBounds = new Rect();
     private int mSampleSize = 1;
+    private final Runnable mUpdateBitmap = new Runnable() {
+        @Override
+        public void run() {
+            synchronized (AutoThumbnailDrawable.this) {
+                updateDrawMatrixLocked();
+                invalidateSelf();
+            }
+        }
+    };
+    private final Runnable mLoadBitmap = new Runnable() {
+        @Override
+        public void run() {
+            T data;
+            synchronized (mLock) {
+                data = mData;
+            }
+            int preferredSampleSize = 1;
+            byte[] preferred = getPreferredImageBytes(data);
+            boolean hasPreferred = (preferred != null && preferred.length > 0);
+            if (hasPreferred) {
+                mOptions.inJustDecodeBounds = true;
+                BitmapFactory.decodeByteArray(preferred, 0, preferred.length, mOptions);
+                mOptions.inJustDecodeBounds = false;
+            }
+            int sampleSize, width, height;
+            synchronized (mLock) {
+                if (dataChangedLocked(data)) {
+                    return;
+                }
+                width = mImageWidth;
+                height = mImageHeight;
+                if (hasPreferred) {
+                    preferredSampleSize = calculateSampleSizeLocked(
+                            mOptions.outWidth, mOptions.outHeight);
+                }
+                sampleSize = calculateSampleSizeLocked(width, height);
+                mIsQueued = false;
+            }
+            Bitmap b = null;
+            InputStream is = null;
+            try {
+                if (hasPreferred) {
+                    mOptions.inSampleSize = preferredSampleSize;
+                    mOptions.inBitmap = sBitmapPool.get(
+                            mOptions.outWidth / preferredSampleSize,
+                            mOptions.outHeight / preferredSampleSize);
+                    b = BitmapFactory.decodeByteArray(preferred, 0, preferred.length, mOptions);
+                    if (mOptions.inBitmap != null && b != mOptions.inBitmap) {
+                        sBitmapPool.put(mOptions.inBitmap);
+                        mOptions.inBitmap = null;
+                    }
+                }
+                if (b == null) {
+                    is = getFallbackImageStream(data);
+                    mOptions.inSampleSize = sampleSize;
+                    mOptions.inBitmap = sBitmapPool.get(width / sampleSize, height / sampleSize);
+                    b = BitmapFactory.decodeStream(is, null, mOptions);
+                    if (mOptions.inBitmap != null && b != mOptions.inBitmap) {
+                        sBitmapPool.put(mOptions.inBitmap);
+                        mOptions.inBitmap = null;
+                    }
+                }
+            } catch (Exception e) {
+                Log.d(TAG, "Failed to fetch bitmap", e);
+                return;
+            } finally {
+                try {
+                    if (is != null) {
+                        is.close();
+                    }
+                } catch (Exception e) {
+                }
+                if (b != null) {
+                    synchronized (mLock) {
+                        if (!dataChangedLocked(data)) {
+                            setBitmapLocked(b);
+                            scheduleSelf(mUpdateBitmap, 0);
+                        }
+                    }
+                }
+            }
+        }
+    };
 
     public AutoThumbnailDrawable() {
         mPaint.setAntiAlias(true);
@@ -65,7 +145,9 @@ public abstract class AutoThumbnailDrawable<T> extends Drawable {
     }
 
     protected abstract byte[] getPreferredImageBytes(T data);
+
     protected abstract InputStream getFallbackImageStream(T data);
+
     protected abstract boolean dataChangedLocked(T data);
 
     public void setImage(T data, int width, int height) {
@@ -221,89 +303,5 @@ public abstract class AutoThumbnailDrawable<T> extends Drawable {
         mPaint.setColorFilter(cf);
         invalidateSelf();
     }
-
-    private final Runnable mLoadBitmap = new Runnable() {
-        @Override
-        public void run() {
-            T data;
-            synchronized (mLock) {
-                data = mData;
-            }
-            int preferredSampleSize = 1;
-            byte[] preferred = getPreferredImageBytes(data);
-            boolean hasPreferred = (preferred != null && preferred.length > 0);
-            if (hasPreferred) {
-                mOptions.inJustDecodeBounds = true;
-                BitmapFactory.decodeByteArray(preferred, 0, preferred.length, mOptions);
-                mOptions.inJustDecodeBounds = false;
-            }
-            int sampleSize, width, height;
-            synchronized (mLock) {
-                if (dataChangedLocked(data)) {
-                    return;
-                }
-                width = mImageWidth;
-                height = mImageHeight;
-                if (hasPreferred) {
-                    preferredSampleSize = calculateSampleSizeLocked(
-                            mOptions.outWidth, mOptions.outHeight);
-                }
-                sampleSize = calculateSampleSizeLocked(width, height);
-                mIsQueued = false;
-            }
-            Bitmap b = null;
-            InputStream is = null;
-            try {
-                if (hasPreferred) {
-                    mOptions.inSampleSize = preferredSampleSize;
-                    mOptions.inBitmap = sBitmapPool.get(
-                            mOptions.outWidth / preferredSampleSize,
-                            mOptions.outHeight / preferredSampleSize);
-                    b = BitmapFactory.decodeByteArray(preferred, 0, preferred.length, mOptions);
-                    if (mOptions.inBitmap != null && b != mOptions.inBitmap) {
-                        sBitmapPool.put(mOptions.inBitmap);
-                        mOptions.inBitmap = null;
-                    }
-                }
-                if (b == null) {
-                    is = getFallbackImageStream(data);
-                    mOptions.inSampleSize = sampleSize;
-                    mOptions.inBitmap = sBitmapPool.get(width / sampleSize, height / sampleSize);
-                    b = BitmapFactory.decodeStream(is, null, mOptions);
-                    if (mOptions.inBitmap != null && b != mOptions.inBitmap) {
-                        sBitmapPool.put(mOptions.inBitmap);
-                        mOptions.inBitmap = null;
-                    }
-                }
-            } catch (Exception e) {
-                Log.d(TAG, "Failed to fetch bitmap", e);
-                return;
-            } finally {
-                try {
-                    if (is != null) {
-                        is.close();
-                    }
-                } catch (Exception e) {}
-                if (b != null) {
-                    synchronized (mLock) {
-                        if (!dataChangedLocked(data)) {
-                            setBitmapLocked(b);
-                            scheduleSelf(mUpdateBitmap, 0);
-                        }
-                    }
-                }
-            }
-        }
-    };
-
-    private final Runnable mUpdateBitmap = new Runnable() {
-        @Override
-        public void run() {
-            synchronized (AutoThumbnailDrawable.this) {
-                updateDrawMatrixLocked();
-                invalidateSelf();
-            }
-        }
-    };
 
 }

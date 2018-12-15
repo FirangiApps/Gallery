@@ -68,14 +68,29 @@ public class TiledImageRenderer {
     private static final int STATE_RECYCLED = 0x40;
 
     private static Pool<Bitmap> sTilePool = new SynchronizedPool<Bitmap>(64);
-
+    private final RectF mSourceRect = new RectF();
+    private final RectF mTargetRect = new RectF();
+    private final LongSparseArray<Tile> mActiveTiles = new LongSparseArray<Tile>();
+    // The following three queue are guarded by mQueueLock
+    private final Object mQueueLock = new Object();
+    private final TileQueue mRecycledQueue = new TileQueue();
+    private final TileQueue mUploadQueue = new TileQueue();
+    private final TileQueue mDecodeQueue = new TileQueue();
+    // Temp variables to avoid memory allocation
+    private final Rect mTileRange = new Rect();
+    private final Rect[] mActiveRange = {new Rect(), new Rect()};
+    protected int mLevelCount;  // cache the value of mScaledBitmaps.length
+    // The width and height of the full-sized bitmap
+    protected int mImageWidth = SIZE_UNKNOWN;
+    protected int mImageHeight = SIZE_UNKNOWN;
+    protected int mCenterX;
+    protected int mCenterY;
+    protected float mScale;
+    protected int mRotation;
     // TILE_SIZE must be 2^N
     private int mTileSize;
-
     private TileSource mModel;
     private BasicTexture mPreview;
-    protected int mLevelCount;  // cache the value of mScaledBitmaps.length
-
     // The mLevel variable indicates which level of bitmap we should use.
     // Level 0 means the original full-sized bitmap, and a larger value means
     // a smaller scaled bitmap (The width and height of each scaled bitmap is
@@ -83,79 +98,21 @@ public class TiledImageRenderer {
     // use the bitmap in mScaledBitmaps[mLevel] for display, otherwise the value
     // is mLevelCount
     private int mLevel = 0;
-
     private int mOffsetX;
     private int mOffsetY;
-
     private int mUploadQuota;
     private boolean mRenderComplete;
-
-    private final RectF mSourceRect = new RectF();
-    private final RectF mTargetRect = new RectF();
-
-    private final LongSparseArray<Tile> mActiveTiles = new LongSparseArray<Tile>();
-
-    // The following three queue are guarded by mQueueLock
-    private final Object mQueueLock = new Object();
-    private final TileQueue mRecycledQueue = new TileQueue();
-    private final TileQueue mUploadQueue = new TileQueue();
-    private final TileQueue mDecodeQueue = new TileQueue();
-
-    // The width and height of the full-sized bitmap
-    protected int mImageWidth = SIZE_UNKNOWN;
-    protected int mImageHeight = SIZE_UNKNOWN;
-
-    protected int mCenterX;
-    protected int mCenterY;
-    protected float mScale;
-    protected int mRotation;
-
     private boolean mLayoutTiles;
-
-    // Temp variables to avoid memory allocation
-    private final Rect mTileRange = new Rect();
-    private final Rect mActiveRange[] = {new Rect(), new Rect()};
-
     private TileDecoder mTileDecoder;
     private boolean mBackgroundTileUploaded;
 
     private int mViewWidth, mViewHeight;
     private View mParent;
 
-    /**
-     * Interface for providing tiles to a {@link TiledImageRenderer}
-     */
-    public static interface TileSource {
-
-        /**
-         * If the source does not care about the tile size, it should use
-         * {@link TiledImageRenderer#suggestedTileSize(Context)}
-         */
-        public int getTileSize();
-        public int getImageWidth();
-        public int getImageHeight();
-        public int getRotation();
-
-        /**
-         * Return a Preview image if available. This will be used as the base layer
-         * if higher res tiles are not yet available
-         */
-        public BasicTexture getPreview();
-
-        /**
-         * The tile returned by this method can be specified this way: Assuming
-         * the image size is (width, height), first take the intersection of (0,
-         * 0) - (width, height) and (x, y) - (x + tileSize, y + tileSize). If
-         * in extending the region, we found some part of the region is outside
-         * the image, those pixels are filled with black.
-         *
-         * If level > 0, it does the same operation on a down-scaled version of
-         * the original image (down-scaled by a factor of 2^level), but (x, y)
-         * still refers to the coordinate on the original image.
-         *
-         * The method would be called by the decoder thread.
-         */
-        public Bitmap getTile(int level, int x, int y, Bitmap reuse);
+    public TiledImageRenderer(View parent) {
+        mParent = parent;
+        mTileDecoder = new TileDecoder();
+        mTileDecoder.start();
     }
 
     public static int suggestedTileSize(Context context) {
@@ -167,13 +124,14 @@ public class TiledImageRenderer {
         WindowManager wm = (WindowManager)
                 context.getSystemService(Context.WINDOW_SERVICE);
         wm.getDefaultDisplay().getMetrics(metrics);
-        return metrics.heightPixels > 2048 ||  metrics.widthPixels > 2048;
+        return metrics.heightPixels > 2048 || metrics.widthPixels > 2048;
     }
 
-    public TiledImageRenderer(View parent) {
-        mParent = parent;
-        mTileDecoder = new TileDecoder();
-        mTileDecoder.start();
+    private static long makeTileKey(int x, int y, int level) {
+        long result = x;
+        result = (result << 16) | y;
+        result = (result << 16) | level;
+        return result;
     }
 
     public int getViewWidth() {
@@ -202,7 +160,7 @@ public class TiledImageRenderer {
     private void calculateLevelCount() {
         if (mPreview != null) {
             mLevelCount = Math.max(0, Utils.ceilLog2(
-                mImageWidth / (float) mPreview.getWidth()));
+                    mImageWidth / (float) mPreview.getWidth()));
         } else {
             int levels = 1;
             int maxDim = Math.max(mImageWidth, mImageHeight);
@@ -288,7 +246,7 @@ public class TiledImageRenderer {
         fromLevel = Math.max(0, Math.min(fromLevel, mLevelCount - 2));
         endLevel = Math.min(fromLevel + 2, mLevelCount);
 
-        Rect range[] = mActiveRange;
+        Rect[] range = mActiveRange;
         for (int i = fromLevel; i < endLevel; ++i) {
             getRange(range[i - fromLevel], mCenterX, mCenterY, i, mRotation);
         }
@@ -357,7 +315,7 @@ public class TiledImageRenderer {
     // (cX, cY) is the point on the original bitmap which will be put in the
     // center of the ImageViewer.
     private void getRange(Rect out,
-            int cX, int cY, int level, float scale, int rotation) {
+                          int cX, int cY, int level, float scale, int rotation) {
 
         double radians = Math.toRadians(-rotation);
         double w = mViewWidth;
@@ -407,7 +365,8 @@ public class TiledImageRenderer {
         mActiveTiles.clear();
         mTileRange.set(0, 0, 0, 0);
 
-        while (sTilePool.acquire() != null) {}
+        while (sTilePool.acquire() != null) {
+        }
     }
 
     public boolean draw(GLCanvas canvas) {
@@ -478,15 +437,15 @@ public class TiledImageRenderer {
         }
     }
 
-   private void queueForDecode(Tile tile) {
-       synchronized (mQueueLock) {
-           if (tile.mTileState == STATE_ACTIVATED) {
-               tile.mTileState = STATE_IN_QUEUE;
-               if (mDecodeQueue.push(tile)) {
-                   mQueueLock.notifyAll();
-               }
-           }
-       }
+    private void queueForDecode(Tile tile) {
+        synchronized (mQueueLock) {
+            if (tile.mTileState == STATE_ACTIVATED) {
+                tile.mTileState = STATE_IN_QUEUE;
+                if (mDecodeQueue.push(tile)) {
+                    mQueueLock.notifyAll();
+                }
+            }
+        }
     }
 
     private void decodeTile(Tile tile) {
@@ -560,13 +519,6 @@ public class TiledImageRenderer {
         return mActiveTiles.get(makeTileKey(x, y, level));
     }
 
-    private static long makeTileKey(int x, int y, int level) {
-        long result = x;
-        result = (result << 16) | y;
-        result = (result << 16) | level;
-        return result;
-    }
-
     private void uploadTiles(GLCanvas canvas) {
         int quota = UPLOAD_LIMIT;
         Tile tile = null;
@@ -594,7 +546,7 @@ public class TiledImageRenderer {
     // Draw the tile to a square at canvas that locates at (x, y) and
     // has a side length of length.
     private void drawTile(GLCanvas canvas,
-            int tx, int ty, int level, float x, float y, float length) {
+                          int tx, int ty, int level, float x, float y, float length) {
         RectF source = mSourceRect;
         RectF target = mTargetRect;
         target.set(x, y, x + length, y + length);
@@ -610,7 +562,7 @@ public class TiledImageRenderer {
                     } else {
                         mRenderComplete = false;
                     }
-                } else if (tile.mTileState != STATE_DECODE_FAIL){
+                } else if (tile.mTileState != STATE_DECODE_FAIL) {
                     mRenderComplete = false;
                     queueForDecode(tile);
                 }
@@ -657,6 +609,83 @@ public class TiledImageRenderer {
                 source.bottom = (mTileSize + source.bottom) / 2f;
             }
             tile = parent;
+        }
+    }
+
+    /**
+     * Interface for providing tiles to a {@link TiledImageRenderer}
+     */
+    public interface TileSource {
+
+        /**
+         * If the source does not care about the tile size, it should use
+         * {@link TiledImageRenderer#suggestedTileSize(Context)}
+         */
+        int getTileSize();
+
+        int getImageWidth();
+
+        int getImageHeight();
+
+        int getRotation();
+
+        /**
+         * Return a Preview image if available. This will be used as the base layer
+         * if higher res tiles are not yet available
+         */
+        BasicTexture getPreview();
+
+        /**
+         * The tile returned by this method can be specified this way: Assuming
+         * the image size is (width, height), first take the intersection of (0,
+         * 0) - (width, height) and (x, y) - (x + tileSize, y + tileSize). If
+         * in extending the region, we found some part of the region is outside
+         * the image, those pixels are filled with black.
+         * <p>
+         * If level > 0, it does the same operation on a down-scaled version of
+         * the original image (down-scaled by a factor of 2^level), but (x, y)
+         * still refers to the coordinate on the original image.
+         * <p>
+         * The method would be called by the decoder thread.
+         */
+        Bitmap getTile(int level, int x, int y, Bitmap reuse);
+    }
+
+    private static class TileQueue {
+        private Tile mHead;
+
+        public Tile pop() {
+            Tile tile = mHead;
+            if (tile != null) {
+                mHead = tile.mNext;
+            }
+            return tile;
+        }
+
+        public boolean push(Tile tile) {
+            if (contains(tile)) {
+                Log.w(TAG, "Attempting to add a tile already in the queue!");
+                return false;
+            }
+            boolean wasEmpty = mHead == null;
+            tile.mNext = mHead;
+            mHead = tile;
+            return wasEmpty;
+        }
+
+        private boolean contains(Tile tile) {
+            Tile other = mHead;
+            while (other != null) {
+                if (other == tile) {
+                    return true;
+                }
+                other = other.mNext;
+            }
+            return false;
+        }
+
+        public void clean() {
+            mHead = null;
         }
     }
 
@@ -745,44 +774,6 @@ public class TiledImageRenderer {
         public String toString() {
             return String.format("tile(%s, %s, %s / %s)",
                     mX / mTileSize, mY / mTileSize, mLevel, mLevelCount);
-        }
-    }
-
-    private static class TileQueue {
-        private Tile mHead;
-
-        public Tile pop() {
-            Tile tile = mHead;
-            if (tile != null) {
-                mHead = tile.mNext;
-            }
-            return tile;
-        }
-
-        public boolean push(Tile tile) {
-            if (contains(tile)) {
-                Log.w(TAG, "Attempting to add a tile already in the queue!");
-                return false;
-            }
-            boolean wasEmpty = mHead == null;
-            tile.mNext = mHead;
-            mHead = tile;
-            return wasEmpty;
-        }
-
-        private boolean contains(Tile tile) {
-            Tile other = mHead;
-            while (other != null) {
-                if (other == tile) {
-                    return true;
-                }
-                other = other.mNext;
-            }
-            return false;
-        }
-
-        public void clean() {
-            mHead = null;
         }
     }
 

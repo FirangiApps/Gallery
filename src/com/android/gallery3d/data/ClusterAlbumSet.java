@@ -35,13 +35,15 @@ public class ClusterAlbumSet extends MediaSet implements ContentListener {
     private boolean mIsLoading;
 
     private int mTotalMediaItemCount;
-    /** mTotalSelectableMediaItemCount is the count of items
-     * exclude not selectable such as Title item in TimeLine. */
+    /**
+     * mTotalSelectableMediaItemCount is the count of items
+     * exclude not selectable such as Title item in TimeLine.
+     */
     private int mTotalSelectableMediaItemCount;
     private ArrayList<Integer> mAlbumItemCountList;
 
     public ClusterAlbumSet(Path path, GalleryApp application,
-            MediaSet baseSet, int kind) {
+                           MediaSet baseSet, int kind) {
         super(path, INVALID_DATA_VERSION);
         mApplication = application;
         mBaseSet = baseSet;
@@ -192,9 +194,9 @@ public class ClusterAlbumSet extends MediaSet implements ContentListener {
                     newPaths.add(p);
                     mediaType = existing.get(p);
                     existing.remove(p);
-                    if(mediaType == MediaObject.MEDIA_TYPE_IMAGE) {
+                    if (mediaType == MediaObject.MEDIA_TYPE_IMAGE) {
                         imageCount++;
-                    } else if(mediaType == MediaObject.MEDIA_TYPE_VIDEO) {
+                    } else if (mediaType == MediaObject.MEDIA_TYPE_VIDEO) {
                         videoCount++;
                     }
                 }
@@ -225,65 +227,65 @@ public class ClusterAlbumSet extends MediaSet implements ContentListener {
         return mTotalSelectableMediaItemCount;
     }
 
-  private void calculateTotalItemsCount() {
-      mTotalMediaItemCount = 0;
-      if( mAlbums != null && mAlbums.size() > 0) {
-          mAlbumItemCountList = new ArrayList<Integer>();
-          for(ClusterAlbum album: mAlbums) {
-              int count = album.getMediaItemCount();
-              mTotalMediaItemCount = mTotalMediaItemCount + count;
-              mAlbumItemCountList.add(mTotalMediaItemCount);
-          }
-      }
-  }
+    private void calculateTotalItemsCount() {
+        mTotalMediaItemCount = 0;
+        if (mAlbums != null && mAlbums.size() > 0) {
+            mAlbumItemCountList = new ArrayList<Integer>();
+            for (ClusterAlbum album : mAlbums) {
+                int count = album.getMediaItemCount();
+                mTotalMediaItemCount = mTotalMediaItemCount + count;
+                mAlbumItemCountList.add(mTotalMediaItemCount);
+            }
+        }
+    }
 
-  @Override
-  public int getMediaItemCount() {
-      return mTotalMediaItemCount;
-  }
+    @Override
+    public int getMediaItemCount() {
+        return mTotalMediaItemCount;
+    }
 
-  @Override
-  public ArrayList<MediaItem> getMediaItem(int start, int count) {
-      if ((start + count) > mTotalMediaItemCount ) {
-          count  = mTotalMediaItemCount - start;
-      }
-      if (count <= 0) return null;
-      ArrayList<MediaItem> mediaItems = new ArrayList<MediaItem>();
-      int startAlbum = findTimelineAlbumIndex(start);
-      int endAlbum = findTimelineAlbumIndex(start + count - 1);
-      int s;
-      int lCount;
-      if (mAlbums.size() > 0 && mAlbumItemCountList.size() > 0) {
-          s = mAlbums.get(startAlbum).getTotalMediaItemCount() -
-                  (mAlbumItemCountList.get(startAlbum) - start);
-          for (int i = startAlbum; i <= endAlbum && i < mAlbums.size(); ++i) {
-              int albumCount = mAlbums.get(i).getTotalMediaItemCount();
-              lCount = Math.min(albumCount - s, count);
-              ArrayList<MediaItem> items = mAlbums.get(i).getMediaItem(s, lCount);
-              if (items != null)
-                  mediaItems.addAll(items);
-              count -= lCount;
-              s = 0;
-          }
-      }
-      return mediaItems;
-  }
+    @Override
+    public ArrayList<MediaItem> getMediaItem(int start, int count) {
+        if ((start + count) > mTotalMediaItemCount) {
+            count = mTotalMediaItemCount - start;
+        }
+        if (count <= 0) return null;
+        ArrayList<MediaItem> mediaItems = new ArrayList<MediaItem>();
+        int startAlbum = findTimelineAlbumIndex(start);
+        int endAlbum = findTimelineAlbumIndex(start + count - 1);
+        int s;
+        int lCount;
+        if (mAlbums.size() > 0 && mAlbumItemCountList.size() > 0) {
+            s = mAlbums.get(startAlbum).getTotalMediaItemCount() -
+                    (mAlbumItemCountList.get(startAlbum) - start);
+            for (int i = startAlbum; i <= endAlbum && i < mAlbums.size(); ++i) {
+                int albumCount = mAlbums.get(i).getTotalMediaItemCount();
+                lCount = Math.min(albumCount - s, count);
+                ArrayList<MediaItem> items = mAlbums.get(i).getMediaItem(s, lCount);
+                if (items != null)
+                    mediaItems.addAll(items);
+                count -= lCount;
+                s = 0;
+            }
+        }
+        return mediaItems;
+    }
 
-  public int findTimelineAlbumIndex(int itemIndex) {
-      int index = Arrays.binarySearch(mAlbumItemCountList.toArray(new Integer[0]), itemIndex);
-      if (index <  mTotalMediaItemCount && index >=  0)
-          return index + 1;
-      if (index < 0) {
-          index = (index * (-1)) - 1;
-      }
-      return index;
-  }
+    public int findTimelineAlbumIndex(int itemIndex) {
+        int index = Arrays.binarySearch(mAlbumItemCountList.toArray(new Integer[0]), itemIndex);
+        if (index < mTotalMediaItemCount && index >= 0)
+            return index + 1;
+        if (index < 0) {
+            index = (index * (-1)) - 1;
+        }
+        return index;
+    }
 
-  public ClusterAlbum getAlbumFromindex(int index) {
-      int aIndex = findTimelineAlbumIndex(index);
-      if (aIndex < mAlbums.size() && aIndex >= 0) {
-          return mAlbums.get(aIndex);
-      }
-      return null;
-  }
+    public ClusterAlbum getAlbumFromindex(int index) {
+        int aIndex = findTimelineAlbumIndex(index);
+        if (aIndex < mAlbums.size() && aIndex >= 0) {
+            return mAlbums.get(aIndex);
+        }
+        return null;
+    }
 }

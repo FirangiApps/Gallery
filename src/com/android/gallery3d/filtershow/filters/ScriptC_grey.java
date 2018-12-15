@@ -22,32 +22,37 @@
 package com.android.gallery3d.filtershow.filters;
 
 import android.content.res.Resources;
-import android.renderscript.*;
+import android.renderscript.Allocation;
+import android.renderscript.Element;
+import android.renderscript.RSRuntimeException;
+import android.renderscript.RenderScript;
+import android.renderscript.Script;
+import android.renderscript.ScriptC;
+import android.renderscript.Type;
 
 /**
  * @hide
  */
 public class ScriptC_grey extends ScriptC {
     private static final String __rs_resource_name = "grey";
+    //private final static int mExportForEachIdx_root = 0;
+    private final static int mExportForEachIdx_RGBAtoA = 1;
+    private Element __U8;
+    private Element __U8_4;
     // Constructor
-    public  ScriptC_grey(RenderScript rs) {
+    public ScriptC_grey(RenderScript rs) {
         this(rs,
-             rs.getApplicationContext().getResources(),
-             rs.getApplicationContext().getResources().getIdentifier(
-                 __rs_resource_name, "raw",
-                 rs.getApplicationContext().getPackageName()));
+                rs.getApplicationContext().getResources(),
+                rs.getApplicationContext().getResources().getIdentifier(
+                        __rs_resource_name, "raw",
+                        rs.getApplicationContext().getPackageName()));
     }
-
-    public  ScriptC_grey(RenderScript rs, Resources resources, int id) {
+    public ScriptC_grey(RenderScript rs, Resources resources, int id) {
         super(rs, resources, id);
         __U8_4 = Element.U8_4(rs);
         __U8 = Element.U8(rs);
     }
 
-    private Element __U8;
-    private Element __U8_4;
-    //private final static int mExportForEachIdx_root = 0;
-    private final static int mExportForEachIdx_RGBAtoA = 1;
     public Script.KernelID getKernelID_RGBAtoA() {
         return createKernelID(mExportForEachIdx_RGBAtoA, 35, null, null);
     }
@@ -69,11 +74,11 @@ public class ScriptC_grey extends ScriptC {
         t0 = ain.getType();
         t1 = aout.getType();
         if ((t0.getCount() != t1.getCount()) ||
-            (t0.getX() != t1.getX()) ||
-            (t0.getY() != t1.getY()) ||
-            (t0.getZ() != t1.getZ()) ||
-            (t0.hasFaces()   != t1.hasFaces()) ||
-            (t0.hasMipmaps() != t1.hasMipmaps())) {
+                (t0.getX() != t1.getX()) ||
+                (t0.getY() != t1.getY()) ||
+                (t0.getZ() != t1.getZ()) ||
+                (t0.hasFaces() != t1.hasFaces()) ||
+                (t0.hasMipmaps() != t1.hasMipmaps())) {
             throw new RSRuntimeException("Dimension mismatch between parameters ain and aout!");
         }
 

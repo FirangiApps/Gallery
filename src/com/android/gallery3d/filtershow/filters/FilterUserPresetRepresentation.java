@@ -41,7 +41,7 @@ public class FilterUserPresetRepresentation extends FilterRepresentation {
         return mId;
     }
 
-    public FilterRepresentation copy(){
+    public FilterRepresentation copy() {
         FilterRepresentation representation = new FilterUserPresetRepresentation(getName(),
                 new ImagePreset(mPreset), mId);
         return representation;

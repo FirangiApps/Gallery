@@ -17,7 +17,6 @@
 package com.android.gallery3d.app;
 
 import android.annotation.TargetApi;
-import android.app.Activity;
 import android.app.AlertDialog;
 import android.content.BroadcastReceiver;
 import android.content.ComponentName;
@@ -38,7 +37,6 @@ import android.view.MenuItem;
 import android.view.WindowManager;
 import android.widget.Toolbar;
 
-import org.codeaurora.gallery.R;
 import com.android.gallery3d.common.ApiHelper;
 import com.android.gallery3d.data.DataManager;
 import com.android.gallery3d.data.MediaItem;
@@ -49,11 +47,15 @@ import com.android.gallery3d.util.PanoramaViewHelper;
 import com.android.gallery3d.util.ThreadPool;
 import com.android.photos.data.GalleryBitmapPool;
 
+import org.codeaurora.gallery.R;
+
 import java.io.FileNotFoundException;
 
 public abstract class AbstractGalleryActivity extends AbstractPermissionActivity
         implements GalleryContext {
     private static final String TAG = "AbstractGalleryActivity";
+    private static final String DEFAULT_PRINT_JOB_NAME = "print job";
+    public boolean isTopMenuShow = false;
     private GLRootView mGLRootView;
     private StateManager mStateManager;
     private GalleryActionBar mActionBar;
@@ -61,8 +63,6 @@ public abstract class AbstractGalleryActivity extends AbstractPermissionActivity
     private TransitionStore mTransitionStore = new TransitionStore();
     private PanoramaViewHelper mPanoramaViewHelper;
     private Toolbar mToolbar;
-    public boolean isTopMenuShow = false;
-
     private AlertDialog mAlertDialog = null;
     private BroadcastReceiver mMountReceiver = new BroadcastReceiver() {
         @Override
@@ -71,8 +71,25 @@ public abstract class AbstractGalleryActivity extends AbstractPermissionActivity
         }
     };
     private IntentFilter mMountFilter = new IntentFilter(Intent.ACTION_MEDIA_MOUNTED);
+    private BatchService mBatchService;
+    private boolean mBatchServiceIsBound = false;
+    private ServiceConnection mBatchServiceConnection = new ServiceConnection() {
+        @Override
+        public void onServiceConnected(ComponentName className, IBinder service) {
+            mBatchService = ((BatchService.LocalBinder) service).getService();
+        }
 
-    private static final String DEFAULT_PRINT_JOB_NAME = "print job";
+        @Override
+        public void onServiceDisconnected(ComponentName className) {
+            mBatchService = null;
+        }
+    };
+
+    @TargetApi(ApiHelper.VERSION_CODES.HONEYCOMB)
+    private static void setAlertDialogIconAttribute(
+            AlertDialog.Builder builder) {
+        builder.setIconAttribute(android.R.attr.alertDialogIcon);
+    }
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -142,7 +159,7 @@ public abstract class AbstractGalleryActivity extends AbstractPermissionActivity
     @Override
     public void setContentView(int resId) {
         super.setContentView(resId);
-        mGLRootView = (GLRootView) findViewById(R.id.gl_root_view);
+        mGLRootView = findViewById(R.id.gl_root_view);
     }
 
     protected void onStorageReady() {
@@ -183,12 +200,6 @@ public abstract class AbstractGalleryActivity extends AbstractPermissionActivity
             registerReceiver(mMountReceiver, mMountFilter);
         }
         mPanoramaViewHelper.onStart();
-    }
-
-    @TargetApi(ApiHelper.VERSION_CODES.HONEYCOMB)
-    private static void setAlertDialogIconAttribute(
-            AlertDialog.Builder builder) {
-        builder.setIconAttribute(android.R.attr.alertDialogIcon);
     }
 
     @Override
@@ -304,20 +315,6 @@ public abstract class AbstractGalleryActivity extends AbstractPermissionActivity
                 & WindowManager.LayoutParams.FLAG_FULLSCREEN) != 0;
     }
 
-    private BatchService mBatchService;
-    private boolean mBatchServiceIsBound = false;
-    private ServiceConnection mBatchServiceConnection = new ServiceConnection() {
-        @Override
-        public void onServiceConnected(ComponentName className, IBinder service) {
-            mBatchService = ((BatchService.LocalBinder)service).getService();
-        }
-
-        @Override
-        public void onServiceDisconnected(ComponentName className) {
-            mBatchService = null;
-        }
-    };
-
     private void doBindBatchService() {
         bindService(new Intent(this, BatchService.class), mBatchServiceConnection, Context.BIND_AUTO_CREATE);
         mBatchServiceIsBound = true;
@@ -353,7 +350,7 @@ public abstract class AbstractGalleryActivity extends AbstractPermissionActivity
         } catch (FileNotFoundException fnfe) {
             Log.e(TAG, "Error printing an image", fnfe);
         } catch (RuntimeException e) {
-            Log.e(TAG,"Print failure,",e);
+            Log.e(TAG, "Print failure,", e);
         }
     }
 
@@ -381,16 +378,16 @@ public abstract class AbstractGalleryActivity extends AbstractPermissionActivity
         if (lastPathSegment == null) {
             // use substring to get last path segment.
             int indexOfLastPathSegment = path.lastIndexOf("/") + 1;
-            lastPathSegment = path.substring(indexOfLastPathSegment, path.length());
+            lastPathSegment = path.substring(indexOfLastPathSegment);
         }
         return lastPathSegment;
     }
 
-   public Toolbar getToolbar() {
-       return mToolbar;
-   }
+    public Toolbar getToolbar() {
+        return mToolbar;
+    }
 
-   public void setToolbar(Toolbar toolbar) {
-       mToolbar = toolbar ;
-   }
+    public void setToolbar(Toolbar toolbar) {
+        mToolbar = toolbar;
+    }
 }

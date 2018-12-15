@@ -40,8 +40,9 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.widget.Toast;
 
-import org.codeaurora.gallery.R;
 import com.android.gallery3d.common.ApiHelper.AudioSystem;
+
+import org.codeaurora.gallery.R;
 
 public class SpeakerHooker extends MovieHooker {
 
@@ -52,6 +53,37 @@ public class SpeakerHooker extends MovieHooker {
     private MenuItem mMenuSpeakerButton;
 
     private boolean mIsHeadsetOn = false;
+    private final BroadcastReceiver mHeadSetReceiver = new BroadcastReceiver() {
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            final String action = intent.getAction();
+            if (mAudioManager == null) {
+                initAudioManager();
+            }
+            if (action.equals(Intent.ACTION_HEADSET_PLUG)) {
+                mIsHeadsetOn = (intent.getIntExtra("state", 0) == 1)
+                        || mAudioManager.isBluetoothA2dpOn();
+            } else if (action.equals(BluetoothDevice.ACTION_ACL_CONNECTED)
+                    || action.equals(BluetoothDevice.ACTION_ACL_DISCONNECTED)) {
+                final BluetoothClass bc = ((BluetoothDevice)
+                        intent.getParcelableExtra(BluetoothDevice.EXTRA_DEVICE))
+                        .getBluetoothClass();
+                if (bc == null) return;
+                final int deviceClass = bc.getDeviceClass();
+                if ((deviceClass == BluetoothClass.Device.AUDIO_VIDEO_HEADPHONES)
+                        || (deviceClass == BluetoothClass.Device.AUDIO_VIDEO_WEARABLE_HEADSET)) {
+                    mIsHeadsetOn = action.equals(BluetoothDevice.ACTION_ACL_CONNECTED)
+                            || mAudioManager.isWiredHeadsetOn();
+                }
+            } else if (action.equals(AudioManager.ACTION_AUDIO_BECOMING_NOISY)) {
+                mIsHeadsetOn = false;
+            }
+            updateSpeakerButton();
+            if (!mIsHeadsetOn) {
+                turnSpeakerOff();
+            }
+        }
+    };
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -98,38 +130,6 @@ public class SpeakerHooker extends MovieHooker {
             e.printStackTrace();
         }
     }
-
-    private final BroadcastReceiver mHeadSetReceiver = new BroadcastReceiver() {
-        @Override
-        public void onReceive(Context context, Intent intent) {
-            final String action = intent.getAction();
-            if (mAudioManager == null) {
-                initAudioManager();
-            }
-            if (action.equals(Intent.ACTION_HEADSET_PLUG)) {
-                mIsHeadsetOn = (intent.getIntExtra("state", 0) == 1)
-                        || mAudioManager.isBluetoothA2dpOn();
-            } else if (action.equals(BluetoothDevice.ACTION_ACL_CONNECTED)
-                    || action.equals(BluetoothDevice.ACTION_ACL_DISCONNECTED)) {
-                final BluetoothClass bc = ((BluetoothDevice)
-                        intent.getParcelableExtra(BluetoothDevice.EXTRA_DEVICE))
-                                .getBluetoothClass();
-                if (bc == null) return;
-                final int deviceClass = bc.getDeviceClass();
-                if ((deviceClass == BluetoothClass.Device.AUDIO_VIDEO_HEADPHONES)
-                        || (deviceClass == BluetoothClass.Device.AUDIO_VIDEO_WEARABLE_HEADSET)) {
-                    mIsHeadsetOn = action.equals(BluetoothDevice.ACTION_ACL_CONNECTED)
-                            || mAudioManager.isWiredHeadsetOn();
-                }
-            } else if (action.equals(AudioManager.ACTION_AUDIO_BECOMING_NOISY)) {
-                mIsHeadsetOn = false;
-            }
-            updateSpeakerButton();
-            if (!mIsHeadsetOn) {
-                turnSpeakerOff();
-            }
-        }
-    };
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {

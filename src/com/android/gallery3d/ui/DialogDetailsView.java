@@ -17,7 +17,6 @@
 package com.android.gallery3d.ui;
 
 import android.app.AlertDialog;
-import android.app.Dialog;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.DialogInterface.OnDismissListener;
@@ -32,15 +31,15 @@ import android.widget.BaseAdapter;
 import android.widget.ListView;
 import android.widget.TextView;
 
-import org.codeaurora.gallery.R;
 import com.android.gallery3d.app.AbstractGalleryActivity;
-import com.android.gallery3d.common.Utils;
 import com.android.gallery3d.data.MediaDetails;
 import com.android.gallery3d.ui.DetailsAddressResolver.AddressResolvingListener;
 import com.android.gallery3d.ui.DetailsHelper.CloseListener;
 import com.android.gallery3d.ui.DetailsHelper.DetailsSource;
 import com.android.gallery3d.ui.DetailsHelper.DetailsViewContainer;
 import com.android.gallery3d.ui.DetailsHelper.ResolutionResolvingListener;
+
+import org.codeaurora.gallery.R;
 
 import java.text.DecimalFormat;
 import java.util.ArrayList;
@@ -52,9 +51,9 @@ public class DialogDetailsView implements DetailsViewContainer {
     private static final String TAG = "DialogDetailsView";
 
     private final AbstractGalleryActivity mActivity;
+    private final DetailsSource mSource;
     private DetailsAdapter mAdapter;
     private MediaDetails mDetails;
-    private final DetailsSource mSource;
     private int mIndex;
     private AlertDialog mDialog;
     private CloseListener mListener;
@@ -98,7 +97,7 @@ public class DialogDetailsView implements DetailsViewContainer {
         detailsList.setAdapter(mAdapter);
         AlertDialog.Builder builder = new AlertDialog.Builder(mActivity);
 
-         builder.setView(detailsList);
+        builder.setView(detailsList);
         builder.setTitle(title);
         builder.setPositiveButton(R.string.close,
                 new DialogInterface.OnClickListener() {
@@ -122,7 +121,7 @@ public class DialogDetailsView implements DetailsViewContainer {
 
         int buttonColor = r.getColor(R.color.dialog_button_color);
         mDialog.getButton(DialogInterface.BUTTON_POSITIVE)
-                .setTextSize(TypedValue.COMPLEX_UNIT_SP,14);
+                .setTextSize(TypedValue.COMPLEX_UNIT_SP, 14);
         mDialog.getButton(DialogInterface.BUTTON_POSITIVE).setTextColor(
                 buttonColor);
 
@@ -137,13 +136,17 @@ public class DialogDetailsView implements DetailsViewContainer {
                 });
     }
 
+    @Override
+    public void setCloseListener(CloseListener listener) {
+        mListener = listener;
+    }
 
     private class DetailsAdapter extends BaseAdapter
-        implements AddressResolvingListener, ResolutionResolvingListener {
+            implements AddressResolvingListener, ResolutionResolvingListener {
         private final ArrayList<String> mItems;
-        private int mLocationIndex;
         private final Locale mDefaultLocale = Locale.getDefault();
         private final DecimalFormat mDecimalFormat = new DecimalFormat(".####");
+        private int mLocationIndex;
         private int mWidthIndex = -1;
         private int mHeightIndex = -1;
 
@@ -198,7 +201,7 @@ public class DialogDetailsView implements DetailsViewContainer {
                         } else {
                             int integer = (int) time;
                             time -= integer;
-                            value = String.valueOf(integer) + "''";
+                            value = integer + "''";
                             if (time > 0.0001) {
                                 value += String.format(mDefaultLocale, " %d/%d", 1,
                                         (int) (0.5f + 1 / time));
@@ -334,8 +337,8 @@ public class DialogDetailsView implements DetailsViewContainer {
             String heightString = String.format(mDefaultLocale, "%s: %d",
                     DetailsHelper.getDetailsName(
                             context, MediaDetails.INDEX_HEIGHT), height);
-            mItems.set(mWidthIndex, String.valueOf(widthString));
-            mItems.set(mHeightIndex, String.valueOf(heightString));
+            mItems.set(mWidthIndex, widthString);
+            mItems.set(mHeightIndex, heightString);
             notifyDataSetChanged();
         }
 
@@ -358,19 +361,18 @@ public class DialogDetailsView implements DetailsViewContainer {
             }
         }
 
-        /** Converts the given integer to a localized String version. */
+        /**
+         * Converts the given integer to a localized String version.
+         */
         private String toLocalNumber(int n) {
             return String.format(mDefaultLocale, "%d", n);
         }
 
-        /** Converts the given double to a localized String version. */
+        /**
+         * Converts the given double to a localized String version.
+         */
         private String toLocalNumber(double n) {
             return mDecimalFormat.format(n);
         }
-    }
-
-    @Override
-    public void setCloseListener(CloseListener listener) {
-        mListener = listener;
     }
 }

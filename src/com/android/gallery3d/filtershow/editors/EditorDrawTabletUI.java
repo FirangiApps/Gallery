@@ -31,7 +31,6 @@ import android.widget.LinearLayout;
 import android.widget.SeekBar;
 import android.widget.TextView;
 
-import org.codeaurora.gallery.R;
 import com.android.gallery3d.filtershow.colorpicker.ColorCompareView;
 import com.android.gallery3d.filtershow.colorpicker.ColorHueView;
 import com.android.gallery3d.filtershow.colorpicker.ColorListener;
@@ -42,12 +41,14 @@ import com.android.gallery3d.filtershow.controller.BasicParameterStyle;
 import com.android.gallery3d.filtershow.controller.ParameterColor;
 import com.android.gallery3d.filtershow.filters.FilterDrawRepresentation;
 
+import org.codeaurora.gallery.R;
+
 import java.util.Arrays;
 
 public class EditorDrawTabletUI {
+    private static int sIconDim = 120;
     private EditorDraw mEditorDraw;
     private int[] mBrushIcons;
-    private static int sIconDim = 120;
     private int mSelectedColorButton;
     private int mSelectedStyleButton;
     private FilterDrawRepresentation mRep;
@@ -71,33 +72,18 @@ public class EditorDrawTabletUI {
             R.id.draw_color_button05,
     };
 
-    public void setDrawRepresentation(FilterDrawRepresentation rep) {
-        mRep = rep;
-        BasicParameterInt size;
-        size = (BasicParameterInt) mRep.getParam(FilterDrawRepresentation.PARAM_SIZE);
-        mdrawSizeSeekBar.setMax(size.getMaximum() - size.getMinimum());
-        mdrawSizeSeekBar.setProgress(size.getValue());
-
-        ParameterColor color;
-        color = (ParameterColor) mRep.getParam(FilterDrawRepresentation.PARAM_COLOR);
-        color.setValue(mBasColors[mSelectedColorButton]);
-        BasicParameterStyle style;
-        style = (BasicParameterStyle) mRep.getParam(FilterDrawRepresentation.PARAM_STYLE);
-        style.setSelected(mSelectedStyleButton);
-    }
-
     public EditorDrawTabletUI(EditorDraw editorDraw, Context context, LinearLayout lp) {
         mEditorDraw = editorDraw;
         mBasColors = editorDraw.mBasColors;
         mBrushIcons = editorDraw.brushIcons;
         Resources res = context.getResources();
         sIconDim = res.getDimensionPixelSize(R.dimen.draw_style_icon_dim);
-        LinearLayout buttonContainer = (LinearLayout) lp.findViewById(R.id.listStyles);
+        LinearLayout buttonContainer = lp.findViewById(R.id.listStyles);
 
-        mdrawSizeSeekBar = (SeekBar) lp.findViewById(R.id.drawSizeSeekBar);
-        mDrawSizeValue = (TextView) lp.findViewById(R.id.drawSizeValue);
+        mdrawSizeSeekBar = lp.findViewById(R.id.drawSizeSeekBar);
+        mDrawSizeValue = lp.findViewById(R.id.drawSizeValue);
 
-        Button clearButton = (Button) lp.findViewById(R.id.clearButton);
+        Button clearButton = lp.findViewById(R.id.clearButton);
         clearButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
@@ -121,8 +107,8 @@ public class EditorDrawTabletUI {
                 size = (BasicParameterInt) mRep.getParam(FilterDrawRepresentation.PARAM_SIZE);
                 size.setValue(progress + size.getMinimum());
                 mEditorDraw.commitLocalRepresentation();
-                int val  = progress + size.getMinimum();
-                mDrawSizeValue.setText(((val>0)?"+":"")+val);
+                int val = progress + size.getMinimum();
+                mDrawSizeValue.setText(((val > 0) ? "+" : "") + val);
             }
         });
 
@@ -154,17 +140,17 @@ public class EditorDrawTabletUI {
             });
         }
 
-        final LinearLayout ctls = (LinearLayout) lp.findViewById(R.id.controls);
-        final LinearLayout pick = (LinearLayout) lp.findViewById(R.id.colorPicker);
-        Button b = (Button) lp.findViewById(R.id.draw_color_popupbutton);
+        final LinearLayout ctls = lp.findViewById(R.id.controls);
+        final LinearLayout pick = lp.findViewById(R.id.colorPicker);
+        Button b = lp.findViewById(R.id.draw_color_popupbutton);
         b.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                boolean b = ctls.getVisibility() == View.VISIBLE;
-                ctls.setVisibility((b) ? View.GONE : View.VISIBLE);
-                pick.setVisibility((!b) ? View.GONE : View.VISIBLE);
-            }
-        }
+                                 @Override
+                                 public void onClick(View view) {
+                                     boolean b = ctls.getVisibility() == View.VISIBLE;
+                                     ctls.setVisibility((b) ? View.GONE : View.VISIBLE);
+                                     pick.setVisibility((!b) ? View.GONE : View.VISIBLE);
+                                 }
+                             }
         );
 
         mTransparent = res.getColor(R.color.color_chooser_unslected_border);
@@ -172,7 +158,7 @@ public class EditorDrawTabletUI {
 
         mColorButton = new Button[ids.length];
         for (int i = 0; i < ids.length; i++) {
-            mColorButton[i] = (Button) lp.findViewById(ids[i]);
+            mColorButton[i] = lp.findViewById(ids[i]);
 
             float[] hsvo = new float[4];
             Color.colorToHSV(mBasColors[i], hsvo);
@@ -207,10 +193,10 @@ public class EditorDrawTabletUI {
             });
         }
 
-        mHueView = (ColorHueView) lp.findViewById(R.id.ColorHueView);
-        mSatValView = (ColorSVRectView) lp.findViewById(R.id.colorRectView);
-        mOpacityView = (ColorOpacityView) lp.findViewById(R.id.colorOpacityView);
-        mColorCompareView = (ColorCompareView) lp.findViewById(R.id.btnSelect);
+        mHueView = lp.findViewById(R.id.ColorHueView);
+        mSatValView = lp.findViewById(R.id.colorRectView);
+        mOpacityView = lp.findViewById(R.id.colorOpacityView);
+        mColorCompareView = lp.findViewById(R.id.btnSelect);
 
         float[] hsvo = new float[4];
         Color.colorToHSV(mBasColors[0], hsvo);
@@ -255,6 +241,21 @@ public class EditorDrawTabletUI {
             colorViews[i].addColorListener(colorListener);
         }
 
+    }
+
+    public void setDrawRepresentation(FilterDrawRepresentation rep) {
+        mRep = rep;
+        BasicParameterInt size;
+        size = (BasicParameterInt) mRep.getParam(FilterDrawRepresentation.PARAM_SIZE);
+        mdrawSizeSeekBar.setMax(size.getMaximum() - size.getMinimum());
+        mdrawSizeSeekBar.setProgress(size.getValue());
+
+        ParameterColor color;
+        color = (ParameterColor) mRep.getParam(FilterDrawRepresentation.PARAM_COLOR);
+        color.setValue(mBasColors[mSelectedColorButton]);
+        BasicParameterStyle style;
+        style = (BasicParameterStyle) mRep.getParam(FilterDrawRepresentation.PARAM_STYLE);
+        style.setSelected(mSelectedStyleButton);
     }
 
     public void resetStyle() {

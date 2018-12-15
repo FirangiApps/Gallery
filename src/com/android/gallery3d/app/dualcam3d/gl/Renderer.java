@@ -35,30 +35,24 @@ import android.opengl.GLSurfaceView;
 import android.opengl.Matrix;
 import android.util.Log;
 
-
 import javax.microedition.khronos.egl.EGLConfig;
 import javax.microedition.khronos.opengles.GL10;
 
 public class Renderer implements GLSurfaceView.Renderer {
-    private static final String TAG = "Renderer";
     public static final float THETA_MAX = (float) Math.toRadians(6);
+    private static final String TAG = "Renderer";
     private final float[] mProjectionMatrix = new float[16];
-
+    private final Mesh mMesh = Mesh.create();
+    private final Texture mImageTexture = new Texture();
     private float mOffsetX;
     private float mOffsetY;
-
     private Bitmap mImageBitmap;
     private Bitmap mDepthMap;
-
     private boolean mImageChanged;
     private boolean mDepthMapChanged;
-
     private RectF mSurfaceRect;
     private android.graphics.Matrix mImageInvertMatrix;
-
-    private final Mesh mMesh = Mesh.create();
     private Shader mShader;
-    private final Texture mImageTexture = new Texture();
 
     public Renderer() {
     }

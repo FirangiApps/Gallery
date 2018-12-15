@@ -38,33 +38,29 @@ import android.view.View;
 import android.widget.ImageButton;
 import android.widget.TextView;
 
-import org.codeaurora.gallery.R;
 import com.android.gallery3d.filtershow.FilterShowActivity;
 import com.android.gallery3d.filtershow.editors.EditorCrop;
 
+import org.codeaurora.gallery.R;
+
 public class EditorCropPanel extends BasicGeometryPanel {
-    private EditorCrop mEditorCrop;
-
-    private int mSelectPosition = 0;
-
     private final int[] mCropAspectIds = {
             R.id.crop_menu_none,
             R.id.crop_menu_original,
             R.id.crop_menu_1to1
     };
-
     private final int[] mCropDrawableIds = {
             R.drawable.crop_free_background,
             R.drawable.crop_original_background,
             R.drawable.crop_one_background
     };
-
     private final int[] mCropTextIds = {
             R.string.aspectNone_effect,
             R.string.aspectOriginal_effect,
             R.string.aspect1to1_effect
     };
-
+    private EditorCrop mEditorCrop;
+    private int mSelectPosition = 0;
     private View.OnClickListener mOnClickListener = new View.OnClickListener() {
         @Override
         public void onClick(View v) {

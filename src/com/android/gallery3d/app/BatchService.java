@@ -25,12 +25,6 @@ import com.android.gallery3d.util.ThreadPool;
 
 public class BatchService extends Service {
 
-    public class LocalBinder extends Binder {
-        BatchService getService() {
-            return BatchService.this;
-        }
-    }
-
     private final IBinder mBinder = new LocalBinder();
     private ThreadPool mThreadPool = new ThreadPool(1, 1);
 
@@ -44,5 +38,11 @@ public class BatchService extends Service {
     // guarantee for synchronization.
     public ThreadPool getThreadPool() {
         return mThreadPool;
+    }
+
+    public class LocalBinder extends Binder {
+        BatchService getService() {
+            return BatchService.this;
+        }
     }
 }

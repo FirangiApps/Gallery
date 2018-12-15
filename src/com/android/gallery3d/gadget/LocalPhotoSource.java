@@ -55,14 +55,13 @@ public class LocalPhotoSource implements WidgetSource {
     private static final String SELECTION =
             String.format("%s != %s", Media.BUCKET_ID, getDownloadBucketId());
     private static final String ORDER = String.format("%s DESC", DATE_TAKEN);
-
+    private static final Path LOCAL_IMAGE_ROOT = Path.fromString("/local/image/item");
     private Context mContext;
     private ArrayList<Long> mPhotos = new ArrayList<Long>();
     private ContentListener mContentListener;
     private ContentObserver mContentObserver;
     private boolean mContentDirty = true;
     private DataManager mDataManager;
-    private static final Path LOCAL_IMAGE_ROOT = Path.fromString("/local/image/item");
 
     public LocalPhotoSource(Context context) {
         mContext = context;
@@ -76,6 +75,18 @@ public class LocalPhotoSource implements WidgetSource {
         };
         mContext.getContentResolver()
                 .registerContentObserver(CONTENT_URI, true, mContentObserver);
+    }
+
+    /**
+     * Builds the bucket ID for the public external storage Downloads directory
+     *
+     * @return the bucket ID
+     */
+    private static int getDownloadBucketId() {
+        String downloadsPath = Environment
+                .getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS)
+                .getAbsolutePath();
+        return GalleryUtils.getBucketId(downloadsPath);
     }
 
     @Override
@@ -109,10 +120,10 @@ public class LocalPhotoSource implements WidgetSource {
         if (count > total) count = total;
         HashSet<Integer> selected = new HashSet<Integer>(count);
         while (selected.size() < count) {
-            int row = (int)(-Math.log(random.nextDouble()) * total / 2);
+            int row = (int) (-Math.log(random.nextDouble()) * total / 2);
             if (row < total) selected.add(row);
         }
-        int values[] = new int[count];
+        int[] values = new int[count];
         int index = 0;
         for (int value : selected) {
             values[index++] = value;
@@ -163,7 +174,7 @@ public class LocalPhotoSource implements WidgetSource {
         int photoCount = getPhotoCount(resolver);
         if (isContentSound(photoCount)) return;
 
-        int choosedIds[] = getExponentialIndice(photoCount, MAX_PHOTO_COUNT);
+        int[] choosedIds = getExponentialIndice(photoCount, MAX_PHOTO_COUNT);
         Arrays.sort(choosedIds);
 
         mPhotos.clear();
@@ -185,17 +196,6 @@ public class LocalPhotoSource implements WidgetSource {
     public int size() {
         reload();
         return mPhotos.size();
-    }
-
-    /**
-     * Builds the bucket ID for the public external storage Downloads directory
-     * @return the bucket ID
-     */
-    private static int getDownloadBucketId() {
-        String downloadsPath = Environment
-                .getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS)
-                .getAbsolutePath();
-        return GalleryUtils.getBucketId(downloadsPath);
     }
 
     @Override

@@ -43,7 +43,7 @@ import java.lang.ref.WeakReference;
 import java.lang.reflect.Field;
 
 
-public class ImageViewImpl{
+public class ImageViewImpl {
 
     private final static String TAG = "ImageViewImpl";
     protected Reference<View> viewRef;
@@ -53,6 +53,21 @@ public class ImageViewImpl{
         if (imageView == null) throw new IllegalArgumentException("view must not be null");
 
         this.viewRef = new WeakReference<View>(imageView);
+    }
+
+    private static int getImageViewFieldValue(Object object, String fieldName) {
+        int value = 0;
+        try {
+            Field field = ImageView.class.getDeclaredField(fieldName);
+            field.setAccessible(true);
+            int fieldValue = (Integer) field.get(object);
+            if (fieldValue > 0 && fieldValue < Integer.MAX_VALUE) {
+                value = fieldValue;
+            }
+        } catch (Exception e) {
+            Log.e(TAG, e.toString());
+        }
+        return value;
     }
 
     public int getWidth() {
@@ -77,7 +92,8 @@ public class ImageViewImpl{
         View view = viewRef.get();
         if (view != null) {
             final ViewGroup.LayoutParams params = view.getLayoutParams();
-            if (height <= 0 && params != null) height = params.height; // Get layout height parameter
+            if (height <= 0 && params != null)
+                height = params.height; // Get layout height parameter
             return height;
         }
         if (height <= 0) {
@@ -95,7 +111,7 @@ public class ImageViewImpl{
             if (view != null) {
                 ((ImageView) view).setImageDrawable(drawable);
                 if (drawable instanceof AnimationDrawable) {
-                    ((AnimationDrawable)drawable).start();
+                    ((AnimationDrawable) drawable).start();
                 }
                 return true;
             }
@@ -108,21 +124,6 @@ public class ImageViewImpl{
     public int getId() {
         View view = viewRef.get();
         return view == null ? super.hashCode() : view.hashCode();
-    }
-
-    private static int getImageViewFieldValue(Object object, String fieldName) {
-        int value = 0;
-        try {
-            Field field = ImageView.class.getDeclaredField(fieldName);
-            field.setAccessible(true);
-            int fieldValue = (Integer) field.get(object);
-            if (fieldValue > 0 && fieldValue < Integer.MAX_VALUE) {
-                value = fieldValue;
-            }
-        } catch (Exception e) {
-            Log.e(TAG, e.toString());
-        }
-        return value;
     }
 
     public ViewScaleType getScaleType() {

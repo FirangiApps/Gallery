@@ -74,6 +74,10 @@ public class MediaItemsLoader extends AsyncTaskLoader<Cursor> implements LoaderC
         mMediaSet = mDataManager.getMediaSet(parentPath);
     }
 
+    public static int getThumbnailSize() {
+        return MediaItem.getTargetSize(MediaItem.TYPE_MICROTHUMBNAIL);
+    }
+
     @Override
     protected void onStartLoading() {
         super.onStartLoading();
@@ -151,10 +155,6 @@ public class MediaItemsLoader extends AsyncTaskLoader<Cursor> implements LoaderC
         int index = item.getInt(PhotoSetLoader.INDEX_ID);
         drawable.setMediaItem(mMediaItems.get(index));
         return drawable;
-    }
-
-    public static int getThumbnailSize() {
-        return MediaItem.getTargetSize(MediaItem.TYPE_MICROTHUMBNAIL);
     }
 
     @Override

@@ -23,14 +23,14 @@ import java.io.InputStream;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
 
 public class CountedDataInputStream extends FilterInputStream {
 
-    private int mCount = 0;
-
     // allocate a byte buffer for a long value;
-    private final byte mByteArray[] = new byte[8];
+    private final byte[] mByteArray = new byte[8];
     private final ByteBuffer mByteBuffer = ByteBuffer.wrap(mByteArray);
+    private int mCount = 0;
 
     public CountedDataInputStream(InputStream in) {
         super(in);
@@ -75,7 +75,7 @@ public class CountedDataInputStream extends FilterInputStream {
     public void skipTo(long target) throws IOException {
         long cur = mCount;
         long diff = target - cur;
-        assert(diff >= 0);
+        assert (diff >= 0);
         skipOrThrow(diff);
     }
 
@@ -88,16 +88,16 @@ public class CountedDataInputStream extends FilterInputStream {
         readOrThrow(b, 0, b.length);
     }
 
-    public void setByteOrder(ByteOrder order) {
-        mByteBuffer.order(order);
-    }
-
     public ByteOrder getByteOrder() {
         return mByteBuffer.order();
     }
 
+    public void setByteOrder(ByteOrder order) {
+        mByteBuffer.order(order);
+    }
+
     public short readShort() throws IOException {
-        readOrThrow(mByteArray, 0 ,2);
+        readOrThrow(mByteArray, 0, 2);
         mByteBuffer.rewind();
         return mByteBuffer.getShort();
     }
@@ -107,7 +107,7 @@ public class CountedDataInputStream extends FilterInputStream {
     }
 
     public int readInt() throws IOException {
-        readOrThrow(mByteArray, 0 , 4);
+        readOrThrow(mByteArray, 0, 4);
         mByteBuffer.rewind();
         return mByteBuffer.getInt();
     }
@@ -117,19 +117,19 @@ public class CountedDataInputStream extends FilterInputStream {
     }
 
     public long readLong() throws IOException {
-        readOrThrow(mByteArray, 0 , 8);
+        readOrThrow(mByteArray, 0, 8);
         mByteBuffer.rewind();
         return mByteBuffer.getLong();
     }
 
     public String readString(int n) throws IOException {
-        byte buf[] = new byte[n];
+        byte[] buf = new byte[n];
         readOrThrow(buf);
-        return new String(buf, "UTF8");
+        return new String(buf, StandardCharsets.UTF_8);
     }
 
     public String readString(int n, Charset charset) throws IOException {
-        byte buf[] = new byte[n];
+        byte[] buf = new byte[n];
         readOrThrow(buf);
         return new String(buf, charset);
     }

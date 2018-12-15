@@ -36,11 +36,17 @@ public class SelectionManager {
     private NfcAdapter mNfcAdapter;
     private SelectedUriSource mUriSource;
     private Intent mShareIntent = new Intent();
-
-    public interface SelectedUriSource {
-        public ArrayList<Uri> getSelectedShareableUris();
-    }
-
+    private int mSelectedTotalCount = 0;
+    private int mSelectedShareableCount = 0;
+    private int mSelectedShareableImageCount = 0;
+    private int mSelectedShareableVideoCount = 0;
+    private int mSelectedDeletableCount = 0;
+    private int mSelectedEditableCount = 0;
+    private int mSelectedCroppableCount = 0;
+    private int mSelectedSetableCount = 0;
+    private int mSelectedTrimmableCount = 0;
+    private int mSelectedMuteableCount = 0;
+    private ArrayList<Uri> mCachedShareableUris = null;
     public SelectionManager(Activity activity) {
         mActivity = activity;
         if (ApiHelper.AT_LEAST_16) {
@@ -48,7 +54,7 @@ public class SelectionManager {
             mNfcAdapter.setBeamPushUrisCallback(new CreateBeamUrisCallback() {
                 @Override
                 public Uri[] createBeamUris(NfcEvent arg0) {
-                 // This will have been preceded by a call to onItemSelectedStateChange
+                    // This will have been preceded by a call to onItemSelectedStateChange
                     if (mCachedShareableUris == null) return null;
                     return mCachedShareableUris.toArray(
                             new Uri[mCachedShareableUris.size()]);
@@ -61,21 +67,8 @@ public class SelectionManager {
         mUriSource = source;
     }
 
-    private int mSelectedTotalCount = 0;
-    private int mSelectedShareableCount = 0;
-    private int mSelectedShareableImageCount = 0;
-    private int mSelectedShareableVideoCount = 0;
-    private int mSelectedDeletableCount = 0;
-    private int mSelectedEditableCount = 0;
-    private int mSelectedCroppableCount = 0;
-    private int mSelectedSetableCount = 0;
-    private int mSelectedTrimmableCount = 0;
-    private int mSelectedMuteableCount = 0;
-
-    private ArrayList<Uri> mCachedShareableUris = null;
-
     public void onItemSelectedStateChanged(ShareActionProvider share,
-            int itemType, int itemSupportedOperations, boolean selected) {
+                                           int itemType, int itemSupportedOperations, boolean selected) {
         int increment = selected ? 1 : -1;
 
         mSelectedTotalCount += increment;
@@ -180,5 +173,9 @@ public class SelectionManager {
         mCachedShareableUris = null;
         mShareIntent.removeExtra(Intent.EXTRA_STREAM);
         mShareIntent.setAction(null).setType(null);
+    }
+
+    public interface SelectedUriSource {
+        ArrayList<Uri> getSelectedShareableUris();
     }
 }

@@ -32,24 +32,18 @@ import com.android.gallery3d.util.GalleryUtils;
 public class EyePosition {
     @SuppressWarnings("unused")
     private static final String TAG = "EyePosition";
-
-    public interface EyePositionListener {
-        public void onEyePositionChanged(float x, float y, float z);
-    }
-
     private static final float GYROSCOPE_THRESHOLD = 0.15f;
     private static final float GYROSCOPE_LIMIT = 10f;
     private static final int GYROSCOPE_SETTLE_DOWN = 15;
     private static final float GYROSCOPE_RESTORE_FACTOR = 0.995f;
-
     private static final float USER_ANGEL = (float) Math.toRadians(10);
     private static final float USER_ANGEL_COS = (float) Math.cos(USER_ANGEL);
     private static final float USER_ANGEL_SIN = (float) Math.sin(USER_ANGEL);
     private static final float MAX_VIEW_RANGE = 0.5f;
     private static final int NOT_STARTED = -1;
-
     private static final float USER_DISTANCE_METER = 0.3f;
-
+    private final float mUserDistance; // in pixel
+    private final float mLimit;
     private Context mContext;
     private EyePositionListener mListener;
     private Display mDisplay;
@@ -58,13 +52,9 @@ public class EyePosition {
     private float mX;
     private float mY;
     private float mZ;
-
-    private final float mUserDistance; // in pixel
-    private final float mLimit;
     private long mStartTime = NOT_STARTED;
     private Sensor mSensor;
     private PositionListener mPositionListener = new PositionListener();
-
     private int mGyroscopeCountdown = 0;
 
     public EyePosition(Context context, EyePositionListener listener) {
@@ -115,13 +105,22 @@ public class EyePosition {
         float x = gx, y = gy, z = gz;
 
         switch (mDisplay.getRotation()) {
-            case Surface.ROTATION_90: x = -gy; y= gx; break;
-            case Surface.ROTATION_180: x = -gx; y = -gy; break;
-            case Surface.ROTATION_270: x = gy; y = -gx; break;
+            case Surface.ROTATION_90:
+                x = -gy;
+                y = gx;
+                break;
+            case Surface.ROTATION_180:
+                x = -gx;
+                y = -gy;
+                break;
+            case Surface.ROTATION_270:
+                x = gy;
+                y = -gx;
+                break;
         }
 
         float temp = x * x + y * y + z * z;
-        float t = -y /temp;
+        float t = -y / temp;
 
         float tx = t * x;
         float ty = -1 + t * y;
@@ -131,10 +130,10 @@ public class EyePosition {
         float glength = (float) Math.sqrt(temp);
 
         mX = Utils.clamp((x * USER_ANGEL_COS / glength
-                + tx * USER_ANGEL_SIN / length) * mUserDistance,
+                        + tx * USER_ANGEL_SIN / length) * mUserDistance,
                 -mLimit, mLimit);
         mY = -Utils.clamp((y * USER_ANGEL_COS / glength
-                + ty * USER_ANGEL_SIN / length) * mUserDistance,
+                        + ty * USER_ANGEL_SIN / length) * mUserDistance,
                 -mLimit, mLimit);
         mZ = (float) -Math.sqrt(
                 mUserDistance * mUserDistance - mX * mX - mY * mY);
@@ -143,7 +142,7 @@ public class EyePosition {
 
     private void onGyroscopeChanged(float gx, float gy, float gz) {
         long now = SystemClock.elapsedRealtime();
-        float distance = (gx > 0 ? gx : -gx) + (gy > 0 ? gy : - gy);
+        float distance = (gx > 0 ? gx : -gx) + (gy > 0 ? gy : -gy);
         if (distance < GYROSCOPE_THRESHOLD
                 || distance > GYROSCOPE_LIMIT || mGyroscopeCountdown > 0) {
             --mGyroscopeCountdown;
@@ -164,9 +163,18 @@ public class EyePosition {
 
         float x = -gy, y = -gx;
         switch (mDisplay.getRotation()) {
-            case Surface.ROTATION_90: x = -gx; y= gy; break;
-            case Surface.ROTATION_180: x = gy; y = gx; break;
-            case Surface.ROTATION_270: x = gx; y = -gy; break;
+            case Surface.ROTATION_90:
+                x = -gx;
+                y = gy;
+                break;
+            case Surface.ROTATION_180:
+                x = gy;
+                y = gx;
+                break;
+            case Surface.ROTATION_270:
+                x = gx;
+                y = -gy;
+                break;
         }
 
         mX = Utils.clamp((float) (mX + x * t / Math.hypot(mZ, mX)),
@@ -177,27 +185,6 @@ public class EyePosition {
         mZ = (float) -Math.sqrt(
                 mUserDistance * mUserDistance - mX * mX - mY * mY);
         mListener.onEyePositionChanged(mX, mY, mZ);
-    }
-
-    private class PositionListener implements SensorEventListener {
-        @Override
-        public void onAccuracyChanged(Sensor sensor, int accuracy) {
-        }
-
-        @Override
-        public void onSensorChanged(SensorEvent event) {
-            switch (event.sensor.getType()) {
-                case Sensor.TYPE_GYROSCOPE: {
-                    onGyroscopeChanged(
-                            event.values[0], event.values[1], event.values[2]);
-                    break;
-                }
-                case Sensor.TYPE_ACCELEROMETER: {
-                    onAccelerometerChanged(
-                            event.values[0], event.values[1], event.values[2]);
-                }
-            }
-        }
     }
 
     public void pause() {
@@ -221,5 +208,30 @@ public class EyePosition {
         mX = mY = 0;
         mZ = -mUserDistance;
         mListener.onEyePositionChanged(mX, mY, mZ);
+    }
+
+    public interface EyePositionListener {
+        void onEyePositionChanged(float x, float y, float z);
+    }
+
+    private class PositionListener implements SensorEventListener {
+        @Override
+        public void onAccuracyChanged(Sensor sensor, int accuracy) {
+        }
+
+        @Override
+        public void onSensorChanged(SensorEvent event) {
+            switch (event.sensor.getType()) {
+                case Sensor.TYPE_GYROSCOPE: {
+                    onGyroscopeChanged(
+                            event.values[0], event.values[1], event.values[2]);
+                    break;
+                }
+                case Sensor.TYPE_ACCELEROMETER: {
+                    onAccelerometerChanged(
+                            event.values[0], event.values[1], event.values[2]);
+                }
+            }
+        }
     }
 }

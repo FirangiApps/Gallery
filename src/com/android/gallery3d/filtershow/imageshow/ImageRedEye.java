@@ -107,7 +107,7 @@ public class ImageRedEye extends ImagePoint {
 
     @Override
     protected void drawPoint(FilterPoint point, Canvas canvas, Matrix originalToScreen,
-            Matrix originalRotateToScreen, Paint paint) {
+                             Matrix originalRotateToScreen, Paint paint) {
         RedEyeCandidate candidate = (RedEyeCandidate) point;
         RectF rect = candidate.getRect();
         RectF drawRect = new RectF();

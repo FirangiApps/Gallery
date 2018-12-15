@@ -18,6 +18,7 @@ package com.android.photos;
 
 import android.app.Activity;
 import android.os.Bundle;
+
 import com.android.photos.views.TiledImageView;
 
 

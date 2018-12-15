@@ -41,10 +41,6 @@ public class BottomPanel extends Fragment {
     private BottomPanelDelegate mPanelDelegate;
     private View mBottomView;
 
-    interface BottomPanelDelegate {
-        View getBottomPanelView(LayoutInflater inflater);
-    }
-
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
@@ -56,5 +52,9 @@ public class BottomPanel extends Fragment {
 
     public void setBottomPanelDelegate(BottomPanelDelegate panelDelegate) {
         mPanelDelegate = panelDelegate;
+    }
+
+    interface BottomPanelDelegate {
+        View getBottomPanelView(LayoutInflater inflater);
     }
 }

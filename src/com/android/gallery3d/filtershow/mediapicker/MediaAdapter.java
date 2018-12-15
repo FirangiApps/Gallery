@@ -40,11 +40,12 @@ import android.view.ViewGroup.LayoutParams;
 import android.widget.AbsListView.RecyclerListener;
 import android.widget.RelativeLayout;
 
+import com.android.gallery3d.filtershow.mediapicker.imageloader.ImageLoaderStub;
+
+import org.codeaurora.gallery.R;
+
 import java.util.ArrayList;
 import java.util.List;
-
-import com.android.gallery3d.filtershow.mediapicker.imageloader.ImageLoaderStub;
-import org.codeaurora.gallery.R;
 
 /**
  * Adapter for display media item list.
@@ -89,7 +90,7 @@ public class MediaAdapter extends CursorAdapter implements RecyclerListener {
     public View newView(Context context, Cursor cursor, ViewGroup viewGroup) {
         View root = View
                 .inflate(context, R.layout.mediapicker_list_item, null);
-        SelectedImageView imageView = (SelectedImageView) root.findViewById(R.id.thumbnail);
+        SelectedImageView imageView = root.findViewById(R.id.thumbnail);
 
         imageView.setLayoutParams(mImageViewLayoutParams);
         // Check the height matches our calculated column width
@@ -115,8 +116,7 @@ public class MediaAdapter extends CursorAdapter implements RecyclerListener {
         if (uri == null)
             return false;
         if (mMediaSelected != null) {
-            if (mMediaSelected.equals(uri))
-                return true;
+            return mMediaSelected.equals(uri);
         }
         return false;
     }
@@ -144,13 +144,13 @@ public class MediaAdapter extends CursorAdapter implements RecyclerListener {
         mMediaSelected = item;
     }
 
+    public int getNumColumns() {
+        return mNumColumns;
+    }
+
     // set numcols
     public void setNumColumns(int numColumns) {
         mNumColumns = numColumns;
-    }
-
-    public int getNumColumns() {
-        return mNumColumns;
     }
 
     // set photo item height
@@ -166,7 +166,7 @@ public class MediaAdapter extends CursorAdapter implements RecyclerListener {
 
     @Override
     public void onMovedToScrapHeap(View view) {
-        SelectedImageView imageView = (SelectedImageView) view
+        SelectedImageView imageView = view
                 .findViewById(R.id.thumbnail);
         mImageViewSelected.remove(imageView);
     }

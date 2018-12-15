@@ -58,30 +58,20 @@ public class TiledImageView extends FrameLayout {
     private GLSurfaceView mGLSurfaceView;
     private boolean mInvalPending = false;
     private FrameCallback mFrameCallback;
-
-    private static class ImageRendererWrapper {
-        // Guarded by locks
-        float scale;
-        int centerX, centerY;
-        int rotation;
-        TileSource source;
-        Runnable isReadyCallback;
-
-        // GL thread only
-        TiledImageRenderer image;
-    }
-
     private float[] mValues = new float[9];
-
     // -------------------------
     // Guarded by mLock
     // -------------------------
     private Object mLock = new Object();
     private ImageRendererWrapper mRenderer;
+    private Runnable mFreeTextures = new Runnable() {
 
-    public static boolean isTilingSupported() {
-        return IS_SUPPORTED;
-    }
+        @Override
+        public void run() {
+            mRenderer.image.freeTextures();
+        }
+    };
+    private RectF mTempRectF = new RectF();
 
     public TiledImageView(Context context) {
         this(context, null);
@@ -112,6 +102,10 @@ public class TiledImageView extends FrameLayout {
         //setTileSource(new ColoredTiles());
     }
 
+    public static boolean isTilingSupported() {
+        return IS_SUPPORTED;
+    }
+
     public void destroy() {
         if (!IS_SUPPORTED) {
             return;
@@ -122,14 +116,6 @@ public class TiledImageView extends FrameLayout {
             mGLSurfaceView.queueEvent(mFreeTextures);
         }
     }
-
-    private Runnable mFreeTextures = new Runnable() {
-
-        @Override
-        public void run() {
-            mRenderer.image.freeTextures();
-        }
-    };
 
     public void onPause() {
         if (!IS_SUPPORTED) {
@@ -167,7 +153,7 @@ public class TiledImageView extends FrameLayout {
 
     @Override
     protected void onLayout(boolean changed, int left, int top, int right,
-            int bottom) {
+                            int bottom) {
         super.onLayout(changed, left, top, right, bottom);
         if (!IS_SUPPORTED) {
             return;
@@ -241,7 +227,6 @@ public class TiledImageView extends FrameLayout {
         }
     }
 
-    private RectF mTempRectF = new RectF();
     public void positionFromMatrix(Matrix matrix) {
         if (!IS_SUPPORTED) {
             return;
@@ -278,60 +263,28 @@ public class TiledImageView extends FrameLayout {
         }
     }
 
-    private class TileRenderer implements Renderer {
+    private static class ImageRendererWrapper {
+        // Guarded by locks
+        float scale;
+        int centerX, centerY;
+        int rotation;
+        TileSource source;
+        Runnable isReadyCallback;
 
-        private GLES20Canvas mCanvas;
-
-        @Override
-        public void onSurfaceCreated(GL10 gl, EGLConfig config) {
-            mCanvas = new GLES20Canvas();
-            BasicTexture.invalidateAllTextures();
-            mRenderer.image.setModel(mRenderer.source, mRenderer.rotation);
-        }
-
-        @Override
-        public void onSurfaceChanged(GL10 gl, int width, int height) {
-            mCanvas.setSize(width, height);
-            mRenderer.image.setViewSize(width, height);
-        }
-
-        @Override
-        public void onDrawFrame(GL10 gl) {
-            mCanvas.clearBuffer();
-            Runnable readyCallback;
-            synchronized (mLock) {
-                readyCallback = mRenderer.isReadyCallback;
-                mRenderer.image.setModel(mRenderer.source, mRenderer.rotation);
-                mRenderer.image.setPosition(mRenderer.centerX, mRenderer.centerY,
-                        mRenderer.scale);
-            }
-            boolean complete = mRenderer.image.draw(mCanvas);
-            if (complete && readyCallback != null) {
-                synchronized (mLock) {
-                    // Make sure we don't trample on a newly set callback/source
-                    // if it changed while we were rendering
-                    if (mRenderer.isReadyCallback == readyCallback) {
-                        mRenderer.isReadyCallback = null;
-                    }
-                }
-                if (readyCallback != null) {
-                    post(readyCallback);
-                }
-            }
-        }
-
+        // GL thread only
+        TiledImageRenderer image;
     }
 
     @SuppressWarnings("unused")
     private static class ColoredTiles implements TileSource {
-        private static final int[] COLORS = new int[] {
-            Color.RED,
-            Color.BLUE,
-            Color.YELLOW,
-            Color.GREEN,
-            Color.CYAN,
-            Color.MAGENTA,
-            Color.WHITE,
+        private static final int[] COLORS = new int[]{
+                Color.RED,
+                Color.BLUE,
+                Color.YELLOW,
+                Color.GREEN,
+                Color.CYAN,
+                Color.MAGENTA,
+                Color.WHITE,
         };
 
         private Paint mPaint = new Paint();
@@ -382,5 +335,49 @@ public class TiledImageView extends FrameLayout {
         public BasicTexture getPreview() {
             return null;
         }
+    }
+
+    private class TileRenderer implements Renderer {
+
+        private GLES20Canvas mCanvas;
+
+        @Override
+        public void onSurfaceCreated(GL10 gl, EGLConfig config) {
+            mCanvas = new GLES20Canvas();
+            BasicTexture.invalidateAllTextures();
+            mRenderer.image.setModel(mRenderer.source, mRenderer.rotation);
+        }
+
+        @Override
+        public void onSurfaceChanged(GL10 gl, int width, int height) {
+            mCanvas.setSize(width, height);
+            mRenderer.image.setViewSize(width, height);
+        }
+
+        @Override
+        public void onDrawFrame(GL10 gl) {
+            mCanvas.clearBuffer();
+            Runnable readyCallback;
+            synchronized (mLock) {
+                readyCallback = mRenderer.isReadyCallback;
+                mRenderer.image.setModel(mRenderer.source, mRenderer.rotation);
+                mRenderer.image.setPosition(mRenderer.centerX, mRenderer.centerY,
+                        mRenderer.scale);
+            }
+            boolean complete = mRenderer.image.draw(mCanvas);
+            if (complete && readyCallback != null) {
+                synchronized (mLock) {
+                    // Make sure we don't trample on a newly set callback/source
+                    // if it changed while we were rendering
+                    if (mRenderer.isReadyCallback == readyCallback) {
+                        mRenderer.isReadyCallback = null;
+                    }
+                }
+                if (readyCallback != null) {
+                    post(readyCallback);
+                }
+            }
+        }
+
     }
 }

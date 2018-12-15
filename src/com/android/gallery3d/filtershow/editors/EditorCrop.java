@@ -27,31 +27,20 @@ import android.widget.FrameLayout;
 import android.widget.LinearLayout;
 import android.widget.PopupMenu;
 
-import org.codeaurora.gallery.R;
 import com.android.gallery3d.filtershow.FilterShowActivity;
 import com.android.gallery3d.filtershow.filters.FilterCropRepresentation;
 import com.android.gallery3d.filtershow.filters.FilterRepresentation;
 import com.android.gallery3d.filtershow.imageshow.ImageCrop;
 import com.android.gallery3d.filtershow.imageshow.MasterImage;
 
+import org.codeaurora.gallery.R;
+
 public class EditorCrop extends Editor implements EditorInfo {
     public static final String TAG = EditorCrop.class.getSimpleName();
     public static final int ID = R.id.editorCrop;
-
-    // Holder for an aspect ratio it's string id
-    protected static final class AspectInfo {
-        int mAspectX;
-        int mAspectY;
-        int mStringId;
-        AspectInfo(int stringID, int x, int y) {
-            mStringId = stringID;
-            mAspectX = x;
-            mAspectY = y;
-        }
-    };
-
     // Mapping from menu id to aspect ratio
     protected static final SparseArray<AspectInfo> sAspects;
+
     static {
         sAspects = new SparseArray<AspectInfo>();
         sAspects.put(R.id.crop_menu_1to1, new AspectInfo(R.string.aspect1to1_effect, 1, 1));
@@ -65,7 +54,6 @@ public class EditorCrop extends Editor implements EditorInfo {
 
     protected ImageCrop mImageCrop;
     private String mAspectString = "";
-
     public EditorCrop() {
         super(ID);
         mChangesGeometry = true;
@@ -103,7 +91,7 @@ public class EditorCrop extends Editor implements EditorInfo {
 
     @Override
     public void openUtilityPanel(final LinearLayout accessoryViewList) {
-        Button view = (Button) accessoryViewList.findViewById(R.id.applyEffect);
+        Button view = accessoryViewList.findViewById(R.id.applyEffect);
         view.setText(mContext.getString(R.string.crop));
         view.setOnClickListener(new OnClickListener() {
             @Override
@@ -129,7 +117,7 @@ public class EditorCrop extends Editor implements EditorInfo {
     }
 
     private void showPopupMenu(LinearLayout accessoryViewList) {
-        final Button button = (Button) accessoryViewList.findViewById(R.id.applyEffect);
+        final Button button = accessoryViewList.findViewById(R.id.applyEffect);
         final PopupMenu popupMenu = new PopupMenu(mImageShow.getActivity(), button);
         popupMenu.getMenuInflater().inflate(R.menu.filtershow_menu_crop, popupMenu.getMenu());
         popupMenu.setOnMenuItemClickListener(new PopupMenu.OnMenuItemClickListener() {
@@ -140,7 +128,7 @@ public class EditorCrop extends Editor implements EditorInfo {
             }
         });
         popupMenu.show();
-        ((FilterShowActivity)mContext).onShowMenu(popupMenu);
+        ((FilterShowActivity) mContext).onShowMenu(popupMenu);
     }
 
     @Override
@@ -176,5 +164,18 @@ public class EditorCrop extends Editor implements EditorInfo {
 
     private void setAspectString(String s) {
         mAspectString = s;
+    }
+
+    // Holder for an aspect ratio it's string id
+    protected static final class AspectInfo {
+        int mAspectX;
+        int mAspectY;
+        int mStringId;
+
+        AspectInfo(int stringID, int x, int y) {
+            mStringId = stringID;
+            mAspectX = x;
+            mAspectY = y;
+        }
     }
 }

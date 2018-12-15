@@ -39,17 +39,14 @@ public abstract class SQLiteContentProvider extends ContentProvider {
 
     @SuppressWarnings("unused")
     private static final String TAG = "SQLiteContentProvider";
-
-    private SQLiteOpenHelper mOpenHelper;
-    private Set<Uri> mChangedUris;
-
-    private final ThreadLocal<Boolean> mApplyingBatch = new ThreadLocal<Boolean>();
     private static final int SLEEP_AFTER_YIELD_DELAY = 4000;
-
     /**
      * Maximum number of operations allowed in a batch between yield points.
      */
     private static final int MAX_OPERATIONS_PER_YIELD_POINT = 500;
+    private final ThreadLocal<Boolean> mApplyingBatch = new ThreadLocal<Boolean>();
+    private SQLiteOpenHelper mOpenHelper;
+    private Set<Uri> mChangedUris;
 
     @Override
     public boolean onCreate() {
@@ -74,21 +71,21 @@ public abstract class SQLiteContentProvider extends ContentProvider {
      * transaction.
      */
     public abstract Uri insertInTransaction(Uri uri, ContentValues values,
-            boolean callerIsSyncAdapter);
+                                            boolean callerIsSyncAdapter);
 
     /**
      * The equivalent of the {@link #update} method, but invoked within a
      * transaction.
      */
     public abstract int updateInTransaction(Uri uri, ContentValues values, String selection,
-            String[] selectionArgs, boolean callerIsSyncAdapter);
+                                            String[] selectionArgs, boolean callerIsSyncAdapter);
 
     /**
      * The equivalent of the {@link #delete} method, but invoked within a
      * transaction.
      */
     public abstract int deleteInTransaction(Uri uri, String selection, String[] selectionArgs,
-            boolean callerIsSyncAdapter);
+                                            boolean callerIsSyncAdapter);
 
     /**
      * Call this to add a URI to the list of URIs to be notified when the

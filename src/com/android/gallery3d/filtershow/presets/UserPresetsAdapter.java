@@ -25,11 +25,13 @@ import android.widget.ArrayAdapter;
 import android.widget.EditText;
 import android.widget.ImageButton;
 import android.widget.ImageView;
-import org.codeaurora.gallery.R;
+
 import com.android.gallery3d.filtershow.category.Action;
 import com.android.gallery3d.filtershow.category.CategoryView;
 import com.android.gallery3d.filtershow.filters.FilterRepresentation;
 import com.android.gallery3d.filtershow.filters.FilterUserPresetRepresentation;
+
+import org.codeaurora.gallery.R;
 
 import java.util.ArrayList;
 
@@ -83,21 +85,15 @@ public class UserPresetsAdapter extends ArrayAdapter<Action>
         }
     }
 
-    static class UserPresetViewHolder {
-        ImageView imageView;
-        EditText editText;
-        ImageButton deleteButton;
-    }
-
     @Override
     public View getView(int position, View convertView, ViewGroup parent) {
         UserPresetViewHolder viewHolder;
         if (convertView == null) {
             convertView = mInflater.inflate(R.layout.filtershow_presets_management_row, null);
             viewHolder = new UserPresetViewHolder();
-            viewHolder.imageView = (ImageView) convertView.findViewById(R.id.imageView);
-            viewHolder.editText = (EditText) convertView.findViewById(R.id.editView);
-            viewHolder.deleteButton = (ImageButton) convertView.findViewById(R.id.deleteUserPreset);
+            viewHolder.imageView = convertView.findViewById(R.id.imageView);
+            viewHolder.editText = convertView.findViewById(R.id.editView);
+            viewHolder.deleteButton = convertView.findViewById(R.id.deleteUserPreset);
             viewHolder.editText.setOnClickListener(this);
             viewHolder.editText.setOnFocusChangeListener(this);
             viewHolder.deleteButton.setOnClickListener(this);
@@ -167,5 +163,11 @@ public class UserPresetsAdapter extends ArrayAdapter<Action>
             action.setName(editText.getText().toString());
             changePreset(action);
         }
+    }
+
+    static class UserPresetViewHolder {
+        ImageView imageView;
+        EditText editText;
+        ImageButton deleteButton;
     }
 }

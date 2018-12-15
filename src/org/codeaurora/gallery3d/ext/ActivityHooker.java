@@ -13,8 +13,8 @@ public class ActivityHooker implements IActivityHooker {
 
     private static final int MENU_MAX_NUMBER = 100;
     private static int sMenuId = 1;
-    private int mMenuId;
     private static Object sMenuLock = new Object();
+    private int mMenuId;
     private Activity mContext;
     private Intent mIntent;
 
@@ -28,7 +28,7 @@ public class ActivityHooker implements IActivityHooker {
     @Override
     public int getMenuActivityId(int id) {
         return mMenuId + id;
-    };
+    }
 
     @Override
     public int getMenuOriginalId(int id) {

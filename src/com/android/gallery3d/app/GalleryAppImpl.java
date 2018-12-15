@@ -26,7 +26,6 @@ import com.android.gallery3d.data.ImageCacheService;
 import com.android.gallery3d.gadget.WidgetUtils;
 import com.android.gallery3d.picasasource.PicasaSource;
 import com.android.gallery3d.util.GalleryUtils;
-import com.android.gallery3d.util.LightCycleHelper;
 import com.android.gallery3d.util.ThreadPool;
 import com.android.gallery3d.util.UsageStatistics;
 
@@ -44,6 +43,10 @@ public class GalleryAppImpl extends Application implements GalleryApp {
     private ThreadPool mThreadPool;
     private DownloadCache mDownloadCache;
 
+    public static Context getContext() {
+        return sGalleryAppImpl;
+    }
+
     @Override
     public void onCreate() {
         super.onCreate();
@@ -58,10 +61,6 @@ public class GalleryAppImpl extends Application implements GalleryApp {
     @Override
     public Context getAndroidContext() {
         return this;
-    }
-
-    public static Context getContext() {
-        return sGalleryAppImpl;
     }
 
     @Override

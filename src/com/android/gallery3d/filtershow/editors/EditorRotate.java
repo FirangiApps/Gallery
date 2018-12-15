@@ -24,11 +24,12 @@ import android.widget.Button;
 import android.widget.FrameLayout;
 import android.widget.LinearLayout;
 
-import org.codeaurora.gallery.R;
 import com.android.gallery3d.filtershow.filters.FilterRepresentation;
 import com.android.gallery3d.filtershow.filters.FilterRotateRepresentation;
 import com.android.gallery3d.filtershow.imageshow.ImageRotate;
 import com.android.gallery3d.filtershow.imageshow.MasterImage;
+
+import org.codeaurora.gallery.R;
 
 public class EditorRotate extends Editor implements EditorInfo {
     public static final String TAG = EditorRotate.class.getSimpleName();
@@ -68,7 +69,7 @@ public class EditorRotate extends Editor implements EditorInfo {
 
     @Override
     public void openUtilityPanel(final LinearLayout accessoryViewList) {
-        final Button button = (Button) accessoryViewList.findViewById(R.id.applyEffect);
+        final Button button = accessoryViewList.findViewById(R.id.applyEffect);
         button.setOnClickListener(new OnClickListener() {
             @Override
             public void onClick(View arg0) {

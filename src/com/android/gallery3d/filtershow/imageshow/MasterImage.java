@@ -16,9 +16,6 @@
 
 package com.android.gallery3d.filtershow.imageshow;
 
-import java.util.List;
-import java.util.Vector;
-
 import android.animation.Animator;
 import android.animation.ValueAnimator;
 import android.content.Context;
@@ -30,7 +27,6 @@ import android.graphics.Rect;
 import android.graphics.RectF;
 import android.net.Uri;
 import android.util.Log;
-import android.util.Size;
 
 import com.android.gallery3d.exif.ExifTag;
 import com.android.gallery3d.filtershow.FilterShowActivity;
@@ -56,36 +52,36 @@ import com.android.gallery3d.filtershow.state.StateAdapter;
 import com.android.gallery3d.filtershow.tools.DualCameraEffect;
 import com.android.gallery3d.util.GDepth;
 
+import java.util.List;
+import java.util.Vector;
+
 public class MasterImage implements RenderingRequestCaller {
-    private static final String TAG = "MasterImage";
-    private boolean DEBUG  = false;
-    private static final boolean DISABLEZOOM = false;
     public static final int SMALL_BITMAP_DIM = 160;
     public static final int MAX_BITMAP_DIM = 1280;
+    public static final int CIRCLE_ANIMATION = 1;
+    public static final int ROTATE_ANIMATION = 2;
+    public static final int MIRROR_ANIMATION = 3;
+    private static final String TAG = "MasterImage";
+    private static final boolean DISABLEZOOM = false;
     private static MasterImage sMasterImage = null;
-
+    private final Vector<ImageShow> mLoadListeners = new Vector<ImageShow>();
+    private boolean DEBUG = false;
     private boolean mSupportsHighRes = false;
-
     private ImageFilter mCurrentFilter = null;
     private ImagePreset mPreset = null;
     private ImagePreset mLoadedPreset = null;
     private ImagePreset mGeometryOnlyPreset = null;
     private ImagePreset mFiltersOnlyPreset = null;
-
     private SharedBuffer mPreviewBuffer = new SharedBuffer();
     private SharedPreset mPreviewPreset = new SharedPreset();
-
     private Bitmap mOriginalBitmapSmall = null;
     private Bitmap mOriginalBitmapLarge = null;
     private Bitmap mOriginalBitmapHighres = null;
     private Bitmap mTemporaryThumbnail = null;
-
     private int mOrientation;
     private Rect mOriginalBounds;
-    private final Vector<ImageShow> mLoadListeners = new Vector<ImageShow>();
     private Uri mUri = null;
     private int mZoomOrientation = ImageLoader.ORI_NORMAL;
-
     private Bitmap mGeometryOnlyBitmap = null;
     private Bitmap mFiltersOnlyBitmap = null;
     private Bitmap mPartialBitmap = null;
@@ -93,11 +89,9 @@ public class MasterImage implements RenderingRequestCaller {
     private Bitmap mPreviousImage = null;
     private int mShadowMargin = 15; // not scaled, fixed in the asset
     private Rect mPartialBounds = new Rect();
-
     private Bitmap mFusionUnderlay = null;
     private Rect mImageBounds = null;
     private Rect mFusionBounds = null;
-
     private ValueAnimator mAnimator = null;
     private float mMaskScale = 1;
     private boolean mOnGoingNewLookAnimation = false;
@@ -105,10 +99,6 @@ public class MasterImage implements RenderingRequestCaller {
     private float mCurrentAnimRotationStartValue = 0;
     private float mAnimFraction = 0;
     private int mCurrentLookAnimation = 0;
-    public static final int CIRCLE_ANIMATION = 1;
-    public static final int ROTATE_ANIMATION = 2;
-    public static final int MIRROR_ANIMATION = 3;
-
     private HistoryManager mHistory = null;
     private StateAdapter mState = null;
 
@@ -128,13 +118,28 @@ public class MasterImage implements RenderingRequestCaller {
     private boolean mShowsOriginal;
     private List<ExifTag> mEXIF;
     private BitmapCache mBitmapCache = new BitmapCache();
+    private Runnable mWarnListenersRunnable = new Runnable() {
+        @Override
+        public void run() {
+            for (int i = 0; i < mLoadListeners.size(); i++) {
+                ImageShow imageShow = mLoadListeners.elementAt(i);
+                imageShow.imageLoaded();
+            }
+            invalidatePreview();
+        }
+    };
+    private GDepth.Parser mGDepthParser;
+    private GDepth.Image mGDepthImage;
+    private DualCameraEffect mEffect;
+    private int mTargetWidth;
+    private int mTargetHeight;
 
     private MasterImage() {
     }
 
     // TODO: remove singleton
     public static void setMaster(MasterImage master) {
-        if((master == null || master != sMasterImage)
+        if ((master == null || master != sMasterImage)
                 && sMasterImage != null) {
             // clearing singleton, clean up resources
             // in old instance
@@ -150,58 +155,76 @@ public class MasterImage implements RenderingRequestCaller {
         return sMasterImage;
     }
 
+    public static Bitmap convertToEvenNumberWidthImage(Bitmap bmp) {
+        Bitmap retBmp = null;
+        if (bmp != null) {
+            int w = bmp.getWidth();
+            int h = bmp.getHeight();
+            boolean bWidthIsEven = (w & 0x01) == 0;
+            boolean bHeightIsEven = (h & 0x01) == 0;
+            Log.v(TAG, "ori bitmap w=" + w + " h=" + h);
+            if (!bWidthIsEven || !bHeightIsEven) {
+                w = w - (w & 0x01);
+                h = h - (h & 0x01);
+                retBmp = Bitmap.createBitmap(bmp, 0, 0, w, h);
+                Log.v(TAG, "new bitmap w=" + retBmp.getWidth() + " h=" + retBmp.getHeight());
+            }
+        }
+        return retBmp;
+    }
+
     private void freeResources() {
-        if(mOriginalBitmapSmall != null) {
+        if (mOriginalBitmapSmall != null) {
             mOriginalBitmapSmall.recycle();
         }
         mOriginalBitmapSmall = null;
 
-        if(mOriginalBitmapLarge != null) {
+        if (mOriginalBitmapLarge != null) {
             mOriginalBitmapLarge.recycle();
         }
         mOriginalBitmapLarge = null;
 
-        if(mOriginalBitmapHighres != null) {
+        if (mOriginalBitmapHighres != null) {
             mOriginalBitmapHighres.recycle();
         }
         mOriginalBitmapHighres = null;
 
-        if(mTemporaryThumbnail != null) {
+        if (mTemporaryThumbnail != null) {
             mTemporaryThumbnail.recycle();
         }
         mTemporaryThumbnail = null;
 
-        if(mGeometryOnlyBitmap != null) {
+        if (mGeometryOnlyBitmap != null) {
             mGeometryOnlyBitmap.recycle();
         }
         mGeometryOnlyBitmap = null;
 
-        if(mFiltersOnlyBitmap != null) {
+        if (mFiltersOnlyBitmap != null) {
             mFiltersOnlyBitmap.recycle();
         }
         mFiltersOnlyBitmap = null;
 
-        if(mPartialBitmap != null) {
+        if (mPartialBitmap != null) {
             mPartialBitmap.recycle();
         }
         mPartialBitmap = null;
 
-        if(mHighresBitmap != null) {
+        if (mHighresBitmap != null) {
             mHighresBitmap.recycle();
         }
         mHighresBitmap = null;
 
-        if(mPreviousImage != null) {
+        if (mPreviousImage != null) {
             mPreviousImage.recycle();
         }
         mPreviousImage = null;
 
-        if(mFusionUnderlay != null) {
+        if (mFusionUnderlay != null) {
             mFusionUnderlay.recycle();
         }
         mFusionUnderlay = null;
 
-        if(mBitmapCache != null) {
+        if (mBitmapCache != null) {
             mBitmapCache.clear();
         }
 
@@ -270,35 +293,6 @@ public class MasterImage implements RenderingRequestCaller {
         mActivity.runOnUiThread(mWarnListenersRunnable);
     }
 
-    private Runnable mWarnListenersRunnable = new Runnable() {
-        @Override
-        public void run() {
-            for (int i = 0; i < mLoadListeners.size(); i++) {
-                ImageShow imageShow = mLoadListeners.elementAt(i);
-                imageShow.imageLoaded();
-            }
-            invalidatePreview();
-        }
-    };
-
-    public static Bitmap convertToEvenNumberWidthImage(Bitmap bmp) {
-        Bitmap retBmp = null;
-        if (bmp != null) {
-            int w = bmp.getWidth();
-            int h = bmp.getHeight();
-            boolean bWidthIsEven = (w & 0x01) == 0;
-            boolean bHeightIsEven = (h & 0x01) == 0;
-            Log.v(TAG, "ori bitmap w="+w+" h="+h);
-            if( !bWidthIsEven || !bHeightIsEven){
-                w = w - (w & 0x01);
-                h = h - (h & 0x01);
-                retBmp = Bitmap.createBitmap(bmp, 0, 0, w, h);
-                Log.v(TAG, "new bitmap w="+retBmp.getWidth()+" h="+retBmp.getHeight());
-            }
-        }
-        return retBmp;
-    }
-
     public boolean loadBitmap(Uri uri, int size) {
         setUri(uri);
         mEXIF = ImageLoader.getExif(getActivity(), uri);
@@ -309,8 +303,8 @@ public class MasterImage implements RenderingRequestCaller {
                 mOrientation, originalBounds);
         // Force bitmap width and height to even number for beautification algo.
         Bitmap tempBmp = convertToEvenNumberWidthImage(mOriginalBitmapLarge);
-        if(tempBmp != null && mOriginalBitmapLarge != null) {
-            if(!mOriginalBitmapLarge.isRecycled() && mOriginalBitmapLarge != tempBmp) {
+        if (tempBmp != null && mOriginalBitmapLarge != null) {
+            if (!mOriginalBitmapLarge.isRecycled() && mOriginalBitmapLarge != tempBmp) {
                 mOriginalBitmapLarge.recycle();
             }
             mOriginalBitmapLarge = tempBmp;
@@ -354,12 +348,12 @@ public class MasterImage implements RenderingRequestCaller {
         mWaterMark = null;
     }
 
-    public void setActivity(FilterShowActivity activity) {
-        mActivity = activity;
-    }
-
     public FilterShowActivity getActivity() {
         return mActivity;
+    }
+
+    public void setActivity(FilterShowActivity activity) {
+        mActivity = activity;
     }
 
     public synchronized ImagePreset getPreset() {
@@ -431,12 +425,12 @@ public class MasterImage implements RenderingRequestCaller {
         mState = adapter;
     }
 
-    public void setCurrentFilter(ImageFilter filter) {
-        mCurrentFilter = filter;
-    }
-
     public ImageFilter getCurrentFilter() {
         return mCurrentFilter;
+    }
+
+    public void setCurrentFilter(ImageFilter filter) {
+        mCurrentFilter = filter;
     }
 
     public synchronized boolean hasModifications() {
@@ -464,11 +458,8 @@ public class MasterImage implements RenderingRequestCaller {
                 mPreset.getFilterWithSerializationName(FilterDualCamFusionRepresentation.SERIALIZATION_NAME);
         FilterRepresentation tpRepresentation =
                 mPreset.getFilterWithSerializationName(FilterTruePortraitFusionRepresentation.SERIALIZATION_NAME);
-        if(dcRepresentation instanceof FilterDualCamFusionRepresentation ||
-                tpRepresentation instanceof FilterTruePortraitFusionRepresentation) {
-            return true;
-        }
-        return false;
+        return dcRepresentation instanceof FilterDualCamFusionRepresentation ||
+                tpRepresentation instanceof FilterTruePortraitFusionRepresentation;
     }
 
     public SharedBuffer getPreviewBuffer() {
@@ -537,12 +528,12 @@ public class MasterImage implements RenderingRequestCaller {
         notifyObservers();
     }
 
-    public void setAnimFraction(float fraction) {
-        mAnimFraction = fraction;
-    }
-
     public float getAnimFraction() {
         return mAnimFraction;
+    }
+
+    public void setAnimFraction(float fraction) {
+        mAnimFraction = fraction;
     }
 
     public boolean onGoingNewLookAnimation() {
@@ -637,6 +628,7 @@ public class MasterImage implements RenderingRequestCaller {
             mWaterMark.update();
         }
     }
+
     public void resetGeometryImages(boolean force) {
         if (mPreset == null) {
             return;
@@ -963,12 +955,12 @@ public class MasterImage implements RenderingRequestCaller {
         return mShowsOriginal;
     }
 
-    public void setLoadedPreset(ImagePreset preset) {
-        mLoadedPreset = preset;
-    }
-
     public ImagePreset getLoadedPreset() {
         return mLoadedPreset;
+    }
+
+    public void setLoadedPreset(ImagePreset preset) {
+        mLoadedPreset = preset;
     }
 
     public List<ExifTag> getEXIF() {
@@ -983,16 +975,16 @@ public class MasterImage implements RenderingRequestCaller {
         return mPreset.contains(FilterRepresentation.TYPE_TINYPLANET);
     }
 
-    public void setFusionUnderlay(Bitmap underlay) {
-        mFusionUnderlay = underlay;
-    }
-
     public Bitmap getFusionUnderlay() {
         return mFusionUnderlay;
     }
 
+    public void setFusionUnderlay(Bitmap underlay) {
+        mFusionUnderlay = underlay;
+    }
+
     public void setFusionBounds(Canvas canvas, RectF bounds) {
-        if(mFusionBounds == null) mFusionBounds = new Rect();
+        if (mFusionBounds == null) mFusionBounds = new Rect();
         bounds.roundOut(mFusionBounds);
     }
 
@@ -1007,12 +999,6 @@ public class MasterImage implements RenderingRequestCaller {
     public Rect getImageBounds() {
         return mImageBounds;
     }
-
-    private GDepth.Parser mGDepthParser;
-    private GDepth.Image mGDepthImage;
-    private DualCameraEffect mEffect;
-    private int mTargetWidth;
-    private int mTargetHeight;
 
     public boolean parseDepthMap(Context context, Uri uri) {
         if (mGDepthImage != null && mGDepthImage.valid()) return true;

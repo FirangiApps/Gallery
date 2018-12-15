@@ -17,10 +17,8 @@
 package com.android.gallery3d.filtershow.filters;
 
 import android.content.res.Resources;
-import android.text.TextUtils;
 import android.util.JsonReader;
 import android.util.JsonWriter;
-import android.util.Log;
 
 import com.android.gallery3d.filtershow.editors.BasicEditor;
 
@@ -28,6 +26,20 @@ import java.io.IOException;
 import java.util.ArrayList;
 
 public class FilterRepresentation {
+    public static final byte TYPE_BORDER = 1;
+    public static final byte TYPE_FX = 2;
+    public static final byte TYPE_WBALANCE = 3;
+    public static final byte TYPE_VIGNETTE = 4;
+    public static final byte TYPE_NORMAL = 5;
+    public static final byte TYPE_TINYPLANET = 6;
+    public static final byte TYPE_GEOMETRY = 7;
+    public static final byte TYPE_MAKEUP = 8;
+    public static final byte TYPE_DUALCAM = 9;
+    public static final byte TYPE_TRUEPORTRAIT = 10;
+    public static final byte TYPE_PRESETFILTER = 11;
+    public static final byte TYPE_WATERMARK_CATEGORY = 12;
+    public static final byte TYPE_WATERMARK = 13;
+    protected static final String NAME_TAG = "Name";
     private static final String LOGTAG = "FilterRepresentation";
     private static final boolean DEBUG = false;
     private String mName;
@@ -45,27 +57,13 @@ public class FilterRepresentation {
     private boolean isSvgOverlay = false;
     private Resources.Theme currentTheme;
     private String mSerializationName;
-    public static final byte TYPE_BORDER = 1;
-    public static final byte TYPE_FX = 2;
-    public static final byte TYPE_WBALANCE = 3;
-    public static final byte TYPE_VIGNETTE = 4;
-    public static final byte TYPE_NORMAL = 5;
-    public static final byte TYPE_TINYPLANET = 6;
-    public static final byte TYPE_GEOMETRY = 7;
-    public static final byte TYPE_MAKEUP = 8;
-    public static final byte TYPE_DUALCAM = 9;
-    public static final byte TYPE_TRUEPORTRAIT = 10;
-    public static final byte TYPE_PRESETFILTER = 11;
-    public static final byte TYPE_WATERMARK_CATEGORY = 12;
-    public static final byte TYPE_WATERMARK = 13;
-    protected static final String NAME_TAG = "Name";
 
     public FilterRepresentation(String name) {
         mName = name;
         mSerializationName = name.toUpperCase();
     }
 
-    public FilterRepresentation copy(){
+    public FilterRepresentation copy() {
         FilterRepresentation representation = new FilterRepresentation(mName);
         representation.useParametersFrom(this);
         if (getFilterType() == TYPE_WATERMARK) {
@@ -93,7 +91,7 @@ public class FilterRepresentation {
         if (representation == null) {
             return false;
         }
-        if (representation.mFilterClass == mFilterClass
+        return representation.mFilterClass == mFilterClass
                 && representation.mName.equalsIgnoreCase(mName)
                 && representation.mPriority == mPriority
                 // TODO: After we enable partial rendering, we can switch back
@@ -106,10 +104,7 @@ public class FilterRepresentation {
                 && representation.mOverlayOnly == mOverlayOnly
                 && representation.mShowParameterValue == mShowParameterValue
                 && representation.mIsBooleanFilter == mIsBooleanFilter
-                && representation.mColorId == mColorId) {
-            return true;
-        }
-        return false;
+                && representation.mColorId == mColorId;
     }
 
     public int getColorId() {
@@ -133,28 +128,28 @@ public class FilterRepresentation {
         return mName;
     }
 
-    public void setName(String name) {
-        mName = name;
-    }
-
     public String getName() {
         return mName;
     }
 
-    public void setSerializationName(String sname) {
-        mSerializationName = sname;
+    public void setName(String name) {
+        mName = name;
     }
 
     public String getSerializationName() {
         return mSerializationName;
     }
 
-    public void setFilterType(int priority) {
-        mPriority = priority;
+    public void setSerializationName(String sname) {
+        mSerializationName = sname;
     }
 
     public int getFilterType() {
         return mPriority;
+    }
+
+    public void setFilterType(int priority) {
+        mPriority = priority;
     }
 
     public boolean isNil() {
@@ -243,13 +238,13 @@ public class FilterRepresentation {
         return mEditorId;
     }
 
-    public int[] getEditorIds() {
-        return new int[] {
-        mEditorId };
-    }
-
     public void setEditorId(int editorId) {
         mEditorId = editorId;
+    }
+
+    public int[] getEditorIds() {
+        return new int[]{
+                mEditorId};
     }
 
     public boolean showParameterValue() {
@@ -266,6 +261,7 @@ public class FilterRepresentation {
 
     /**
      * Method must "beginObject()" add its info and "endObject()"
+     *
      * @param writer
      * @throws IOException
      */
@@ -317,10 +313,7 @@ public class FilterRepresentation {
     }
 
     public boolean canMergeWith(FilterRepresentation representation) {
-        if (getFilterType() == FilterRepresentation.TYPE_GEOMETRY
-            && representation.getFilterType() == FilterRepresentation.TYPE_GEOMETRY) {
-            return true;
-        }
-        return false;
+        return getFilterType() == FilterRepresentation.TYPE_GEOMETRY
+                && representation.getFilterType() == FilterRepresentation.TYPE_GEOMETRY;
     }
 }

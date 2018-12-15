@@ -30,24 +30,22 @@ import android.os.Binder;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.IBinder;
-import android.util.Log;
 
-import org.codeaurora.gallery.R;
-import com.android.gallery3d.filtershow.FilterShowActivity;
 import com.android.gallery3d.filtershow.filters.FiltersManager;
 import com.android.gallery3d.filtershow.filters.ImageFilter;
 import com.android.gallery3d.filtershow.imageshow.MasterImage;
 import com.android.gallery3d.filtershow.tools.SaveImage;
 
+import org.codeaurora.gallery.R;
+
 import java.io.File;
 
 public class ProcessingService extends Service {
+    public static final String SAVE_IMAGE_COMPLETE_ACTION = "save_image_complete_action";
+    public static final String KEY_URL = "key_url";
+    public static final String KEY_REQUEST_ID = "request_id";
     private static final String LOGTAG = "ProcessingService";
     private static final boolean SHOW_IMAGE = false;
-    private int mNotificationId;
-    private NotificationManager mNotifyMgr = null;
-    private Notification.Builder mBuilder = null;
-
     private static final String PRESET = "preset";
     private static final String QUALITY = "quality";
     private static final String SOURCE_URI = "sourceUri";
@@ -59,10 +57,14 @@ public class ProcessingService extends Service {
     private static final String EXIT = "exit";
     private static final String REQUEST_ID = "request_id";
 
-    public static final String SAVE_IMAGE_COMPLETE_ACTION = "save_image_complete_action";
-    public static final String KEY_URL = "key_url";
-    public static final String KEY_REQUEST_ID = "request_id";
+    static {
+        System.loadLibrary("jni_gallery_filters");
+    }
 
+    private final IBinder mBinder = new LocalBinder();
+    private int mNotificationId;
+    private NotificationManager mNotifyMgr = null;
+    private Notification.Builder mBuilder = null;
     private ProcessingTaskController mProcessingTaskController;
     private ImageSavingTask mImageSavingTask;
     private UpdatePreviewTask mUpdatePreviewTask;
@@ -70,8 +72,29 @@ public class ProcessingService extends Service {
     private FullresRenderingRequestTask mFullresRenderingRequestTask;
     private RenderingRequestTask mRenderingRequestTask;
 
-    private final IBinder mBinder = new LocalBinder();
-
+    public static Intent getSaveIntent(Context context, ImagePreset preset, File destination,
+                                       Uri selectedImageUri, Uri sourceImageUri, boolean doFlatten, int quality,
+                                       float sizeFactor, boolean needsExit, long requestId) {
+        Intent processIntent = new Intent(context, ProcessingService.class);
+        processIntent.putExtra(ProcessingService.SOURCE_URI,
+                sourceImageUri.toString());
+        processIntent.putExtra(ProcessingService.SELECTED_URI,
+                selectedImageUri.toString());
+        processIntent.putExtra(ProcessingService.QUALITY, quality);
+        processIntent.putExtra(ProcessingService.SIZE_FACTOR, sizeFactor);
+        if (destination != null) {
+            processIntent.putExtra(ProcessingService.DESTINATION_FILE, destination.toString());
+        }
+        processIntent.putExtra(ProcessingService.PRESET,
+                preset.getJsonString(ImagePreset.JASON_SAVED));
+        processIntent.putExtra(ProcessingService.SAVING, true);
+        processIntent.putExtra(ProcessingService.EXIT, needsExit);
+        processIntent.putExtra(ProcessingService.REQUEST_ID, requestId);
+        if (doFlatten) {
+            processIntent.putExtra(ProcessingService.FLATTEN, true);
+        }
+        return processIntent;
+    }
 
     public void setOriginalBitmap(Bitmap originalBitmap) {
         if (mUpdatePreviewTask == null) {
@@ -135,37 +158,6 @@ public class ProcessingService extends Service {
     public void setOriginalBitmapHighres(Bitmap originalHires) {
         mHighresRenderingRequestTask.setOriginalBitmapHighres(originalHires);
     }
-
-    public class LocalBinder extends Binder {
-        public ProcessingService getService() {
-            return ProcessingService.this;
-        }
-    }
-
-    public static Intent getSaveIntent(Context context, ImagePreset preset, File destination,
-            Uri selectedImageUri, Uri sourceImageUri, boolean doFlatten, int quality,
-            float sizeFactor, boolean needsExit, long requestId) {
-        Intent processIntent = new Intent(context, ProcessingService.class);
-        processIntent.putExtra(ProcessingService.SOURCE_URI,
-                sourceImageUri.toString());
-        processIntent.putExtra(ProcessingService.SELECTED_URI,
-                selectedImageUri.toString());
-        processIntent.putExtra(ProcessingService.QUALITY, quality);
-        processIntent.putExtra(ProcessingService.SIZE_FACTOR, sizeFactor);
-        if (destination != null) {
-            processIntent.putExtra(ProcessingService.DESTINATION_FILE, destination.toString());
-        }
-        processIntent.putExtra(ProcessingService.PRESET,
-                preset.getJsonString(ImagePreset.JASON_SAVED));
-        processIntent.putExtra(ProcessingService.SAVING, true);
-        processIntent.putExtra(ProcessingService.EXIT, needsExit);
-        processIntent.putExtra(ProcessingService.REQUEST_ID, requestId);
-        if (doFlatten) {
-            processIntent.putExtra(ProcessingService.FLATTEN, true);
-        }
-        return processIntent;
-    }
-
 
     @Override
     public void onCreate() {
@@ -240,12 +232,12 @@ public class ProcessingService extends Service {
     }
 
     public void handleSaveRequest(Uri sourceUri, Uri selectedUri,
-            File destinationFile, ImagePreset preset, Bitmap previewImage,
-            boolean flatten, int quality, float sizeFactor, boolean exit, long requestId) {
+                                  File destinationFile, ImagePreset preset, Bitmap previewImage,
+                                  boolean flatten, int quality, float sizeFactor, boolean exit, long requestId) {
         mNotifyMgr = (NotificationManager) getSystemService(NOTIFICATION_SERVICE);
         mNotifyMgr.cancelAll();
 
-        if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
             String channelId = "GallerySavingRequest";
             NotificationChannel channel = new NotificationChannel(channelId, channelId,
                     NotificationManager.IMPORTANCE_DEFAULT);
@@ -352,7 +344,9 @@ public class ProcessingService extends Service {
         CachingPipeline.destroyRenderScriptContext();
     }
 
-    static {
-        System.loadLibrary("jni_gallery_filters");
+    public class LocalBinder extends Binder {
+        public ProcessingService getService() {
+            return ProcessingService.this;
+        }
     }
 }

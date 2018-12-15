@@ -39,58 +39,38 @@ import java.util.ArrayList;
 
 public class GalleryThumbnailView extends ViewGroup {
 
-    public interface GalleryThumbnailAdapter extends ListAdapter {
-        /**
-         * @param position Position to get the intrinsic aspect ratio for
-         * @return width / height
-         */
-        float getIntrinsicAspectRatio(int position);
-    }
-
     private static final String TAG = "GalleryThumbnailView";
     private static final float ASPECT_RATIO = (float) Math.sqrt(1.5f);
     private static final int LAND_UNITS = 2;
     private static final int PORT_UNITS = 3;
-
-    private GalleryThumbnailAdapter mAdapter;
-
+    private static final int TOUCH_MODE_IDLE = 0;
+    private static final int TOUCH_MODE_DRAGGING = 1;
+    private static final int TOUCH_MODE_FLINGING = 2;
     private final RecycleBin mRecycler = new RecycleBin();
-
     private final AdapterDataSetObserver mObserver = new AdapterDataSetObserver();
-
+    private final VelocityTracker mVelocityTracker = VelocityTracker.obtain();
+    private final OverScroller mScroller;
+    private final EdgeEffectCompat mLeftEdge;
+    private final EdgeEffectCompat mRightEdge;
+    private GalleryThumbnailAdapter mAdapter;
     private boolean mDataChanged;
     private int mOldItemCount;
     private int mItemCount;
     private boolean mHasStableIds;
-
     private int mFirstPosition;
-
     private boolean mPopulating;
     private boolean mInLayout;
-
     private int mTouchSlop;
     private int mMaximumVelocity;
     private int mFlingVelocity;
     private float mLastTouchX;
     private float mTouchRemainderX;
     private int mActivePointerId;
-
-    private static final int TOUCH_MODE_IDLE = 0;
-    private static final int TOUCH_MODE_DRAGGING = 1;
-    private static final int TOUCH_MODE_FLINGING = 2;
-
     private int mTouchMode;
-    private final VelocityTracker mVelocityTracker = VelocityTracker.obtain();
-    private final OverScroller mScroller;
-
-    private final EdgeEffectCompat mLeftEdge;
-    private final EdgeEffectCompat mRightEdge;
-
     private int mLargeColumnWidth;
     private int mSmallColumnWidth;
     private int mLargeColumnUnitCount = 8;
     private int mSmallColumnUnitCount = 10;
-
     public GalleryThumbnailView(Context context) {
         this(context, null);
     }
@@ -229,17 +209,17 @@ public class GalleryThumbnailView extends ViewGroup {
      * recycle bin.
      *
      * @param startPosition Logical position in the list to start from
-     * @param x Left or right edge of the view to add
-     * @param forward If true, align left edge to x and increase position.
-     *                If false, align right edge to x and decrease position.
+     * @param x             Left or right edge of the view to add
+     * @param forward       If true, align left edge to x and increase position.
+     *                      If false, align right edge to x and decrease position.
      * @return Number of views added
      */
     private int makeAndAddColumn(int startPosition, int x, boolean forward) {
         int columnWidth = mLargeColumnWidth;
         int addViews = 0;
         for (int remaining = mLargeColumnUnitCount, i = 0;
-                remaining > 0 && startPosition + i >= 0 && startPosition + i < mItemCount;
-                i += forward ? 1 : -1, addViews++) {
+             remaining > 0 && startPosition + i >= 0 && startPosition + i < mItemCount;
+             i += forward ? 1 : -1, addViews++) {
             if (mAdapter.getIntrinsicAspectRatio(startPosition + i) >= 1f) {
                 // landscape
                 remaining -= LAND_UNITS;
@@ -355,7 +335,8 @@ public class GalleryThumbnailView extends ViewGroup {
                         mVelocityTracker.clear();
                     }
                 }
-            } break;
+            }
+            break;
 
             case MotionEvent.ACTION_CANCEL:
                 mTouchMode = TOUCH_MODE_IDLE;
@@ -375,13 +356,13 @@ public class GalleryThumbnailView extends ViewGroup {
                     mTouchMode = TOUCH_MODE_IDLE;
                 }
 
-            } break;
+            }
+            break;
         }
         return true;
     }
 
     /**
-     *
      * @param deltaX Pixels that content should move by
      * @return true if the movement completed, false if it was stopped prematurely.
      */
@@ -440,7 +421,7 @@ public class GalleryThumbnailView extends ViewGroup {
         final int clearBelow = height;
         for (int i = getChildCount() - 1; i >= 0; i--) {
             final View child = getChildAt(i);
-            if (child.getTop() <= clearBelow)  {
+            if (child.getTop() <= clearBelow) {
                 // There may be other offscreen views, but we need to maintain
                 // the invariant documented above.
                 break;
@@ -694,8 +675,16 @@ public class GalleryThumbnailView extends ViewGroup {
         return new LayoutParams(getContext(), attrs);
     }
 
+    public interface GalleryThumbnailAdapter extends ListAdapter {
+        /**
+         * @param position Position to get the intrinsic aspect ratio for
+         * @return width / height
+         */
+        float getIntrinsicAspectRatio(int position);
+    }
+
     public static class LayoutParams extends ViewGroup.LayoutParams {
-        private static final int[] LAYOUT_ATTRS = new int[] {
+        private static final int[] LAYOUT_ATTRS = new int[]{
                 android.R.attr.layout_span
         };
 

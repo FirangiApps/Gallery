@@ -16,19 +16,14 @@
 
 package com.android.gallery3d.app;
 
-import java.util.ArrayList;
-import java.util.Random;
-
 import android.app.Activity;
 import android.content.Intent;
-//import android.drm.DrmHelper;
 import android.graphics.Bitmap;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
 import android.view.MotionEvent;
 
-import org.codeaurora.gallery.R;
 import com.android.gallery3d.common.Utils;
 import com.android.gallery3d.data.ContentListener;
 import com.android.gallery3d.data.MediaItem;
@@ -42,54 +37,29 @@ import com.android.gallery3d.ui.SynchronizedHandler;
 import com.android.gallery3d.util.Future;
 import com.android.gallery3d.util.FutureListener;
 
-public class SlideshowPage extends ActivityState {
-    private static final String TAG = "SlideshowPage";
+import org.codeaurora.gallery.R;
 
+import java.util.ArrayList;
+import java.util.Random;
+
+//import android.drm.DrmHelper;
+
+public class SlideshowPage extends ActivityState {
     public static final String KEY_SET_PATH = "media-set-path";
     public static final String KEY_ITEM_PATH = "media-item-path";
     public static final String KEY_PHOTO_INDEX = "photo-index";
     public static final String KEY_RANDOM_ORDER = "random-order";
     public static final String KEY_REPEAT = "repeat";
     public static final String KEY_DREAM = "dream";
-
+    private static final String TAG = "SlideshowPage";
     private static final long SLIDESHOW_DELAY = 3000; // 3 seconds
 
     private static final int MSG_LOAD_NEXT_BITMAP = 1;
     private static final int MSG_SHOW_PENDING_BITMAP = 2;
-
-    public static interface Model {
-        public void pause();
-
-        public void resume();
-
-        public Future<Slide> nextSlide(FutureListener<Slide> listener);
-    }
-
-    public static class Slide {
-        public Bitmap bitmap;
-        public MediaItem item;
-        public int index;
-
-        public Slide(MediaItem item, int index, Bitmap bitmap) {
-            this.bitmap = bitmap;
-            this.item = item;
-            this.index = index;
-        }
-    }
-
+    private final Intent mResultIntent = new Intent();
     private Handler mHandler;
     private Model mModel;
     private SlideshowView mSlideshowView;
-
-    private Slide mPendingSlide = null;
-    private boolean mIsActive = false;
-    private final Intent mResultIntent = new Intent();
-
-    @Override
-    protected int getBackgroundColorId() {
-        return R.color.slideshow_background;
-    }
-
     private final GLView mRootPane = new GLView() {
         @Override
         protected void onLayout(boolean changed, int left, int top, int right, int bottom) {
@@ -109,6 +79,26 @@ public class SlideshowPage extends ActivityState {
             canvas.clearBuffer(getBackgroundColor());
         }
     };
+    private Slide mPendingSlide = null;
+    private boolean mIsActive = false;
+
+    private static MediaItem findMediaItem(MediaSet mediaSet, int index) {
+        for (int i = 0, n = mediaSet.getSubMediaSetCount(); i < n; ++i) {
+            MediaSet subset = mediaSet.getSubMediaSet(i);
+            int count = subset.getTotalMediaItemCount();
+            if (index < count) {
+                return findMediaItem(subset, index);
+            }
+            index -= count;
+        }
+        ArrayList<MediaItem> list = mediaSet.getMediaItem(index, 1);
+        return list.isEmpty() ? null : list.get(0);
+    }
+
+    @Override
+    protected int getBackgroundColorId() {
+        return R.color.slideshow_background;
+    }
 
     @Override
     public void onCreate(Bundle data, Bundle restoreState) {
@@ -134,7 +124,8 @@ public class SlideshowPage extends ActivityState {
                     case MSG_LOAD_NEXT_BITMAP:
                         loadNextBitmap();
                         break;
-                    default: throw new AssertionError();
+                    default:
+                        throw new AssertionError();
                 }
             }
         };
@@ -229,25 +220,32 @@ public class SlideshowPage extends ActivityState {
         setContentPane(mRootPane);
     }
 
-    private static MediaItem findMediaItem(MediaSet mediaSet, int index) {
-        for (int i = 0, n = mediaSet.getSubMediaSetCount(); i < n; ++i) {
-            MediaSet subset = mediaSet.getSubMediaSet(i);
-            int count = subset.getTotalMediaItemCount();
-            if (index < count) {
-                return findMediaItem(subset, index);
-            }
-            index -= count;
+    public interface Model {
+        void pause();
+
+        void resume();
+
+        Future<Slide> nextSlide(FutureListener<Slide> listener);
+    }
+
+    public static class Slide {
+        public Bitmap bitmap;
+        public MediaItem item;
+        public int index;
+
+        public Slide(MediaItem item, int index, Bitmap bitmap) {
+            this.bitmap = bitmap;
+            this.item = item;
+            this.index = index;
         }
-        ArrayList<MediaItem> list = mediaSet.getMediaItem(index, 1);
-        return list.isEmpty() ? null : list.get(0);
     }
 
     private static class ShuffleSource implements SlideshowDataAdapter.SlideshowSource {
         private static final int RETRY_COUNT = 5;
         private final MediaSet mMediaSet;
         private final Random mRandom = new Random();
-        private int mOrder[] = new int[0];
         private final boolean mRepeat;
+        private int[] mOrder = new int[0];
         private long mSourceVersion = MediaSet.INVALID_DATA_VERSION;
         private int mLastIndex = -1;
 
@@ -314,12 +312,11 @@ public class SlideshowPage extends ActivityState {
 
     private static class SequentialSource implements SlideshowDataAdapter.SlideshowSource {
         private static final int DATA_SIZE = 32;
-
+        private final MediaSet mMediaSet;
+        private final boolean mRepeat;
         private ArrayList<MediaItem> mData = new ArrayList<MediaItem>();
         private int mDataStart = 0;
         private long mDataVersion = MediaObject.INVALID_DATA_VERSION;
-        private final MediaSet mMediaSet;
-        private final boolean mRepeat;
 
         public SequentialSource(MediaSet mediaSet, boolean repeat) {
             mMediaSet = mediaSet;

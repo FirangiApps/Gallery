@@ -16,9 +16,10 @@
 
 package com.android.gallery3d.data;
 
-import org.codeaurora.gallery.R;
 import com.android.gallery3d.app.GalleryApp;
 import com.android.gallery3d.util.Future;
+
+import org.codeaurora.gallery.R;
 
 // ComboAlbumSet combines multiple media sets into one. It lists all sub
 // media sets from the input album sets.

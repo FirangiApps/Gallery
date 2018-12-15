@@ -1,12 +1,12 @@
 /**
  * Copyright (C) 2010 The Android Open Source Project
- *
+ * <p>
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
+ * <p>
+ * http://www.apache.org/licenses/LICENSE-2.0
+ * <p>
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -47,8 +47,6 @@ import android.widget.ShareActionProvider;
 import android.widget.Toast;
 import android.widget.Toolbar;
 
-import org.codeaurora.gallery.R;
-
 import com.android.gallery3d.app.dualcam3d.ThreeDimensionalActivity;
 import com.android.gallery3d.common.ApiHelper;
 import com.android.gallery3d.data.ComboAlbum;
@@ -67,7 +65,6 @@ import com.android.gallery3d.data.SnailAlbum;
 import com.android.gallery3d.data.SnailItem;
 import com.android.gallery3d.data.SnailSource;
 import com.android.gallery3d.filtershow.FilterShowActivity;
-import com.android.gallery3d.filtershow.imageshow.MasterImage;
 import com.android.gallery3d.filtershow.tools.DualCameraEffect;
 import com.android.gallery3d.ui.DetailsHelper;
 import com.android.gallery3d.ui.DetailsHelper.CloseListener;
@@ -82,6 +79,8 @@ import com.android.gallery3d.util.GDepth;
 import com.android.gallery3d.util.GalleryUtils;
 import com.android.gallery3d.util.UsageStatistics;
 
+import org.codeaurora.gallery.R;
+
 import java.util.List;
 import java.util.Locale;
 
@@ -89,31 +88,7 @@ import java.util.Locale;
 
 public abstract class PhotoPage extends ActivityState implements
         PhotoView.Listener, AppBridge.Server, ShareActionProvider.OnShareTargetSelectedListener,
-        PhotoPageBottomControls.Delegate, ThreeDButton.Delegate{
-    private static final String TAG = "PhotoPage";
-
-    private static final int MSG_HIDE_BARS = 1;
-    private static final int MSG_ON_FULL_SCREEN_CHANGED = 4;
-    private static final int MSG_UPDATE_ACTION_BAR = 5;
-    private static final int MSG_WANT_BARS = 7;
-    private static final int MSG_REFRESH_BOTTOM_CONTROLS = 8;
-    private static final int MSG_ON_CAMERA_CENTER = 9;
-    private static final int MSG_ON_PICTURE_CENTER = 10;
-    private static final int MSG_REFRESH_IMAGE = 11;
-    private static final int MSG_UPDATE_PHOTO_UI = 12;
-    private static final int MSG_UPDATE_DEFERRED = 14;
-    private static final int MSG_UPDATE_SHARE_URI = 15;
-    private static final int MSG_UPDATE_PANORAMA_UI = 16;
-
-    private static final int HIDE_BARS_TIMEOUT = 3500;
-
-    private static final int REQUEST_SLIDESHOW = 1;
-    private static final int REQUEST_CROP = 2;
-    private static final int REQUEST_CROP_PICASA = 3;
-    private static final int REQUEST_EDIT = 4;
-    private static final int REQUEST_PLAY_VIDEO = 5;
-    private static final int REQUEST_TRIM = 6;
-
+        PhotoPageBottomControls.Delegate, ThreeDButton.Delegate {
     public static final String KEY_MEDIA_SET_PATH = "media-set-path";
     public static final String KEY_MEDIA_ITEM_PATH = "media-item-path";
     public static final String KEY_INDEX_HINT = "index-hint";
@@ -128,43 +103,99 @@ public abstract class PhotoPage extends ActivityState implements
     public static final String KEY_READONLY = "read-only";
     public static final String KEY_FROM_VIDEOS_SCREEN = "from-video-screen";
     public static final String KEY_FROM_TIMELINE_SCREEN = "from-timeline-screen";
-
     // Bundle key, used for checking whether it is from widget
     public static final String KEY_IS_FROM_WIDGET = "is_from_widget";
-
     public static final String KEY_ALBUMPAGE_TRANSITION = "albumpage-transition";
     public static final int MSG_ALBUMPAGE_NONE = 0;
     public static final int MSG_ALBUMPAGE_STARTED = 1;
     public static final int MSG_ALBUMPAGE_RESUMED = 2;
     public static final int MSG_ALBUMPAGE_PICKED = 4;
-
     public static final String ACTION_NEXTGEN_EDIT = "action_nextgen_edit";
     public static final String ACTION_SIMPLE_EDIT = "action_simple_edit";
-
+    private static final String TAG = "PhotoPage";
+    private static final int MSG_HIDE_BARS = 1;
+    private static final int MSG_ON_FULL_SCREEN_CHANGED = 4;
+    private static final int MSG_UPDATE_ACTION_BAR = 5;
+    private static final int MSG_WANT_BARS = 7;
+    private static final int MSG_REFRESH_BOTTOM_CONTROLS = 8;
+    private static final int MSG_ON_CAMERA_CENTER = 9;
+    private static final int MSG_ON_PICTURE_CENTER = 10;
+    private static final int MSG_REFRESH_IMAGE = 11;
+    private static final int MSG_UPDATE_PHOTO_UI = 12;
+    private static final int MSG_UPDATE_DEFERRED = 14;
+    private static final int MSG_UPDATE_SHARE_URI = 15;
+    private static final int MSG_UPDATE_PANORAMA_UI = 16;
+    private static final int HIDE_BARS_TIMEOUT = 3500;
+    private static final int REQUEST_SLIDESHOW = 1;
+    private static final int REQUEST_CROP = 2;
+    private static final int REQUEST_CROP_PICASA = 3;
+    private static final int REQUEST_EDIT = 4;
+    private static final int REQUEST_PLAY_VIDEO = 5;
+    private static final int REQUEST_TRIM = 6;
+    private static final long CAMERA_SWITCH_CUTOFF_THRESHOLD_MS = 300;
+    private static final long DEFERRED_UPDATE_MS = 250;
+    private final MyMenuVisibilityListener mMenuVisibilityListener =
+            new MyMenuVisibilityListener();
     private GalleryApp mApplication;
     private SelectionManager mSelectionManager;
-
     private PhotoView mPhotoView;
     private PhotoPage.Model mModel;
     private DetailsHelper mDetailsHelper;
     private boolean mShowDetails;
-
     // mMediaSet could be null if there is no KEY_MEDIA_SET_PATH supplied.
     // E.g., viewing a photo in gmail attachment
     private FilterDeleteSet mMediaSet;
-
     // The mediaset used by camera launched from secure lock screen.
     private SecureAlbum mSecureAlbum;
-
     private int mCurrentIndex = 0;
     private Handler mHandler;
     private boolean mShowBars = true;
     private volatile boolean mActionBarAllowed = true;
     private GalleryActionBar mActionBar;
+    private final GLView mRootPane = new GLView() {
+        @Override
+        protected void onLayout(
+                boolean changed, int left, int top, int right, int bottom) {
+            mPhotoView.layout(0, 0, right - left, bottom - top);
+            if (mShowDetails) {
+                mDetailsHelper.layout(left, mActionBar.getHeight(), right, bottom);
+            }
+        }
+    };
     private boolean mIsMenuVisible;
     private boolean mHaveImageEditor;
     private PhotoPageBottomControls mBottomControls;
     private MediaItem mCurrentPhoto = null;
+    private final PanoramaSupportCallback mUpdatePanoramaMenuItemsCallback = new PanoramaSupportCallback() {
+        @Override
+        public void panoramaInfoAvailable(MediaObject mediaObject, boolean isPanorama,
+                                          boolean isPanorama360) {
+            if (mediaObject == mCurrentPhoto) {
+                mHandler.obtainMessage(MSG_UPDATE_PANORAMA_UI, isPanorama360 ? 1 : 0, 0,
+                        mediaObject).sendToTarget();
+            }
+        }
+    };
+    private final PanoramaSupportCallback mRefreshBottomControlsCallback = new PanoramaSupportCallback() {
+        @Override
+        public void panoramaInfoAvailable(MediaObject mediaObject, boolean isPanorama,
+                                          boolean isPanorama360) {
+            if (mediaObject == mCurrentPhoto) {
+                mHandler.obtainMessage(MSG_REFRESH_BOTTOM_CONTROLS, isPanorama ? 1 : 0, isPanorama360 ? 1 : 0,
+                        mediaObject).sendToTarget();
+            }
+        }
+    };
+    private final PanoramaSupportCallback mUpdateShareURICallback = new PanoramaSupportCallback() {
+        @Override
+        public void panoramaInfoAvailable(MediaObject mediaObject, boolean isPanorama,
+                                          boolean isPanorama360) {
+            if (mediaObject == mCurrentPhoto) {
+                mHandler.obtainMessage(MSG_UPDATE_SHARE_URI, isPanorama360 ? 1 : 0, 0, mediaObject)
+                        .sendToTarget();
+            }
+        }
+    };
     private MenuExecutor mMenuExecutor;
     private boolean mIsActive;
     private boolean mShowSpinner;
@@ -184,86 +215,65 @@ public abstract class PhotoPage extends ActivityState implements
     private boolean mRecenterCameraOnResume = true;
     private boolean mIsFromVideoScreen;
     private boolean mIsFromTimelineScreen;
-
     // These are only valid after the panorama callback
     private boolean mIsPanorama;
     private boolean mIsPanorama360;
-
     private long mCameraSwitchCutoff = 0;
     private boolean mSkipUpdateCurrentPhoto = false;
-    private static final long CAMERA_SWITCH_CUTOFF_THRESHOLD_MS = 300;
-
-    private static final long DEFERRED_UPDATE_MS = 250;
     private boolean mDeferredUpdateWaiting = false;
     private long mDeferUpdateUntil = Long.MAX_VALUE;
-
     // The item that is deleted (but it can still be undeleted before commiting)
     private Path mDeletePath;
     private boolean mDeleteIsFocus;  // whether the deleted item was in focus
-
     private Uri[] mNfcPushUris = new Uri[1];
-
-    private final MyMenuVisibilityListener mMenuVisibilityListener =
-            new MyMenuVisibilityListener();
-
     private int mLastSystemUiVis = 0;
-
     private ShareActionProvider mShareActionProvider;
     private Intent mShareIntent;
-
     //use for saving the original height and padding of toolbar
     private int originalHeight = 0;
     private int originalPadding = 0;
-
     private ThreeDButton m3DButton;
     private boolean bShow3DButton;
     private ParseGDepthTask mParseGDepthTask;
+    private MenuExecutor.ProgressListener mConfirmDialogListener =
+            new MenuExecutor.ProgressListener() {
+                @Override
+                public void onProgressUpdate(int index) {
+                }
 
-    private final PanoramaSupportCallback mUpdatePanoramaMenuItemsCallback = new PanoramaSupportCallback() {
-        @Override
-        public void panoramaInfoAvailable(MediaObject mediaObject, boolean isPanorama,
-                boolean isPanorama360) {
-            if (mediaObject == mCurrentPhoto) {
-                mHandler.obtainMessage(MSG_UPDATE_PANORAMA_UI, isPanorama360 ? 1 : 0, 0,
-                        mediaObject).sendToTarget();
-            }
-        }
-    };
+                @Override
+                public void onProgressComplete(int result) {
+                }
 
-    private final PanoramaSupportCallback mRefreshBottomControlsCallback = new PanoramaSupportCallback() {
-        @Override
-        public void panoramaInfoAvailable(MediaObject mediaObject, boolean isPanorama,
-                boolean isPanorama360) {
-            if (mediaObject == mCurrentPhoto) {
-                mHandler.obtainMessage(MSG_REFRESH_BOTTOM_CONTROLS, isPanorama ? 1 : 0, isPanorama360 ? 1 : 0,
-                        mediaObject).sendToTarget();
-            }
-        }
-    };
+                @Override
+                public void onConfirmDialogShown() {
+                    mHandler.removeMessages(MSG_HIDE_BARS);
+                }
 
-    private final PanoramaSupportCallback mUpdateShareURICallback = new PanoramaSupportCallback() {
-        @Override
-        public void panoramaInfoAvailable(MediaObject mediaObject, boolean isPanorama,
-                boolean isPanorama360) {
-            if (mediaObject == mCurrentPhoto) {
-                mHandler.obtainMessage(MSG_UPDATE_SHARE_URI, isPanorama360 ? 1 : 0, 0, mediaObject)
-                        .sendToTarget();
-            }
-        }
-    };
+                @Override
+                public void onConfirmDialogDismissed(boolean confirmed) {
+                    refreshHidingMessage();
+                }
 
-    public static interface Model extends PhotoView.Model {
-        public void resume();
-        public void pause();
-        public boolean isEmpty();
-        public void setCurrentPhoto(Path path, int indexHint);
+                @Override
+                public void onProgressStart() {
+                }
+            };
+
+    private static Intent createSharePanoramaIntent(Uri contentUri) {
+        return new Intent(Intent.ACTION_SEND)
+                .setType(GalleryUtils.MIME_TYPE_PANORAMA360)
+                .putExtra(Intent.EXTRA_STREAM, contentUri)
+                .addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
     }
 
-    private class MyMenuVisibilityListener implements OnMenuVisibilityListener {
-        @Override
-        public void onMenuVisibilityChanged(boolean isVisible) {
-            mIsMenuVisible = isVisible;
-            refreshHidingMessage();
+    private static String getMediaTypeString(MediaItem item) {
+        if (item.getMediaType() == MediaObject.MEDIA_TYPE_VIDEO) {
+            return "Video";
+        } else if (item.getMediaType() == MediaObject.MEDIA_TYPE_IMAGE) {
+            return "Photo";
+        } else {
+            return "Unknown:" + item.getMediaType();
         }
     }
 
@@ -271,17 +281,6 @@ public abstract class PhotoPage extends ActivityState implements
     protected int getBackgroundColorId() {
         return R.color.photo_background;
     }
-
-    private final GLView mRootPane = new GLView() {
-        @Override
-        protected void onLayout(
-                boolean changed, int left, int top, int right, int bottom) {
-            mPhotoView.layout(0, 0, right - left, bottom - top);
-            if (mShowDetails) {
-                mDetailsHelper.layout(left, mActionBar.getHeight(), right, bottom);
-            }
-        }
-    };
 
     @Override
     public void onCreate(Bundle data, Bundle restoreState) {
@@ -294,7 +293,7 @@ public abstract class PhotoPage extends ActivityState implements
         mPhotoView = new PhotoView(mActivity);
         mPhotoView.setListener(this);
         mRootPane.addComponent(mPhotoView);
-        mApplication = (GalleryApp) ((Activity) mActivity).getApplication();
+        mApplication = (GalleryApp) mActivity.getApplication();
         mOrientationManager = mActivity.getOrientationManager();
         mActivity.getGLRoot().setOrientationSource(mOrientationManager);
         mIsFromVideoScreen = data.getBoolean(KEY_FROM_VIDEOS_SCREEN, false);
@@ -411,7 +410,8 @@ public abstract class PhotoPage extends ActivityState implements
                         }
                         break;
                     }
-                    default: throw new AssertionError(message.what);
+                    default:
+                        throw new AssertionError(message.what);
                 }
             }
         };
@@ -423,7 +423,7 @@ public abstract class PhotoPage extends ActivityState implements
         String itemPathString = data.getString(KEY_MEDIA_ITEM_PATH);
         Path itemPath = itemPathString != null ?
                 Path.fromString(data.getString(KEY_MEDIA_ITEM_PATH)) :
-                    null;
+                null;
         mTreatBackAsUp = data.getBoolean(KEY_TREAT_BACK_AS_UP, false);
         mIsFromWidget = data.getBoolean(KEY_IS_FROM_WIDGET, false);
         mStartInFilmstrip = data.getBoolean(KEY_START_IN_FILMSTRIP, false);
@@ -443,7 +443,7 @@ public abstract class PhotoPage extends ActivityState implements
         }
         if (mSetPathString != null) {
             mShowSpinner = true;
-            mAppBridge = (AppBridge) data.getParcelable(KEY_APP_BRIDGE);
+            mAppBridge = data.getParcelable(KEY_APP_BRIDGE);
             if (mAppBridge != null) {
                 mShowBars = false;
                 mHasCameraScreennailOrPlaceholder = true;
@@ -472,7 +472,7 @@ public abstract class PhotoPage extends ActivityState implements
                                 .getMediaSet(mSetPathString);
                         mShowSpinner = false;
                     }
-                    mSetPathString = "/filter/empty/{"+mSetPathString+"}";
+                    mSetPathString = "/filter/empty/{" + mSetPathString + "}";
                 }
 
                 // Combine the original MediaSet with the one for ScreenNail
@@ -501,7 +501,7 @@ public abstract class PhotoPage extends ActivityState implements
             mMediaSet = (FilterDeleteSet) mActivity.getDataManager()
                     .getMediaSet(mSetPathString);
             if (mMediaSet != null && mIsFromTimelineScreen) {
-                mMediaSet.setShowAlbumsetTimeTitle(false);
+                MediaSet.setShowAlbumsetTimeTitle(false);
             }
             if (mMediaSet == null) {
                 Log.w(TAG, "failed to restore " + mSetPathString);
@@ -511,7 +511,7 @@ public abstract class PhotoPage extends ActivityState implements
                 if (mediaItemCount > 0) {
                     if (mCurrentIndex >= mediaItemCount) mCurrentIndex = 0;
                     itemPath = mMediaSet.getMediaItem(mCurrentIndex, 1)
-                        .get(0).getPath();
+                            .get(0).getPath();
                 } else {
                     // Bail out, PhotoPage can't load on an empty album
                     return;
@@ -520,8 +520,8 @@ public abstract class PhotoPage extends ActivityState implements
             PhotoDataAdapter pda = new PhotoDataAdapter(
                     mActivity, mPhotoView, mMediaSet, itemPath, mCurrentIndex,
                     mAppBridge == null ? -1 : 0,
-                    mAppBridge == null ? false : mAppBridge.isPanorama(),
-                    mAppBridge == null ? false : mAppBridge.isStaticCamera());
+                    mAppBridge != null && mAppBridge.isPanorama(),
+                    mAppBridge != null && mAppBridge.isStaticCamera());
             mModel = pda;
             mPhotoView.setModel(mModel);
 
@@ -606,7 +606,7 @@ public abstract class PhotoPage extends ActivityState implements
         }
 
         mPhotoView.setFilmMode(mStartInFilmstrip && mMediaSet.getMediaItemCount() > 1);
-        RelativeLayout galleryRoot = (RelativeLayout) ((Activity) mActivity)
+        RelativeLayout galleryRoot = mActivity
                 .findViewById(mAppBridge != null ? R.id.content : R.id.gallery_root);
         if (galleryRoot != null) {
             if (mSecureAlbum == null) {
@@ -617,7 +617,7 @@ public abstract class PhotoPage extends ActivityState implements
 
         ((GLRootView) mActivity.getGLRoot()).setOnSystemUiVisibilityChangeListener(
                 new View.OnSystemUiVisibilityChangeListener() {
-                @Override
+                    @Override
                     public void onSystemUiVisibilityChange(int visibility) {
                         int diff = mLastSystemUiVis ^ visibility;
                         mLastSystemUiVis = visibility;
@@ -632,7 +632,7 @@ public abstract class PhotoPage extends ActivityState implements
     @Override
     protected void onSaveState(Bundle outState) {
         if (mCurrentPhoto != null) {
-            outState.putInt(KEY_INDEX_HINT,mCurrentIndex);
+            outState.putInt(KEY_INDEX_HINT, mCurrentIndex);
             outState.putString(KEY_CURRENT_PHOTO_HINT, mCurrentPhoto.getFilePath());
             super.onSaveState(outState);
         } else {
@@ -660,71 +660,71 @@ public abstract class PhotoPage extends ActivityState implements
             return false;
         }
         switch (control) {
-        case R.id.photopage_bottom_controls:
-            return mShowBars;
-        case R.id.photopage_bottom_control_edit:
-            return mHaveImageEditor
-                    && mShowBars
-                    && !mReadOnlyView
-                    && !mPhotoView.getFilmMode()
-                    && (mCurrentPhoto.getSupportedOperations() & MediaItem.SUPPORT_EDIT) != 0
-                    && mCurrentPhoto.getMediaType() == MediaObject.MEDIA_TYPE_IMAGE;
-        case R.id.photopage_bottom_control_share:
-            mShareIntent = new Intent(Intent.ACTION_SEND);
-            return mShowBars;
-        case R.id.photopage_bottom_control_delete:
-            return mShowBars && !mReadOnlyView;
-        default:
-            return false;
+            case R.id.photopage_bottom_controls:
+                return mShowBars;
+            case R.id.photopage_bottom_control_edit:
+                return mHaveImageEditor
+                        && mShowBars
+                        && !mReadOnlyView
+                        && !mPhotoView.getFilmMode()
+                        && (mCurrentPhoto.getSupportedOperations() & MediaItem.SUPPORT_EDIT) != 0
+                        && mCurrentPhoto.getMediaType() == MediaObject.MEDIA_TYPE_IMAGE;
+            case R.id.photopage_bottom_control_share:
+                mShareIntent = new Intent(Intent.ACTION_SEND);
+                return mShowBars;
+            case R.id.photopage_bottom_control_delete:
+                return mShowBars && !mReadOnlyView;
+            default:
+                return false;
         }
     }
 
     @Override
     public void onBottomControlClicked(int control) {
-        switch(control) {
+        switch (control) {
             case R.id.photopage_bottom_control_edit:
                 launchPhotoEditor();
                 return;
             case R.id.photopage_bottom_control_share:
-                 if (mModel != null && mModel.getMediaItem(0) != null) {
-                 Uri uri = mActivity.getDataManager().getContentUri(mModel.getMediaItem(0).getPath());
-                 mActivity.isTopMenuShow = true;
-                 mShareIntent.setType(MenuExecutor.getMimeType(mModel
-                    .getMediaItem(0).getMediaType()));
-                 mShareIntent.putExtra(Intent.EXTRA_STREAM, uri);
-                 String shareTitle = mActivity.getResources().
-                         getString(R.string.share_dialogue_title);
-                 if (uri.toString().contains("file:")) {
-                     Log.d(TAG, "can't share uri started with file://");
-                     return;
-                 }
-                 mActivity.startActivity(Intent.createChooser(mShareIntent,
-                    shareTitle));
-                 }
-                 return;
+                if (mModel != null && mModel.getMediaItem(0) != null) {
+                    Uri uri = mActivity.getDataManager().getContentUri(mModel.getMediaItem(0).getPath());
+                    mActivity.isTopMenuShow = true;
+                    mShareIntent.setType(MenuExecutor.getMimeType(mModel
+                            .getMediaItem(0).getMediaType()));
+                    mShareIntent.putExtra(Intent.EXTRA_STREAM, uri);
+                    String shareTitle = mActivity.getResources().
+                            getString(R.string.share_dialogue_title);
+                    if (uri.toString().contains("file:")) {
+                        Log.d(TAG, "can't share uri started with file://");
+                        return;
+                    }
+                    mActivity.startActivity(Intent.createChooser(mShareIntent,
+                            shareTitle));
+                }
+                return;
 
             case R.id.photopage_bottom_control_delete:
-                 String confirmMsg = null;
-                 confirmMsg = mActivity.getResources().getQuantityString(
-                    R.plurals.delete_selection, 1);
-                 if (mModel != null && mModel.getMediaItem(0) != null) {
-                 Path path = mModel.getMediaItem(0).getPath();
-                 mSelectionManager.deSelectAll();
-                 mSelectionManager.toggle(path);
-                 MenuItem item = null;
-                 mMenuExecutor.onMenuClicked(item, confirmMsg,
-                    mConfirmDialogListener);
-                 }
+                String confirmMsg = null;
+                confirmMsg = mActivity.getResources().getQuantityString(
+                        R.plurals.delete_selection, 1);
+                if (mModel != null && mModel.getMediaItem(0) != null) {
+                    Path path = mModel.getMediaItem(0).getPath();
+                    mSelectionManager.deSelectAll();
+                    mSelectionManager.toggle(path);
+                    MenuItem item = null;
+                    mMenuExecutor.onMenuClicked(item, confirmMsg,
+                            mConfirmDialogListener);
+                }
                 return;
-        default:
-            return;
+            default:
+                return;
         }
     }
 
     @Override
     public boolean canDisplay3DButton() {
         return bShow3DButton && mShowBars
-                && (mPhotoView == null ? false : !mPhotoView.getFilmMode());
+                && (mPhotoView != null && !mPhotoView.getFilmMode());
     }
 
     @Override
@@ -773,15 +773,8 @@ public abstract class PhotoPage extends ActivityState implements
                 .addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
     }
 
-    private static Intent createSharePanoramaIntent(Uri contentUri) {
-        return new Intent(Intent.ACTION_SEND)
-                .setType(GalleryUtils.MIME_TYPE_PANORAMA360)
-                .putExtra(Intent.EXTRA_STREAM, contentUri)
-                .addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
-    }
-
     private void overrideTransitionToEditor() {
-        ((Activity) mActivity).overridePendingTransition(android.R.anim.fade_in,
+        mActivity.overridePendingTransition(android.R.anim.fade_in,
                 android.R.anim.fade_out);
     }
 
@@ -791,7 +784,7 @@ public abstract class PhotoPage extends ActivityState implements
         Intent intent = new Intent(FilterShowActivity.TINY_PLANET_ACTION);
         intent.setClass(mActivity, FilterShowActivity.class);
         intent.setDataAndType(current.getContentUri(), current.getMimeType())
-            .setFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
+                .setFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
         intent.putExtra(FilterShowActivity.LAUNCH_FULLSCREEN,
                 mActivity.isFullscreen());
         mActivity.startActivityForResult(intent, REQUEST_EDIT);
@@ -937,16 +930,16 @@ public abstract class PhotoPage extends ActivityState implements
             if (!mHaveImageEditor) {
                 supportedOperations &= ~MediaObject.SUPPORT_EDIT;
             }
-           // If current photo page is single item only, to cut some menu items
-           boolean singleItemOnly = mData.getBoolean("SingleItemOnly", false);
-           if (singleItemOnly) {
-               supportedOperations &= ~MediaObject.SUPPORT_DELETE;
-               supportedOperations &= ~MediaObject.SUPPORT_ROTATE;
-               supportedOperations &= ~MediaObject.SUPPORT_SHARE;
-               supportedOperations &= ~MediaObject.SUPPORT_CROP;
-               supportedOperations &= ~MediaObject.SUPPORT_INFO;
-               supportedOperations &= ~MediaObject.SUPPORT_SETAS;
-           }
+            // If current photo page is single item only, to cut some menu items
+            boolean singleItemOnly = mData.getBoolean("SingleItemOnly", false);
+            if (singleItemOnly) {
+                supportedOperations &= ~MediaObject.SUPPORT_DELETE;
+                supportedOperations &= ~MediaObject.SUPPORT_ROTATE;
+                supportedOperations &= ~MediaObject.SUPPORT_SHARE;
+                supportedOperations &= ~MediaObject.SUPPORT_CROP;
+                supportedOperations &= ~MediaObject.SUPPORT_INFO;
+                supportedOperations &= ~MediaObject.SUPPORT_SETAS;
+            }
         }
         MenuExecutor.updateMenuOperation(menu, supportedOperations);
     }
@@ -955,10 +948,7 @@ public abstract class PhotoPage extends ActivityState implements
         if (mMediaSet == null || mCurrentPhoto == null) {
             return false;
         }
-        if (mCurrentPhoto.getMediaType() != MediaObject.MEDIA_TYPE_IMAGE) {
-            return false;
-        }
-        return true;
+        return mCurrentPhoto.getMediaType() == MediaObject.MEDIA_TYPE_IMAGE;
     }
 
     //////////////////////////////////////////////////////////////////////////
@@ -1003,11 +993,7 @@ public abstract class PhotoPage extends ActivityState implements
         if (!mActionBarAllowed) return false;
 
         Configuration config = mActivity.getResources().getConfiguration();
-        if (config.touchscreen == Configuration.TOUCHSCREEN_NOTOUCH) {
-            return false;
-        }
-
-        return true;
+        return config.touchscreen != Configuration.TOUCHSCREEN_NOTOUCH;
     }
 
     private void wantBars() {
@@ -1031,7 +1017,7 @@ public abstract class PhotoPage extends ActivityState implements
     @Override
     protected void onBackPressed() {
         showBars();
-        ((GalleryActivity)mActivity).toggleNavBar(true);
+        ((GalleryActivity) mActivity).toggleNavBar(true);
         if (mShowDetails) {
             hideDetails();
         } else if (mAppBridge == null || !switchWithCaptureAnimation(-1)) {
@@ -1044,13 +1030,13 @@ public abstract class PhotoPage extends ActivityState implements
             } else {
                 if (mMediaSet != null && mIsFromTimelineScreen) {
                     //if back to TimeLinePage, need show timeline title
-                    mMediaSet.setShowAlbumsetTimeTitle(true);
+                    MediaSet.setShowAlbumsetTimeTitle(true);
                 }
                 super.onBackPressed();
                 mActionBar.setBackGroundDefault();
                 int count = mActivity.getStateManager().getStateCount();
                 if (mIsFromVideoScreen || count == 1 || mIsFromTimelineScreen) {
-                    ((GalleryActivity)mActivity).toggleNavBar(true);
+                    ((GalleryActivity) mActivity).toggleNavBar(true);
                     if (mModel instanceof PhotoDataAdapter) {
                         ((PhotoDataAdapter) mModel).setDataListener(null);
                     }
@@ -1132,28 +1118,6 @@ public abstract class PhotoPage extends ActivityState implements
         //mActionBar.setTitle(mMediaSet != null ? mMediaSet.getName() : "");
         return true;
     }
-
-    private MenuExecutor.ProgressListener mConfirmDialogListener =
-            new MenuExecutor.ProgressListener() {
-        @Override
-        public void onProgressUpdate(int index) {}
-
-        @Override
-        public void onProgressComplete(int result) {}
-
-        @Override
-        public void onConfirmDialogShown() {
-            mHandler.removeMessages(MSG_HIDE_BARS);
-        }
-
-        @Override
-        public void onConfirmDialogDismissed(boolean confirmed) {
-            refreshHidingMessage();
-        }
-
-        @Override
-        public void onProgressStart() {}
-    };
 
     private void switchToGrid() {
         if (mActivity.getStateManager().hasStateClass(AlbumPage.class)) {
@@ -1245,12 +1209,12 @@ public abstract class PhotoPage extends ActivityState implements
                 intent.setData(manager.getContentUri(path));
                 // We need the file path to wrap this into a RandomAccessFile.
                 String str = current.getMimeType();
-                if("video/mp4".equals(str) || "video/mpeg4".equals(str)
+                if ("video/mp4".equals(str) || "video/mpeg4".equals(str)
                         || "video/3gpp".equals(str) || "video/3gpp2".equals(str)) {
                     intent.putExtra(KEY_MEDIA_ITEM_PATH, current.getFilePath());
                     mActivity.startActivityForResult(intent, REQUEST_TRIM);
                 } else {
-                    Toast.makeText(mActivity,mActivity.getString(R.string.can_not_trim),
+                    Toast.makeText(mActivity, mActivity.getString(R.string.can_not_trim),
                             Toast.LENGTH_SHORT).show();
                 }
                 return true;
@@ -1290,8 +1254,8 @@ public abstract class PhotoPage extends ActivityState implements
                 confirmMsg = mActivity.getResources().getQuantityString(
                         R.plurals.delete_selection, 1);
             case R.id.action_setas:
-            //case R.id.action_rotate_ccw:
-            //case R.id.action_rotate_cw:
+                //case R.id.action_rotate_ccw:
+                //case R.id.action_rotate_cw:
             case R.id.action_show_on_map:
                 mSelectionManager.deSelectAll();
                 mSelectionManager.toggle(path);
@@ -1303,7 +1267,7 @@ public abstract class PhotoPage extends ActivityState implements
 //                    DrmHelper.showDrmInfo(mActivity.getAndroidContext(), filepath);
 //                }
 //                return true;
-            default :
+            default:
                 return false;
         }
     }
@@ -1354,7 +1318,7 @@ public abstract class PhotoPage extends ActivityState implements
             int w = mPhotoView.getWidth();
             int h = mPhotoView.getHeight();
             playVideo = (Math.abs(x - w / 2) * 12 <= w)
-                && (Math.abs(y - h / 2) * 12 <= h);
+                    && (Math.abs(y - h / 2) * 12 <= h);
         }
 
         if (playVideo) {
@@ -1580,7 +1544,6 @@ public abstract class PhotoPage extends ActivityState implements
         win.setAttributes(winParams);
     }
 
-
     @Override
     public void onFilmModeChanged(boolean enabled) {
         refreshBottomControlsWhenReady();
@@ -1681,7 +1644,7 @@ public abstract class PhotoPage extends ActivityState implements
 
         //if from TimeLinePage, don't show the timeline title
         if (mMediaSet != null && mIsFromTimelineScreen) {
-            mMediaSet.setShowAlbumsetTimeTitle(false);
+            MediaSet.setShowAlbumsetTimeTitle(false);
         }
 
         mActionBar.setDisplayOptions(
@@ -1689,7 +1652,7 @@ public abstract class PhotoPage extends ActivityState implements
         mActionBar.addOnMenuVisibilityListener(mMenuVisibilityListener);
         refreshBottomControlsWhenReady();
         if (((mSecureAlbum == null) && (mSetPathString != null))) {
-            ((GalleryActivity)mActivity).toggleNavBar(false);
+            ((GalleryActivity) mActivity).toggleNavBar(false);
         }
         // if (mShowSpinner && mPhotoView.getFilmMode()) {
         // mActionBar.enableAlbumModeMenu(
@@ -1735,31 +1698,6 @@ public abstract class PhotoPage extends ActivityState implements
         super.onDestroy();
     }
 
-    private class MyDetailsSource implements DetailsSource {
-
-        @Override
-        public MediaDetails getDetails() {
-            return mModel.getMediaItem(0).getDetails();
-        }
-
-        @Override
-        public int size() {
-            return mMediaSet != null ? mMediaSet.getMediaItemCount() : 1;
-        }
-
-        @Override
-        public int setIndex() {
-            return mModel.getCurrentIndex();
-        }
-    }
-
-    /*@Override
-    public void onAlbumModeSelected(int mode) {
-        if (mode == GalleryActionBar.ALBUM_GRID_MODE_SELECTED) {
-            switchToGrid();
-        }
-    }*/
-
     @Override
     public void refreshBottomControlsWhenReady() {
         if (mBottomControls == null) {
@@ -1798,6 +1736,13 @@ public abstract class PhotoPage extends ActivityState implements
         }
     }
 
+    /*@Override
+    public void onAlbumModeSelected(int mode) {
+        if (mode == GalleryActionBar.ALBUM_GRID_MODE_SELECTED) {
+            switchToGrid();
+        }
+    }*/
+
     @Override
     public void onUndoBarVisibilityChanged(boolean visible) {
         refreshBottomControlsWhenReady();
@@ -1810,19 +1755,45 @@ public abstract class PhotoPage extends ActivityState implements
         UsageStatistics.onEvent(UsageStatistics.COMPONENT_GALLERY,
                 UsageStatistics.ACTION_SHARE,
                 mediaType,
-                        timestampMillis > 0
+                timestampMillis > 0
                         ? System.currentTimeMillis() - timestampMillis
                         : -1);
         return false;
     }
 
-    private static String getMediaTypeString(MediaItem item) {
-        if (item.getMediaType() == MediaObject.MEDIA_TYPE_VIDEO) {
-            return "Video";
-        } else if (item.getMediaType() == MediaObject.MEDIA_TYPE_IMAGE) {
-            return "Photo";
-        } else {
-            return "Unknown:" + item.getMediaType();
+    public interface Model extends PhotoView.Model {
+        void resume();
+
+        void pause();
+
+        boolean isEmpty();
+
+        void setCurrentPhoto(Path path, int indexHint);
+    }
+
+    private class MyMenuVisibilityListener implements OnMenuVisibilityListener {
+        @Override
+        public void onMenuVisibilityChanged(boolean isVisible) {
+            mIsMenuVisible = isVisible;
+            refreshHidingMessage();
+        }
+    }
+
+    private class MyDetailsSource implements DetailsSource {
+
+        @Override
+        public MediaDetails getDetails() {
+            return mModel.getMediaItem(0).getDetails();
+        }
+
+        @Override
+        public int size() {
+            return mMediaSet != null ? mMediaSet.getMediaItemCount() : 1;
+        }
+
+        @Override
+        public int setIndex() {
+            return mModel.getCurrentIndex();
         }
     }
 

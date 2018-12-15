@@ -23,7 +23,6 @@ import android.util.Log;
 import com.adobe.xmp.XMPException;
 import com.adobe.xmp.XMPMeta;
 import com.adobe.xmp.XMPMetaFactory;
-import org.codeaurora.gallery.R;
 import com.android.gallery3d.common.Utils;
 import com.android.gallery3d.filtershow.imageshow.MasterImage;
 import com.android.gallery3d.filtershow.pipeline.ImagePreset;
@@ -41,12 +40,6 @@ public class XmpPresets {
     public static final String XMP_FILTERSTACK = "filterstack";
 
     private static final String LOGTAG = "XmpPresets";
-
-    public static class XMresults {
-        public String presetString;
-        public ImagePreset preset;
-        public Uri originalimage;
-    }
 
     static {
         try {
@@ -130,5 +123,11 @@ public class XmpPresets {
         }
 
         return null;
+    }
+
+    public static class XMresults {
+        public String presetString;
+        public ImagePreset preset;
+        public Uri originalimage;
     }
 }

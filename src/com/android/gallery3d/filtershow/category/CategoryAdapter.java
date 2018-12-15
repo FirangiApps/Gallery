@@ -22,22 +22,23 @@ import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
 import android.widget.ListView;
 
-import org.codeaurora.gallery.R;
 import com.android.gallery3d.filtershow.FilterShowActivity;
 import com.android.gallery3d.filtershow.filters.FilterPresetRepresentation;
 import com.android.gallery3d.filtershow.filters.FilterRepresentation;
 import com.android.gallery3d.filtershow.filters.FilterTinyPlanetRepresentation;
 import com.android.gallery3d.filtershow.pipeline.ImagePreset;
 
+import org.codeaurora.gallery.R;
+
 public class CategoryAdapter extends ArrayAdapter<Action> {
 
     private static final String LOGTAG = "CategoryAdapter";
     private static final int UNKNOWN_INDEX = -1;
+    int mCategory;
     private int mItemHeight;
     private View mContainer;
     private int mItemWidth = ListView.LayoutParams.MATCH_PARENT;
     private int mSelectedPosition;
-    int mCategory;
     private int mOrientation;
     private boolean mShowAddButton = false;
     private String mAddButtonText;
@@ -232,7 +233,7 @@ public class CategoryAdapter extends ArrayAdapter<Action> {
         super.remove(action);
         FilterShowActivity activity = (FilterShowActivity) getContext();
         if (mCategory == MainPanel.LOOKS) {
-            if ((FilterPresetRepresentation)action.getRepresentation() != null ){
+            if (action.getRepresentation() != null) {
                 activity.removePreset(action);
             } else {
                 activity.removeLook(action);

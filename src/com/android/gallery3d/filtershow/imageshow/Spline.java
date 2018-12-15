@@ -27,17 +27,15 @@ import java.util.Collections;
 import java.util.Vector;
 
 public class Spline {
-    private final Vector<ControlPoint> mPoints;
-    private static Drawable mCurveHandle;
-    private static int mCurveHandleSize;
-    private static int mCurveWidth;
-
     public static final int RGB = 0;
     public static final int RED = 1;
     public static final int GREEN = 2;
     public static final int BLUE = 3;
     private static final String LOGTAG = "Spline";
-
+    private static Drawable mCurveHandle;
+    private static int mCurveHandleSize;
+    private static int mCurveWidth;
+    private final Vector<ControlPoint> mPoints;
     private final Paint gPaint = new Paint();
     private ControlPoint mCurrentControlPoint = null;
 
@@ -126,10 +124,7 @@ public class Spline {
         if (mPoints.elementAt(0).x != 0 || mPoints.elementAt(0).y != 1) {
             return false;
         }
-        if (mPoints.elementAt(1).x != 1 || mPoints.elementAt(1).y != 0) {
-            return false;
-        }
-        return true;
+        return mPoints.elementAt(1).x == 1 && mPoints.elementAt(1).y == 0;
     }
 
     public void reset() {
@@ -238,7 +233,7 @@ public class Spline {
     }
 
     public void draw(Canvas canvas, int color, int canvasWidth, int canvasHeight,
-            boolean showHandles, boolean moving) {
+                     boolean showHandles, boolean moving) {
         float w = canvasWidth - mCurveHandleSize;
         float h = canvasHeight - mCurveHandleSize;
         float dx = mCurveHandleSize / 2;

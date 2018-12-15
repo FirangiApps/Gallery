@@ -28,6 +28,7 @@ import android.net.Uri;
 import android.os.Bundle;
 import android.os.Handler;
 import android.provider.MediaStore;
+import android.support.v4.content.FileProvider;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.Window;
@@ -35,21 +36,27 @@ import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
 import android.widget.VideoView;
-import android.support.v4.content.FileProvider;
 
-import org.codeaurora.gallery.R;
 import com.android.gallery3d.util.SaveVideoFileInfo;
 import com.android.gallery3d.util.SaveVideoFileUtils;
 
+import org.codeaurora.gallery.R;
+
 import java.io.File;
 import java.io.IOException;
-import java.net.URI;
 
 public class TrimVideo extends Activity implements
         MediaPlayer.OnErrorListener,
         MediaPlayer.OnCompletionListener,
         ControllerOverlay.Listener {
 
+    public static final String TRIM_ACTION = "com.android.camera.action.TRIM";
+    public static final String KEY_TRIM_START = "trim_start";
+    public static final String KEY_TRIM_END = "trim_end";
+    public static final String KEY_VIDEO_POSITION = "video_pos";
+    private static final String TIME_STAMP_NAME = "'TRIM'_yyyyMMdd_HHmmss";
+    private final Handler mHandler = new Handler();
+    public ProgressDialog mProgress;
     private VideoView mVideoView;
     private TextView mSaveVideoTextView;
     private ImageView mExitImageView;
@@ -57,22 +64,19 @@ public class TrimVideo extends Activity implements
     private AlertDialog mExitDialog;
     private Context mContext;
     private Uri mUri;
-    private final Handler mHandler = new Handler();
-    public static final String TRIM_ACTION = "com.android.camera.action.TRIM";
-
-    public ProgressDialog mProgress;
-
     private int mTrimStartTime = 0;
     private int mTrimEndTime = 0;
     private boolean mCheckTrimStartTime;
     private int mVideoPosition = 0;
-    public static final String KEY_TRIM_START = "trim_start";
-    public static final String KEY_TRIM_END = "trim_end";
-    public static final String KEY_VIDEO_POSITION = "video_pos";
+    private final Runnable mProgressChecker = new Runnable() {
+        @Override
+        public void run() {
+            int pos = setProgress();
+            mHandler.postDelayed(mProgressChecker, 200 - (pos % 200));
+        }
+    };
     private boolean mHasPaused = false;
-
     private String mSrcVideoPath = null;
-    private static final String TIME_STAMP_NAME = "'TRIM'_yyyyMMdd_HHmmss";
     private SaveVideoFileInfo mDstFileInfo = null;
 
     @Override
@@ -90,7 +94,7 @@ public class TrimVideo extends Activity implements
         actionBar.setDisplayOptions(displayOptions, displayOptions);
         actionBar.setCustomView(R.layout.trim_menu);
 
-        mExitImageView = (ImageView) findViewById(R.id.exit_trim);
+        mExitImageView = findViewById(R.id.exit_trim);
         mExitImageView.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -100,24 +104,24 @@ public class TrimVideo extends Activity implements
                         setMessage(R.string.trim_video_exit_msg).
                         setPositiveButton(R.string.trim_video_exit_discard,
                                 new DialogInterface.OnClickListener() {
-                            @Override
-                            public void onClick(DialogInterface dialog, int which) {
-                                finish();
-                            }
-                        }).
+                                    @Override
+                                    public void onClick(DialogInterface dialog, int which) {
+                                        finish();
+                                    }
+                                }).
                         setNegativeButton(R.string.review_cancel,
                                 new DialogInterface.OnClickListener() {
-                            @Override
-                            public void onClick(DialogInterface dialog, int which) {
-                                dialog.dismiss();
-                            }
-                        }).
+                                    @Override
+                                    public void onClick(DialogInterface dialog, int which) {
+                                        dialog.dismiss();
+                                    }
+                                }).
                         create();
                 mExitDialog.show();
             }
         });
 
-        mSaveVideoTextView = (TextView) findViewById(R.id.start_trim);
+        mSaveVideoTextView = findViewById(R.id.start_trim);
         mSaveVideoTextView.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View arg0) {
@@ -132,7 +136,7 @@ public class TrimVideo extends Activity implements
         setContentView(R.layout.trim_view);
         View rootView = findViewById(R.id.trim_view_root);
 
-        mVideoView = (VideoView) rootView.findViewById(R.id.surface_view);
+        mVideoView = rootView.findViewById(R.id.surface_view);
 
         mController = new TrimControllerOverlay(mContext);
         ((ViewGroup) rootView).addView(mController.getView());
@@ -180,14 +184,6 @@ public class TrimVideo extends Activity implements
         mVideoView.stopPlayback();
         super.onDestroy();
     }
-
-    private final Runnable mProgressChecker = new Runnable() {
-        @Override
-        public void run() {
-            int pos = setProgress();
-            mHandler.postDelayed(mProgressChecker, 200 - (pos % 200));
-        }
-    };
 
     @Override
     public void onSaveInstanceState(Bundle savedInstanceState) {
@@ -256,11 +252,7 @@ public class TrimVideo extends Activity implements
 
         // Considering that we only trim at sync frame, we don't want to trim
         // when the time interval is too short or too close to the origin.
-        if (delta < 100 || Math.abs(mVideoView.getDuration() - delta) < 100) {
-            return false;
-        } else {
-            return true;
-        }
+        return delta >= 100 && Math.abs(mVideoView.getDuration() - delta) >= 100;
     }
 
     private void trimVideo() {
@@ -289,14 +281,14 @@ public class TrimVideo extends Activity implements
                     e.printStackTrace();
                 }
                 //If the exception happens,just notify the UI and avoid the crash.
-                if (hasError){
-                    mHandler.post(new Runnable(){
+                if (hasError) {
+                    mHandler.post(new Runnable() {
                         @Override
-                        public void run(){
+                        public void run() {
                             Toast.makeText(getApplicationContext(),
-                                getString(R.string.fail_trim),
-                                Toast.LENGTH_SHORT)
-                                .show();
+                                    getString(R.string.fail_trim),
+                                    Toast.LENGTH_SHORT)
+                                    .show();
                             if (mProgress != null) {
                                 mProgress.dismiss();
                                 mProgress = null;
@@ -310,9 +302,9 @@ public class TrimVideo extends Activity implements
                     @Override
                     public void run() {
                         Toast.makeText(getApplicationContext(),
-                            getString(R.string.save_into, mDstFileInfo.mFolderName),
-                            Toast.LENGTH_SHORT)
-                            .show();
+                                getString(R.string.save_into, mDstFileInfo.mFolderName),
+                                Toast.LENGTH_SHORT)
+                                .show();
                         // TODO: change trimming into a service to avoid
                         // this progressDialog and add notification properly.
                         if (mProgress != null) {

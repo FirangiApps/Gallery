@@ -34,6 +34,9 @@ public class SecureAlbum extends MediaSet implements StitchingChangeListener {
     @SuppressWarnings("unused")
     private static final String TAG = "SecureAlbum";
     private static final String[] PROJECTION = {MediaColumns._ID};
+    private static final Uri[] mWatchUris =
+            {Images.Media.EXTERNAL_CONTENT_URI, Video.Media.EXTERNAL_CONTENT_URI};
+    private final ChangeNotifier mNotifier;
     private int mMinImageId = Integer.MAX_VALUE; // the smallest id of images
     private int mMaxImageId = Integer.MIN_VALUE; // the biggest id in images
     private int mMinVideoId = Integer.MAX_VALUE; // the smallest id of videos
@@ -45,9 +48,6 @@ public class SecureAlbum extends MediaSet implements StitchingChangeListener {
     private ArrayList<Path> mExistingItems = new ArrayList<Path>();
     private Context mContext;
     private DataManager mDataManager;
-    private static final Uri[] mWatchUris =
-        {Images.Media.EXTERNAL_CONTENT_URI, Video.Media.EXTERNAL_CONTENT_URI};
-    private final ChangeNotifier mNotifier;
     // A placeholder image in the end of secure album. When it is tapped, it
     // will take the user to the lock screen.
     private MediaItem mUnlockItem;

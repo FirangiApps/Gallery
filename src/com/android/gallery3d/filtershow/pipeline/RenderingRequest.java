@@ -19,6 +19,7 @@ package com.android.gallery3d.filtershow.pipeline;
 import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.Rect;
+
 import com.android.gallery3d.app.Log;
 import com.android.gallery3d.filtershow.FilterShowActivity;
 import com.android.gallery3d.filtershow.cache.BitmapCache;
@@ -26,7 +27,15 @@ import com.android.gallery3d.filtershow.filters.FiltersManager;
 import com.android.gallery3d.filtershow.imageshow.MasterImage;
 
 public class RenderingRequest {
+    public static final int FULL_RENDERING = 0;
+    public static final int FILTERS_RENDERING = 1;
+    public static final int GEOMETRY_RENDERING = 2;
+    public static final int ICON_RENDERING = 3;
+    public static final int PARTIAL_RENDERING = 4;
+    public static final int HIGHRES_RENDERING = 5;
+    public static final int STYLE_ICON_RENDERING = 6;
     private static final String LOGTAG = "RenderingRequest";
+    private static final Bitmap.Config mConfig = Bitmap.Config.ARGB_8888;
     private boolean mIsDirect = false;
     private Bitmap mBitmap = null;
     private ImagePreset mImagePreset = null;
@@ -37,15 +46,6 @@ public class RenderingRequest {
     private Rect mDestination = null;
     private Rect mIconBounds = null;
     private int mType = FULL_RENDERING;
-    public static final int FULL_RENDERING = 0;
-    public static final int FILTERS_RENDERING = 1;
-    public static final int GEOMETRY_RENDERING = 2;
-    public static final int ICON_RENDERING = 3;
-    public static final int PARTIAL_RENDERING = 4;
-    public static final int HIGHRES_RENDERING = 5;
-    public static final int STYLE_ICON_RENDERING = 6;
-
-    private static final Bitmap.Config mConfig = Bitmap.Config.ARGB_8888;
 
     public static void post(Context context, Bitmap source, ImagePreset preset,
                             int type, RenderingRequestCaller caller) {
@@ -175,12 +175,12 @@ public class RenderingRequest {
         mBounds = bounds;
     }
 
-    public void setScaleFactor(float scaleFactor) {
-        mScaleFactor = scaleFactor;
-    }
-
     public float getScaleFactor() {
         return mScaleFactor;
+    }
+
+    public void setScaleFactor(float scaleFactor) {
+        mScaleFactor = scaleFactor;
     }
 
     public Rect getDestination() {
@@ -191,12 +191,12 @@ public class RenderingRequest {
         mDestination = destination;
     }
 
-    public void setIconBounds(Rect bounds) {
-        mIconBounds = bounds;
-    }
-
     public Rect getIconBounds() {
         return mIconBounds;
+    }
+
+    public void setIconBounds(Rect bounds) {
+        mIconBounds = bounds;
     }
 
     public ImagePreset getOriginalImagePreset() {

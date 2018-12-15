@@ -22,26 +22,23 @@ import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentTransaction;
 import android.util.Log;
 import android.view.LayoutInflater;
-import android.view.Menu;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
-import android.widget.ImageButton;
 import android.widget.LinearLayout;
-import android.widget.TextView;
 
-import org.codeaurora.gallery.R;
 import com.android.gallery3d.filtershow.FilterShowActivity;
-import com.android.gallery3d.filtershow.history.HistoryManager;
 import com.android.gallery3d.filtershow.category.MainPanel;
+import com.android.gallery3d.filtershow.history.HistoryManager;
 import com.android.gallery3d.filtershow.imageshow.MasterImage;
 import com.android.gallery3d.filtershow.state.StatePanel;
 
+import org.codeaurora.gallery.R;
+
 public class EditorPanel extends Fragment {
 
-    private static final String LOGTAG = "EditorPanel";
     public static final String FRAGMENT_TAG = "EditorPanel";
-
+    private static final String LOGTAG = "EditorPanel";
     private LinearLayout mMainView;
     private Editor mEditor;
     private int mEditorID;
@@ -68,7 +65,7 @@ public class EditorPanel extends Fragment {
 
         int position = adapter.undo();
         masterImage.onHistoryItemClick(position);
-        ((FilterShowActivity)getActivity()).invalidateViews();
+        ((FilterShowActivity) getActivity()).invalidateViews();
     }
 
     @Override
@@ -86,7 +83,7 @@ public class EditorPanel extends Fragment {
         mMainView = (LinearLayout) inflater.inflate(R.layout.filtershow_editor_panel, null);
         //TextView mFilterText = (TextView) mMainView.findViewById(R.id.tvFilterName);
         View editControl = mMainView.findViewById(R.id.controlArea);
-        Button toggleState = (Button) mMainView.findViewById(R.id.toggle_state);
+        Button toggleState = mMainView.findViewById(R.id.toggle_state);
         mEditor = activity.getEditor(mEditorID);
         if (mEditor != null) {
             mEditor.setUpEditorUI(editControl, toggleState);

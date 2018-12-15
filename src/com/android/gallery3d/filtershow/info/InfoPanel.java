@@ -29,12 +29,14 @@ import android.view.Window;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
-import org.codeaurora.gallery.R;
+
 import com.android.gallery3d.exif.ExifInterface;
 import com.android.gallery3d.exif.ExifTag;
 import com.android.gallery3d.filtershow.cache.ImageLoader;
 import com.android.gallery3d.filtershow.imageshow.MasterImage;
 import com.android.gallery3d.ui.BaseDialogFragment;
+
+import org.codeaurora.gallery.R;
 
 import java.util.List;
 
@@ -69,16 +71,16 @@ public class InfoPanel extends BaseDialogFragment {
         mMainView = (LinearLayout) inflater.inflate(
                 R.layout.filtershow_info_panel, null, false);
 
-        mImageThumbnail = (ImageView) mMainView.findViewById(R.id.imageThumbnail);
+        mImageThumbnail = mMainView.findViewById(R.id.imageThumbnail);
         Bitmap bitmap = MasterImage.getImage().getFilteredImage();
         mImageThumbnail.setImageBitmap(bitmap);
 
-        mImageName = (TextView) mMainView.findViewById(R.id.imageName);
-        mImageSize = (TextView) mMainView.findViewById(R.id.imageSize);
-        mExifData = (TextView) mMainView.findViewById(R.id.exifData);
-        TextView exifLabel = (TextView) mMainView.findViewById(R.id.exifLabel);
+        mImageName = mMainView.findViewById(R.id.imageName);
+        mImageSize = mMainView.findViewById(R.id.imageSize);
+        mExifData = mMainView.findViewById(R.id.exifData);
+        TextView exifLabel = mMainView.findViewById(R.id.exifLabel);
 
-        HistogramView histogramView = (HistogramView) mMainView.findViewById(R.id.histogramView);
+        HistogramView histogramView = mMainView.findViewById(R.id.histogramView);
         histogramView.setBitmap(bitmap);
         histogramView.setBackgroundColor(Color.DKGRAY);
 

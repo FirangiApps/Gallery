@@ -28,7 +28,6 @@ import android.widget.LinearLayout;
 import android.widget.SeekBar;
 import android.widget.TextView;
 
-import org.codeaurora.gallery.R;
 import com.android.gallery3d.filtershow.colorpicker.ColorCompareView;
 import com.android.gallery3d.filtershow.colorpicker.ColorHueView;
 import com.android.gallery3d.filtershow.colorpicker.ColorListener;
@@ -38,11 +37,15 @@ import com.android.gallery3d.filtershow.controller.BasicParameterInt;
 import com.android.gallery3d.filtershow.controller.ParameterColor;
 import com.android.gallery3d.filtershow.filters.FilterColorBorderRepresentation;
 
+import org.codeaurora.gallery.R;
+
 import java.util.Arrays;
 
 public class EditorColorBorderTabletUI {
-    private EditorColorBorder mEditorDraw;
     private static int sIconDim = 120;
+    TextView mCBCornerSizeValue;
+    TextView mCBSizeValue;
+    private EditorColorBorder mEditorDraw;
     private int mSelectedColorButton;
     private FilterColorBorderRepresentation mRep;
     private Button[] mColorButton;
@@ -50,15 +53,11 @@ public class EditorColorBorderTabletUI {
     private ColorSVRectView mSatValView;
     private ColorOpacityView mOpacityView;
     private ColorCompareView mColorCompareView;
-
     private int[] mBasColors;
     private int mSelected;
     private int mTransparent;
     private SeekBar mCBSizeSeekBar;
     private SeekBar mCBCornerSizeSeekBar;
-    TextView mCBCornerSizeValue;
-    TextView mCBSizeValue;
-
     private int[] ids = {
             R.id.draw_color_button01,
             R.id.draw_color_button02,
@@ -66,6 +65,28 @@ public class EditorColorBorderTabletUI {
             R.id.draw_color_button04,
             R.id.draw_color_button05,
     };
+
+    public EditorColorBorderTabletUI(EditorColorBorder editorDraw, Context context, View base) {
+        mEditorDraw = editorDraw;
+        mBasColors = editorDraw.mBasColors;
+        LayoutInflater inflater =
+                (LayoutInflater) context.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
+        LinearLayout lp = (LinearLayout) inflater.inflate(
+                R.layout.filtershow_color_border_ui, (ViewGroup) base, true);
+
+        Resources res = context.getResources();
+        sIconDim = res.getDimensionPixelSize(R.dimen.draw_style_icon_dim);
+        LinearLayout buttonContainer = lp.findViewById(R.id.listStyles);
+
+        mCBCornerSizeSeekBar = lp.findViewById(R.id.colorBorderCornerSizeSeekBar);
+        mCBCornerSizeValue = lp.findViewById(R.id.colorBorderCornerValue);
+        mCBSizeSeekBar = lp.findViewById(R.id.colorBorderSizeSeekBar);
+
+        mCBSizeValue = lp.findViewById(R.id.colorBorderSizeValue);
+        setupCBSizeSeekBar(lp);
+        setupCBCornerSizeSeekBar(lp);
+        setupColor(lp, res);
+    }
 
     public void setColorBorderRepresentation(FilterColorBorderRepresentation rep) {
         mRep = rep;
@@ -85,36 +106,16 @@ public class EditorColorBorderTabletUI {
         color.setValue(mBasColors[mSelectedColorButton]);
     }
 
-    public EditorColorBorderTabletUI(EditorColorBorder editorDraw, Context context, View base) {
-        mEditorDraw = editorDraw;
-        mBasColors = editorDraw.mBasColors;
-        LayoutInflater inflater =
-                (LayoutInflater) context.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
-        LinearLayout lp = (LinearLayout) inflater.inflate(
-                R.layout.filtershow_color_border_ui, (ViewGroup) base, true);
-
-        Resources res = context.getResources();
-        sIconDim = res.getDimensionPixelSize(R.dimen.draw_style_icon_dim);
-        LinearLayout buttonContainer = (LinearLayout) lp.findViewById(R.id.listStyles);
-
-        mCBCornerSizeSeekBar = (SeekBar) lp.findViewById(R.id.colorBorderCornerSizeSeekBar);
-        mCBCornerSizeValue = (TextView) lp.findViewById(R.id.colorBorderCornerValue);
-        mCBSizeSeekBar = (SeekBar) lp.findViewById(R.id.colorBorderSizeSeekBar);
-
-        mCBSizeValue = (TextView) lp.findViewById(R.id.colorBorderSizeValue);
-        setupCBSizeSeekBar(lp);
-        setupCBCornerSizeSeekBar(lp);
-        setupColor(lp, res);
-    }
-
     private void setupCBSizeSeekBar(LinearLayout lp) {
         mCBSizeSeekBar.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
             @Override
             public void onStopTrackingTouch(SeekBar seekBar) {
             }
+
             @Override
             public void onStartTrackingTouch(SeekBar seekBar) {
             }
+
             @Override
             public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
                 int type = FilterColorBorderRepresentation.PARAM_SIZE;
@@ -132,9 +133,11 @@ public class EditorColorBorderTabletUI {
             @Override
             public void onStopTrackingTouch(SeekBar seekBar) {
             }
+
             @Override
             public void onStartTrackingTouch(SeekBar seekBar) {
             }
+
             @Override
             public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
                 int type = FilterColorBorderRepresentation.PARAM_RADIUS;
@@ -148,18 +151,18 @@ public class EditorColorBorderTabletUI {
     }
 
     private void setupColor(LinearLayout lp, Resources res) {
-        final LinearLayout ctls = (LinearLayout) lp.findViewById(R.id.controls);
-        final LinearLayout pick = (LinearLayout) lp.findViewById(R.id.colorPicker);
-        Button b = (Button) lp.findViewById(R.id.draw_color_popupbutton);
+        final LinearLayout ctls = lp.findViewById(R.id.controls);
+        final LinearLayout pick = lp.findViewById(R.id.colorPicker);
+        Button b = lp.findViewById(R.id.draw_color_popupbutton);
         b.setOnClickListener(new View.OnClickListener() {
 
-            @Override
-            public void onClick(View view) {
-                boolean b = ctls.getVisibility() == View.VISIBLE;
-                ctls.setVisibility((b) ? View.GONE : View.VISIBLE);
-                pick.setVisibility((!b) ? View.GONE : View.VISIBLE);
-            }
-        }
+                                 @Override
+                                 public void onClick(View view) {
+                                     boolean b = ctls.getVisibility() == View.VISIBLE;
+                                     ctls.setVisibility((b) ? View.GONE : View.VISIBLE);
+                                     pick.setVisibility((!b) ? View.GONE : View.VISIBLE);
+                                 }
+                             }
         );
 
         mTransparent = res.getColor(R.color.color_chooser_unslected_border);
@@ -167,7 +170,7 @@ public class EditorColorBorderTabletUI {
 
         mColorButton = new Button[ids.length];
         for (int i = 0; i < ids.length; i++) {
-            mColorButton[i] = (Button) lp.findViewById(ids[i]);
+            mColorButton[i] = lp.findViewById(ids[i]);
             float[] hsvo = new float[4];
             Color.colorToHSV(mBasColors[i], hsvo);
             hsvo[3] = (0xFF & (mBasColors[i] >> 24)) / (float) 255;
@@ -197,10 +200,10 @@ public class EditorColorBorderTabletUI {
                 }
             });
         }
-        mHueView = (ColorHueView) lp.findViewById(R.id.ColorHueView);
-        mSatValView = (ColorSVRectView) lp.findViewById(R.id.colorRectView);
-        mOpacityView = (ColorOpacityView) lp.findViewById(R.id.colorOpacityView);
-        mColorCompareView = (ColorCompareView) lp.findViewById(R.id.btnSelect);
+        mHueView = lp.findViewById(R.id.ColorHueView);
+        mSatValView = lp.findViewById(R.id.colorRectView);
+        mOpacityView = lp.findViewById(R.id.colorOpacityView);
+        mColorCompareView = lp.findViewById(R.id.btnSelect);
 
         float[] hsvo = new float[4];
         Color.colorToHSV(mBasColors[0], hsvo);
@@ -234,6 +237,7 @@ public class EditorColorBorderTabletUI {
                 pram.setValue(color);
                 mEditorDraw.commitLocalRepresentation();
             }
+
             @Override
             public void addColorListener(ColorListener l) {
             }

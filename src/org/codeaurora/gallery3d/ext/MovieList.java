@@ -7,10 +7,9 @@ import java.util.ArrayList;
 public class MovieList implements IMovieList {
     private static final String TAG = "MovieList";
     private static final boolean LOG = true;
-    
-    private final ArrayList<IMovieItem> mItems = new ArrayList<IMovieItem>();
     private static final int UNKNOWN = -1;
-    
+    private final ArrayList<IMovieItem> mItems = new ArrayList<IMovieItem>();
+
     @Override
     public void add(IMovieItem item) {
         if (LOG) {
@@ -18,7 +17,7 @@ public class MovieList implements IMovieList {
         }
         mItems.add(item);
     }
-    
+
     @Override
     public int index(IMovieItem item) {
         int find = UNKNOWN;
@@ -34,12 +33,12 @@ public class MovieList implements IMovieList {
         }
         return find;
     }
-    
+
     @Override
     public int size() {
         return mItems.size();
     }
-    
+
     @Override
     public IMovieItem getNext(IMovieItem item) {
         IMovieItem next = null;
@@ -49,7 +48,7 @@ public class MovieList implements IMovieList {
         }
         return next;
     }
-    
+
     @Override
     public IMovieItem getPrevious(IMovieItem item) {
         IMovieItem prev = null;

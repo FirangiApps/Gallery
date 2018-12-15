@@ -34,26 +34,21 @@ public class TrimTimeBar extends TimeBar {
     public static final int SCRUBBER_START = 1;
     public static final int SCRUBBER_CURRENT = 2;
     public static final int SCRUBBER_END = 3;
-
+    private final Bitmap mTrimStartScrubber;
+    private final Bitmap mTrimEndScrubber;
     private int mPressedThumb = SCRUBBER_NONE;
-
     // On touch event, the setting order is Scrubber Position -> Time ->
     // PlayedBar. At the setTimes(), activity can update the Time directly, then
     // PlayedBar will be updated too.
     private int mTrimStartScrubberLeft;
     private int mTrimEndScrubberLeft;
-
     private int mTrimStartScrubberTop;
     private int mTrimEndScrubberTop;
-
     private int mTrimStartTime;
     private int mTrimEndTime;
-
     private int mTimeBarMargin;
     private int mTimeBarTimeMargin;
 
-    private final Bitmap mTrimStartScrubber;
-    private final Bitmap mTrimEndScrubber;
     public TrimTimeBar(Context context, Listener listener) {
         super(context, listener);
 
@@ -129,7 +124,7 @@ public class TrimTimeBar extends TimeBar {
 
     @Override
     public void setTime(int currentTime, int totalTime,
-            int trimStartTime, int trimEndTime) {
+                        int trimStartTime, int trimEndTime) {
         if (mCurrentTime == currentTime && mTotalTime == totalTime
                 && mTrimStartTime == trimStartTime && mTrimEndTime == trimEndTime) {
             return;
@@ -199,18 +194,18 @@ public class TrimTimeBar extends TimeBar {
         canvas.drawRect(mProgressBar, mProgressPaint);
         canvas.drawRect(mPlayedBar, mPlayedPaint);
         if (mShowTimes) {
-                canvas.drawText(
-                        stringForTime(mCurrentTime),
-                        mTimeBarTimeMargin,
-                        mTimeBounds.height() + mVPaddingInPx / 2 + mScrubberPadding -
-                                mLayoutExt.getProgressOffset(mTimeBounds),
-                        mTimeTextPaint);
-                canvas.drawText(
-                        stringForTime(mTotalTime),
-                        getWidth() - mTimeBarTimeMargin,
-                        mTimeBounds.height() + mVPaddingInPx / 2 + mScrubberPadding -
-                                mLayoutExt.getProgressOffset(mTimeBounds),
-                        mTimeTextPaint);
+            canvas.drawText(
+                    stringForTime(mCurrentTime),
+                    mTimeBarTimeMargin,
+                    mTimeBounds.height() + mVPaddingInPx / 2 + mScrubberPadding -
+                            mLayoutExt.getProgressOffset(mTimeBounds),
+                    mTimeTextPaint);
+            canvas.drawText(
+                    stringForTime(mTotalTime),
+                    getWidth() - mTimeBarTimeMargin,
+                    mTimeBounds.height() + mVPaddingInPx / 2 + mScrubberPadding -
+                            mLayoutExt.getProgressOffset(mTimeBounds),
+                    mTimeTextPaint);
         }
 
         // draw extra scrubbers

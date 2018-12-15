@@ -27,7 +27,6 @@ import android.util.Log;
 import android.widget.RemoteViews;
 import android.widget.Toast;
 
-import org.codeaurora.gallery.R;
 import com.android.gallery3d.app.AlbumPicker;
 import com.android.gallery3d.app.DialogPicker;
 import com.android.gallery3d.app.GalleryApp;
@@ -39,20 +38,18 @@ import com.android.gallery3d.data.Path;
 import com.android.gallery3d.filtershow.crop.CropActivity;
 import com.android.gallery3d.filtershow.crop.CropExtras;
 
+import org.codeaurora.gallery.R;
+
 public class WidgetConfigure extends Activity {
+    public static final String KEY_WIDGET_TYPE = "widget-type";
+    public static final int RESULT_ERROR = RESULT_FIRST_USER;
     @SuppressWarnings("unused")
     private static final String TAG = "WidgetConfigure";
-
-    public static final String KEY_WIDGET_TYPE = "widget-type";
     private static final String KEY_PICKED_ITEM = "picked-item";
-
     private static final int REQUEST_WIDGET_TYPE = 1;
     private static final int REQUEST_CHOOSE_ALBUM = 2;
     private static final int REQUEST_CROP_IMAGE = 3;
     private static final int REQUEST_GET_PHOTO = 4;
-
-    public static final int RESULT_ERROR = RESULT_FIRST_USER;
-
     // Scale up the widget size since we only specified the minimized
     // size of the gadget. The real size could be larger.
     // Note: There is also a limit on the size of data that can be
@@ -125,7 +122,7 @@ public class WidgetConfigure extends Activity {
 
     private void setPhotoWidget(Intent data) {
         // Store the cropped photo in our database
-        Bitmap bitmap = (Bitmap) data.getParcelableExtra("data");
+        Bitmap bitmap = data.getParcelableExtra("data");
         WidgetDatabaseHelper helper = new WidgetDatabaseHelper(this);
         try {
             helper.setPhoto(mAppWidgetId, mPickedItem, bitmap);

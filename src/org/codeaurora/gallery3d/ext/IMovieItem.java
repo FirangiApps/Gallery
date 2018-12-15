@@ -12,19 +12,28 @@ public interface IMovieItem {
     Uri getUri();
 
     /**
+     * set video Uri
+     *
+     * @param uri
+     */
+    void setUri(Uri uri);
+
+    /**
      * @return MIME type of video
      */
     String getMimeType();
 
     /**
+     * Set MIME type of video
+     *
+     * @param mimeType
+     */
+    void setMimeType(String mimeType);
+
+    /**
      * @return title of video
      */
     String getTitle();
-
-    /**
-     * @return whether error occured or not.
-     */
-    boolean getError();
 
     /**
      * set title of video
@@ -34,18 +43,9 @@ public interface IMovieItem {
     void setTitle(String title);
 
     /**
-     * set video Uri
-     *
-     * @param uri
+     * @return whether error occured or not.
      */
-    void setUri(Uri uri);
-
-    /**
-     * Set MIME type of video
-     *
-     * @param mimeType
-     */
-    void setMimeType(String mimeType);
+    boolean getError();
 
     /**
      * Set error occured flag

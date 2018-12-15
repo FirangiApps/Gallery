@@ -40,7 +40,6 @@ import android.util.Log;
 import android.view.WindowManager;
 import android.widget.Toast;
 
-import org.codeaurora.gallery.R;
 import com.android.gallery3d.app.GalleryActivity;
 import com.android.gallery3d.app.PackagesMonitor;
 import com.android.gallery3d.common.ApiHelper;
@@ -50,22 +49,22 @@ import com.android.gallery3d.ui.TiledScreenNail;
 import com.android.gallery3d.util.ThreadPool.CancelListener;
 import com.android.gallery3d.util.ThreadPool.JobContext;
 
+import org.codeaurora.gallery.R;
+
 import java.io.File;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Locale;
 
 public class GalleryUtils {
-    private static final String TAG = "GalleryUtils";
-    private static final String MAPS_PACKAGE_NAME = "com.google.android.apps.maps";
-    private static final String MAPS_CLASS_NAME = "com.google.android.maps.MapsActivity";
-    private static final String CAMERA_LAUNCHER_NAME = "com.android.camera.CameraLauncher";
-
     public static final String MIME_TYPE_IMAGE = "image/*";
     public static final String MIME_TYPE_VIDEO = "video/*";
     public static final String MIME_TYPE_PANORAMA360 = "application/vnd.google.panorama360+jpg";
     public static final String MIME_TYPE_ALL = "*/*";
-
+    private static final String TAG = "GalleryUtils";
+    private static final String MAPS_PACKAGE_NAME = "com.google.android.apps.maps";
+    private static final String MAPS_CLASS_NAME = "com.google.android.maps.MapsActivity";
+    private static final String CAMERA_LAUNCHER_NAME = "com.android.camera.CameraLauncher";
     private static final String DIR_TYPE_IMAGE = "vnd.android.cursor.dir/image";
     private static final String DIR_TYPE_VIDEO = "vnd.android.cursor.dir/video";
 
@@ -74,10 +73,13 @@ public class GalleryUtils {
 
     private static final String KEY_CAMERA_UPDATE = "camera-update";
     private static final String KEY_HAS_CAMERA = "has-camera";
-
+    private static final double RAD_PER_DEG = Math.PI / 180.0;
+    private static final double EARTH_RADIUS_METERS = 6367000.0;
     private static float sPixelDensity = -1f;
     private static boolean sCameraAvailableInitialized = false;
     private static boolean sCameraAvailable;
+    private static volatile Thread sCurrentThread;
+    private static volatile boolean sWarned;
 
     public static void initialize(Context context) {
         DisplayMetrics metrics = new DisplayMetrics();
@@ -100,13 +102,16 @@ public class GalleryUtils {
     }
 
     public static float[] intColorToFloatARGBArray(int from) {
-        return new float[] {
-            Color.alpha(from) / 255f,
-            Color.red(from) / 255f,
-            Color.green(from) / 255f,
-            Color.blue(from) / 255f
+        return new float[]{
+                Color.alpha(from) / 255f,
+                Color.red(from) / 255f,
+                Color.green(from) / 255f,
+                Color.blue(from) / 255f
         };
     }
+
+    // Below are used the detect using database in the render thread. It only
+    // works most of the time, but that's ok because it's for debugging only.
 
     public static float dpToPixel(float dp) {
         return sPixelDensity * dp;
@@ -131,12 +136,6 @@ public class GalleryUtils {
         return result;
     }
 
-    // Below are used the detect using database in the render thread. It only
-    // works most of the time, but that's ok because it's for debugging only.
-
-    private static volatile Thread sCurrentThread;
-    private static volatile boolean sWarned;
-
     public static void setRenderThread() {
         sCurrentThread = Thread.currentThread();
     }
@@ -150,34 +149,31 @@ public class GalleryUtils {
         }
     }
 
-    private static final double RAD_PER_DEG = Math.PI / 180.0;
-    private static final double EARTH_RADIUS_METERS = 6367000.0;
-
     public static double fastDistanceMeters(double latRad1, double lngRad1,
-            double latRad2, double lngRad2) {
-       if ((Math.abs(latRad1 - latRad2) > RAD_PER_DEG)
-             || (Math.abs(lngRad1 - lngRad2) > RAD_PER_DEG)) {
-           return accurateDistanceMeters(latRad1, lngRad1, latRad2, lngRad2);
-       }
-       // Approximate sin(x) = x.
-       double sineLat = (latRad1 - latRad2);
+                                            double latRad2, double lngRad2) {
+        if ((Math.abs(latRad1 - latRad2) > RAD_PER_DEG)
+                || (Math.abs(lngRad1 - lngRad2) > RAD_PER_DEG)) {
+            return accurateDistanceMeters(latRad1, lngRad1, latRad2, lngRad2);
+        }
+        // Approximate sin(x) = x.
+        double sineLat = (latRad1 - latRad2);
 
-       // Approximate sin(x) = x.
-       double sineLng = (lngRad1 - lngRad2);
+        // Approximate sin(x) = x.
+        double sineLng = (lngRad1 - lngRad2);
 
-       // Approximate cos(lat1) * cos(lat2) using
-       // cos((lat1 + lat2)/2) ^ 2
-       double cosTerms = Math.cos((latRad1 + latRad2) / 2.0);
-       cosTerms = cosTerms * cosTerms;
-       double trigTerm = sineLat * sineLat + cosTerms * sineLng * sineLng;
-       trigTerm = Math.sqrt(trigTerm);
+        // Approximate cos(lat1) * cos(lat2) using
+        // cos((lat1 + lat2)/2) ^ 2
+        double cosTerms = Math.cos((latRad1 + latRad2) / 2.0);
+        cosTerms = cosTerms * cosTerms;
+        double trigTerm = sineLat * sineLat + cosTerms * sineLng * sineLng;
+        trigTerm = Math.sqrt(trigTerm);
 
-       // Approximate arcsin(x) = x
-       return EARTH_RADIUS_METERS * trigTerm;
+        // Approximate arcsin(x) = x
+        return EARTH_RADIUS_METERS * trigTerm;
     }
 
     public static double accurateDistanceMeters(double lat1, double lng1,
-            double lat2, double lng2) {
+                                                double lat2, double lng2) {
         double dlat = Math.sin(0.5 * (lat2 - lat1));
         double dlng = Math.sin(0.5 * (lng2 - lng1));
         double x = dlat * dlat + dlng * dlng * Math.cos(lat1) * Math.cos(lat2);
@@ -215,8 +211,8 @@ public class GalleryUtils {
             List<ResolveInfo> infos = packageManager.queryIntentActivities(
                     new Intent(Intent.ACTION_EDIT).setType(mimeType), 0);
             prefs.edit().putInt(updateKey, version)
-                        .putBoolean(hasKey, !infos.isEmpty())
-                        .commit();
+                    .putBoolean(hasKey, !infos.isEmpty())
+                    .commit();
         }
 
         return prefs.getBoolean(hasKey, true);
@@ -230,8 +226,8 @@ public class GalleryUtils {
             List<ResolveInfo> infos = packageManager.queryIntentActivities(
                     new Intent(MediaStore.INTENT_ACTION_STILL_IMAGE_CAMERA), 0);
             prefs.edit().putInt(KEY_CAMERA_UPDATE, version)
-                        .putBoolean(KEY_HAS_CAMERA, !infos.isEmpty())
-                        .commit();
+                    .putBoolean(KEY_HAS_CAMERA, !infos.isEmpty())
+                    .commit();
         }
         return prefs.getBoolean(KEY_HAS_CAMERA, true);
     }
@@ -262,7 +258,7 @@ public class GalleryUtils {
     public static void startGalleryActivity(Context context) {
         Intent intent = new Intent(context, GalleryActivity.class)
                 .setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP
-                | Intent.FLAG_ACTIVITY_NEW_TASK);
+                        | Intent.FLAG_ACTIVITY_NEW_TASK);
         context.startActivity(intent);
     }
 
@@ -272,7 +268,7 @@ public class GalleryUtils {
     }
 
     public static String formatLatitudeLongitude(String format, double latitude,
-            double longitude) {
+                                                 double longitude) {
         // We need to specify the locale otherwise it may go wrong in some language
         // (e.g. Locale.FRENCH)
         return String.format(Locale.ENGLISH, format, latitude, longitude);
@@ -300,7 +296,7 @@ public class GalleryUtils {
                 context.startActivity(mapsIntent);
             } catch (ActivityNotFoundException ex) {
                 Log.e(TAG, "Map view activity not found! url = " + url, ex);
-                ((Activity)context).runOnUiThread(new Runnable() {
+                ((Activity) context).runOnUiThread(new Runnable() {
                     @Override
                     public void run() {
                         Toast.makeText(context,
@@ -314,7 +310,7 @@ public class GalleryUtils {
     }
 
     public static void setViewPointMatrix(
-            float matrix[], float x, float y, float z) {
+            float[] matrix, float x, float y, float z) {
         // The matrix is
         // -z,  0,  x,  0
         //  0, -z,  y,  0
@@ -422,16 +418,17 @@ public class GalleryUtils {
         int h = item.getHeight();
         return (h > 0 && w / h >= 2);
     }
- // Newly added methods
+
+    // Newly added methods
     public static int getIntPref(Context context, String name, int def) {
         SharedPreferences prefs =
-            context.getSharedPreferences(context.getPackageName(), Context.MODE_PRIVATE);
+                context.getSharedPreferences(context.getPackageName(), Context.MODE_PRIVATE);
         return prefs.getInt(name, def);
     }
 
     public static void setIntPref(Context context, String name, int value) {
         SharedPreferences prefs =
-            context.getSharedPreferences(context.getPackageName(), Context.MODE_PRIVATE);
+                context.getSharedPreferences(context.getPackageName(), Context.MODE_PRIVATE);
         Editor ed = prefs.edit();
         ed.putInt(name, value);
         ed.commit();

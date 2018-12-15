@@ -21,8 +21,10 @@ import android.app.ActionBar;
 import android.app.ActionBar.OnMenuVisibilityListener;
 import android.app.AlertDialog;
 import android.app.KeyguardManager;
+import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothClass;
 import android.bluetooth.BluetoothDevice;
+import android.bluetooth.BluetoothProfile;
 import android.content.AsyncQueryHandler;
 import android.content.BroadcastReceiver;
 import android.content.ContentResolver;
@@ -30,26 +32,24 @@ import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.IntentFilter;
-import android.content.res.Configuration;
 import android.content.SharedPreferences;
 import android.content.pm.ActivityInfo;
+import android.content.res.Configuration;
 import android.database.Cursor;
-//import android.drm.DrmHelper;
 import android.graphics.Bitmap;
 import android.graphics.Color;
 import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.ColorDrawable;
 import android.media.AudioManager;
+import android.media.MediaPlayer;
 import android.media.audiofx.AudioEffect;
 import android.media.audiofx.AudioEffect.Descriptor;
 import android.media.audiofx.BassBoost;
 import android.media.audiofx.Virtualizer;
-import android.media.MediaPlayer;
 import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Build;
 import android.os.Bundle;
-//import android.os.SystemProperties;
 import android.provider.MediaStore;
 import android.provider.OpenableColumns;
 import android.view.Display;
@@ -64,86 +64,67 @@ import android.view.WindowManager;
 import android.widget.CompoundButton;
 import android.widget.ImageView;
 import android.widget.ShareActionProvider;
-import android.widget.ToggleButton;
 import android.widget.Toast;
+import android.widget.ToggleButton;
 
-import org.codeaurora.gallery.R;
 import com.android.gallery3d.common.ApiHelper;
 import com.android.gallery3d.common.Utils;
 import com.android.gallery3d.ui.Knob;
+
+import org.codeaurora.gallery.R;
 import org.codeaurora.gallery3d.ext.IActivityHooker;
 import org.codeaurora.gallery3d.ext.IMovieItem;
 import org.codeaurora.gallery3d.ext.MovieItem;
 import org.codeaurora.gallery3d.ext.MovieUtils;
 import org.codeaurora.gallery3d.video.ExtensionHelper;
 import org.codeaurora.gallery3d.video.MovieTitleHelper;
-import android.bluetooth.BluetoothAdapter;
-import android.bluetooth.BluetoothProfile;
+
+//import android.drm.DrmHelper;
+//import android.os.SystemProperties;
 
 /**
  * This activity plays a video from a specified URI.
- *
+ * <p>
  * The client of this activity can pass a logo bitmap in the intent (KEY_LOGO_BITMAP)
  * to set the action bar logo so the playback process looks more seamlessly integrated with
  * the original activity.
  */
 public class MovieActivity extends AbstractPermissionActivity {
+    public static final String KEY_LOGO_BITMAP = "logo-bitmap";
+    public static final String KEY_TREAT_UP_AS_BACK = "treat-up-as-back";
     @SuppressWarnings("unused")
-    private static final String  TAG = "MovieActivity";
+    private static final String TAG = "MovieActivity";
     private static final boolean LOG = true;
-    public  static final String  KEY_LOGO_BITMAP = "logo-bitmap";
-    public  static final String  KEY_TREAT_UP_AS_BACK = "treat-up-as-back";
-    private static final String  VIDEO_SDP_MIME_TYPE = "application/sdp";
-    private static final String  VIDEO_SDP_TITLE = "rtsp://";
-    private static final String  VIDEO_FILE_SCHEMA = "file";
-    private static final String  VIDEO_MIME_TYPE = "video/*";
-    private static final String  SHARE_HISTORY_FILE = "video_share_history_file";
-
-    private MoviePlayer mPlayer;
-    private boolean     mFinishOnCompletion;
-    private Uri         mUri;
-    private ImageView   mLiveImg;
-
-    private static final short BASSBOOST_MAX_STRENGTH   = 1000;
+    private static final String VIDEO_SDP_MIME_TYPE = "application/sdp";
+    private static final String VIDEO_SDP_TITLE = "rtsp://";
+    private static final String VIDEO_FILE_SCHEMA = "file";
+    private static final String VIDEO_MIME_TYPE = "video/*";
+    private static final String SHARE_HISTORY_FILE = "video_share_history_file";
+    private static final short BASSBOOST_MAX_STRENGTH = 1000;
     private static final short VIRTUALIZER_MAX_STRENGTH = 1000;
-
+    private MoviePlayer mPlayer;
+    private boolean mFinishOnCompletion;
+    private Uri mUri;
+    private ImageView mLiveImg;
     private boolean mIsHeadsetOn = false;
     private boolean mVirtualizerSupported = false;
     private boolean mBassBoostSupported = false;
+    private BassBoost mBassBoostEffect;
 
-    static enum Key {
-        global_enabled, bb_strength, virt_strength
-    };
-
-    private BassBoost   mBassBoostEffect;
     private Virtualizer mVirtualizerEffect;
     private AlertDialog mEffectDialog;
-    private ToggleButton mSwitch;
-    private Knob        mBassBoostKnob;
-    private Knob        mVirtualizerKnob;
-
-    private SharedPreferences   mPrefs;
-    private ShareActionProvider mShareProvider;
-    private IMovieItem          mMovieItem;
-    private IActivityHooker     mMovieHooker;
-    private KeyguardManager     mKeyguardManager;
-    private Bundle mSavedInstanceState;
-
-    private boolean mResumed        = false;
-    private boolean mControlResumed = false;
-
     private final BroadcastReceiver mReceiver = new BroadcastReceiver() {
         @Override
         public void onReceive(final Context context, final Intent intent) {
             final String action = intent.getAction();
             final AudioManager audioManager =
-                (AudioManager) getSystemService(Context.AUDIO_SERVICE);
+                    (AudioManager) getSystemService(Context.AUDIO_SERVICE);
             if (action.equals(Intent.ACTION_HEADSET_PLUG)) {
                 mIsHeadsetOn = (intent.getIntExtra("state", 0) == 1)
                         || audioManager.isBluetoothA2dpOn();
             } else if (action.equals(BluetoothDevice.ACTION_ACL_CONNECTED)
                     || action.equals(BluetoothDevice.ACTION_ACL_DISCONNECTED)) {
-                final BluetoothClass bc =  ((BluetoothDevice)
+                final BluetoothClass bc = ((BluetoothDevice)
                         intent.getParcelableExtra(BluetoothDevice.EXTRA_DEVICE))
                         .getBluetoothClass();
                 if (bc == null) return;
@@ -163,6 +144,45 @@ public class MovieActivity extends AbstractPermissionActivity {
                 }
             }
         }
+    };
+    private ToggleButton mSwitch;
+    private Knob mBassBoostKnob;
+    private Knob mVirtualizerKnob;
+
+    private SharedPreferences mPrefs;
+    private ShareActionProvider mShareProvider;
+    private IMovieItem mMovieItem;
+    private IActivityHooker mMovieHooker;
+    private KeyguardManager mKeyguardManager;
+    private Bundle mSavedInstanceState;
+
+    private boolean mResumed = false;
+    private boolean mControlResumed = false;
+    // we do not stop live streaming when other dialog overlays it.
+    private BroadcastReceiver mScreenReceiver = new BroadcastReceiver() {
+
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            Display display = getWindowManager().getDefaultDisplay();
+            if (LOG) {
+                Log.v(TAG, "onReceive(" + intent.getAction() + ") mControlResumed="
+                        + mControlResumed);
+            }
+            if (Intent.ACTION_SCREEN_OFF.equals(intent.getAction()) &&
+                    display.getState() == Display.STATE_OFF) {
+                // Only stop video.
+                if (mControlResumed) {
+                    mPlayer.onStop();
+                    mControlResumed = false;
+                }
+            } else if (Intent.ACTION_USER_PRESENT.equals(intent.getAction())) {
+                if (!mControlResumed) {
+                    mPlayer.onResume();
+                    mControlResumed = true;
+                }
+            }
+        }
+
     };
 
     @TargetApi(Build.VERSION_CODES.JELLY_BEAN)
@@ -186,7 +206,7 @@ public class MovieActivity extends AbstractPermissionActivity {
 
         setSystemUiVisibility(rootView);
 
-        mLiveImg = (ImageView) findViewById(R.id.img_live);
+        mLiveImg = findViewById(R.id.img_live);
 
         Intent intent = getIntent();
 
@@ -331,25 +351,25 @@ public class MovieActivity extends AbstractPermissionActivity {
             // interface: {@link android.provider.OpenableColumns#DISPLAY_NAME}.
             AsyncQueryHandler queryHandler =
                     new AsyncQueryHandler(getContentResolver()) {
-                @Override
-                protected void onQueryComplete(int token, Object cookie,
-                        Cursor cursor) {
-                    try {
-                        if ((cursor != null) && cursor.moveToFirst()) {
-                            String displayName = cursor.getString(0);
+                        @Override
+                        protected void onQueryComplete(int token, Object cookie,
+                                                       Cursor cursor) {
+                            try {
+                                if ((cursor != null) && cursor.moveToFirst()) {
+                                    String displayName = cursor.getString(0);
 
-                            // Just show empty title if other apps don't set
-                            // DISPLAY_NAME
-                            actionBar.setTitle((displayName == null) ? "" :
-                                    displayName);
+                                    // Just show empty title if other apps don't set
+                                    // DISPLAY_NAME
+                                    actionBar.setTitle((displayName == null) ? "" :
+                                            displayName);
+                                }
+                            } finally {
+                                Utils.closeSilently(cursor);
+                            }
                         }
-                    } finally {
-                        Utils.closeSilently(cursor);
-                    }
-                }
-            };
+                    };
             queryHandler.startQuery(0, null, mUri,
-                    new String[] {OpenableColumns.DISPLAY_NAME}, null, null,
+                    new String[]{OpenableColumns.DISPLAY_NAME}, null, null,
                     null);
         }
     }
@@ -408,7 +428,7 @@ public class MovieActivity extends AbstractPermissionActivity {
 
             boolean enabled = mPrefs.getBoolean(Key.global_enabled.toString(), false);
 
-            mSwitch = (ToggleButton) title.findViewById(R.id.audio_effects_switch);
+            mSwitch = title.findViewById(R.id.audio_effects_switch);
             mSwitch.setChecked(enabled);
             mSwitch.setButtonDrawable(enabled ?
                     R.drawable.switch_thumb_activated : R.drawable.switch_thumb_off);
@@ -418,10 +438,10 @@ public class MovieActivity extends AbstractPermissionActivity {
                 public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
                     mSwitch.setButtonDrawable(isChecked ?
                             R.drawable.switch_thumb_activated : R.drawable.switch_thumb_off);
-                    if(mBassBoostEffect != null) {
+                    if (mBassBoostEffect != null) {
                         mBassBoostEffect.setEnabled(isChecked);
                     }
-                    if(mVirtualizerEffect != null) {
+                    if (mVirtualizerEffect != null) {
                         mVirtualizerEffect.setEnabled(isChecked);
                     }
                     mBassBoostKnob.setEnabled(isChecked);
@@ -429,14 +449,14 @@ public class MovieActivity extends AbstractPermissionActivity {
                 }
             });
 
-            mBassBoostKnob = (Knob) content.findViewById(R.id.bBStrengthKnob);
+            mBassBoostKnob = content.findViewById(R.id.bBStrengthKnob);
             mBassBoostKnob.setEnabled(enabled);
             mBassBoostKnob.setMax(BASSBOOST_MAX_STRENGTH);
             mBassBoostKnob.setValue(mPrefs.getInt(Key.bb_strength.toString(), 0));
             mBassBoostKnob.setOnKnobChangeListener(new Knob.OnKnobChangeListener() {
                 @Override
                 public void onValueChanged(Knob knob, int value, boolean fromUser) {
-                    if(mBassBoostEffect != null) {
+                    if (mBassBoostEffect != null) {
                         mBassBoostEffect.setStrength((short) value);
                     }
                 }
@@ -447,14 +467,14 @@ public class MovieActivity extends AbstractPermissionActivity {
                 }
             });
 
-            mVirtualizerKnob = (Knob) content.findViewById(R.id.vIStrengthKnob);
+            mVirtualizerKnob = content.findViewById(R.id.vIStrengthKnob);
             mVirtualizerKnob.setEnabled(enabled);
             mVirtualizerKnob.setMax(VIRTUALIZER_MAX_STRENGTH);
             mVirtualizerKnob.setValue(mPrefs.getInt(Key.virt_strength.toString(), 0));
             mVirtualizerKnob.setOnKnobChangeListener(new Knob.OnKnobChangeListener() {
                 @Override
                 public void onValueChanged(Knob knob, int value, boolean fromUser) {
-                    if(mVirtualizerEffect != null) {
+                    if (mVirtualizerEffect != null) {
                         mVirtualizerEffect.setStrength((short) value);
                     }
                 }
@@ -467,37 +487,37 @@ public class MovieActivity extends AbstractPermissionActivity {
 
             mEffectDialog = new AlertDialog.Builder(MovieActivity.this,
                     AlertDialog.THEME_DEVICE_DEFAULT_LIGHT)
-                .setCustomTitle(title)
-                .setView(content)
-                .setPositiveButton(R.string.ok, new DialogInterface.OnClickListener() {
-                    @Override
-                    public void onClick(DialogInterface dialog, int which) {
-                        SharedPreferences.Editor editor = mPrefs.edit();
-                        editor.putBoolean(Key.global_enabled.toString(), mSwitch.isChecked());
-                        editor.putInt(Key.bb_strength.toString(), mBassBoostKnob.getValue());
-                        editor.putInt(Key.virt_strength.toString(),
-                                mVirtualizerKnob.getValue());
-                        editor.commit();
-                    }
-                })
-                .setNegativeButton(R.string.cancel, new DialogInterface.OnClickListener() {
-                    @Override
-                    public void onClick(DialogInterface dialog, int which) {
-                        boolean enabled = mPrefs.getBoolean(Key.global_enabled.toString(), false);
-                        if(mBassBoostEffect != null) {
-                            mBassBoostEffect.setStrength((short)
-                                    mPrefs.getInt(Key.bb_strength.toString(), 0));
-                            mBassBoostEffect.setEnabled(enabled);
+                    .setCustomTitle(title)
+                    .setView(content)
+                    .setPositiveButton(R.string.ok, new DialogInterface.OnClickListener() {
+                        @Override
+                        public void onClick(DialogInterface dialog, int which) {
+                            SharedPreferences.Editor editor = mPrefs.edit();
+                            editor.putBoolean(Key.global_enabled.toString(), mSwitch.isChecked());
+                            editor.putInt(Key.bb_strength.toString(), mBassBoostKnob.getValue());
+                            editor.putInt(Key.virt_strength.toString(),
+                                    mVirtualizerKnob.getValue());
+                            editor.commit();
                         }
-                        if(mVirtualizerEffect != null) {
-                            mVirtualizerEffect.setStrength((short)
-                                mPrefs.getInt(Key.virt_strength.toString(), 0));
-                            mVirtualizerEffect.setEnabled(enabled);
+                    })
+                    .setNegativeButton(R.string.cancel, new DialogInterface.OnClickListener() {
+                        @Override
+                        public void onClick(DialogInterface dialog, int which) {
+                            boolean enabled = mPrefs.getBoolean(Key.global_enabled.toString(), false);
+                            if (mBassBoostEffect != null) {
+                                mBassBoostEffect.setStrength((short)
+                                        mPrefs.getInt(Key.bb_strength.toString(), 0));
+                                mBassBoostEffect.setEnabled(enabled);
+                            }
+                            if (mVirtualizerEffect != null) {
+                                mVirtualizerEffect.setStrength((short)
+                                        mPrefs.getInt(Key.virt_strength.toString(), 0));
+                                mVirtualizerEffect.setEnabled(enabled);
+                            }
                         }
-                    }
-                })
-                .setCancelable(false)
-                .create();
+                    })
+                    .setCancelable(false)
+                    .create();
             mEffectDialog.show();
         }
     }
@@ -516,22 +536,22 @@ public class MovieActivity extends AbstractPermissionActivity {
             if (mPrefs.getBoolean(Key.global_enabled.toString(), false)) {
                 if (mBassBoostSupported) {
                     mBassBoostEffect.setStrength((short)
-                        mPrefs.getInt(Key.bb_strength.toString(), 0));
+                            mPrefs.getInt(Key.bb_strength.toString(), 0));
                     mBassBoostEffect.setEnabled(true);
                 }
                 if (mVirtualizerSupported) {
                     mVirtualizerEffect.setStrength((short)
-                        mPrefs.getInt(Key.virt_strength.toString(), 0));
+                            mPrefs.getInt(Key.virt_strength.toString(), 0));
                     mVirtualizerEffect.setEnabled(true);
                 }
             } else {
                 if (mBassBoostSupported) {
                     mBassBoostEffect.setStrength((short)
-                        mPrefs.getInt(Key.bb_strength.toString(), 0));
+                            mPrefs.getInt(Key.bb_strength.toString(), 0));
                 }
                 if (mVirtualizerSupported) {
                     mVirtualizerEffect.setStrength((short)
-                        mPrefs.getInt(Key.virt_strength.toString(), 0));
+                            mPrefs.getInt(Key.virt_strength.toString(), 0));
                 }
             }
         }
@@ -562,8 +582,8 @@ public class MovieActivity extends AbstractPermissionActivity {
     public boolean onOptionsItemSelected(MenuItem item) {
         int id = item.getItemId();
         if (id == android.R.id.home) {
-         // If click back up button, we will always finish current activity and
-         // back to previous one.
+            // If click back up button, we will always finish current activity and
+            // back to previous one.
             finish();
             return true;
         } else if (id == R.id.action_share) {
@@ -658,9 +678,9 @@ public class MovieActivity extends AbstractPermissionActivity {
     @Override
     public void onConfigurationChanged(Configuration newConfig) {
         super.onConfigurationChanged(newConfig);
-        if(this.getResources().getConfiguration().orientation == Configuration.ORIENTATION_LANDSCAPE ||
-            this.getResources().getConfiguration().orientation == Configuration.ORIENTATION_PORTRAIT) {
-            if(mPlayer != null) {
+        if (this.getResources().getConfiguration().orientation == Configuration.ORIENTATION_LANDSCAPE ||
+                this.getResources().getConfiguration().orientation == Configuration.ORIENTATION_PORTRAIT) {
+            if (mPlayer != null) {
                 mPlayer.setDefaultScreenMode();
             }
         }
@@ -668,12 +688,9 @@ public class MovieActivity extends AbstractPermissionActivity {
 
     private boolean isBtHeadsetConnected() {
         BluetoothAdapter adapter = BluetoothAdapter.getDefaultAdapter();
-        if (adapter != null)
-            {
-            if ((BluetoothProfile.STATE_CONNECTED == adapter.getProfileConnectionState(BluetoothProfile.HEADSET))
-            || (BluetoothProfile.STATE_CONNECTED == adapter.getProfileConnectionState(BluetoothProfile.A2DP))) {
-            return true;
-           }
+        if (adapter != null) {
+            return (BluetoothProfile.STATE_CONNECTED == adapter.getProfileConnectionState(BluetoothProfile.HEADSET))
+                    || (BluetoothProfile.STATE_CONNECTED == adapter.getProfileConnectionState(BluetoothProfile.A2DP));
         }
         return false;
     }
@@ -727,8 +744,9 @@ public class MovieActivity extends AbstractPermissionActivity {
         String scheme = mUri.getScheme();
         return ContentResolver.SCHEME_FILE.equals(scheme)
                 || (ContentResolver.SCHEME_CONTENT.equals(scheme) && MediaStore.AUTHORITY
-                        .equals(mUri.getAuthority()));
+                .equals(mUri.getAuthority()));
     }
+
     private void initMovieInfo(Intent intent) {
         Uri original = intent.getData();
         String mimeType = intent.getType();
@@ -740,33 +758,6 @@ public class MovieActivity extends AbstractPermissionActivity {
         }
         mMovieItem.setOriginalUri(original);
     }
-
-    // we do not stop live streaming when other dialog overlays it.
-    private BroadcastReceiver mScreenReceiver = new BroadcastReceiver() {
-
-        @Override
-        public void onReceive(Context context, Intent intent) {
-            Display display = getWindowManager().getDefaultDisplay();
-            if (LOG) {
-                Log.v(TAG, "onReceive(" + intent.getAction() + ") mControlResumed="
-                        + mControlResumed);
-            }
-            if (Intent.ACTION_SCREEN_OFF.equals(intent.getAction()) &&
-                    display.getState() == Display.STATE_OFF) {
-                // Only stop video.
-                if (mControlResumed) {
-                    mPlayer.onStop();
-                    mControlResumed = false;
-                }
-            } else if (Intent.ACTION_USER_PRESENT.equals(intent.getAction())) {
-                if (!mControlResumed) {
-                    mPlayer.onResume();
-                    mControlResumed = true;
-                }
-            }
-        }
-
-    };
 
     private void registerScreenReceiver() {
         IntentFilter filter = new IntentFilter();
@@ -851,7 +842,8 @@ public class MovieActivity extends AbstractPermissionActivity {
                 if (movieItem == mMovieItem) {
                     setActionBarTitle(result);
                 }
-            };
+            }
+
         }.execute();
         if (LOG) {
             Log.v(TAG, "enhanceActionBar() " + mMovieItem);
@@ -867,13 +859,19 @@ public class MovieActivity extends AbstractPermissionActivity {
             actionBar.setTitle(title);
         }
     }
+
     @Override
     public void onBackPressed() {
         finishActivity();
     }
-    private void finishActivity(){
+
+    private void finishActivity() {
         MovieActivity.this.finish();
-        overridePendingTransition(0,0);
+        overridePendingTransition(0, 0);
         return;
+    }
+
+    enum Key {
+        global_enabled, bb_strength, virt_strength
     }
 }

@@ -34,10 +34,7 @@ import com.android.gallery3d.filtershow.pipeline.ImagePreset;
 public class ImageFilterTinyPlanet extends SimpleImageFilter {
 
 
-    private static final String LOGTAG = ImageFilterTinyPlanet.class.getSimpleName();
     public static final String GOOGLE_PANO_NAMESPACE = "http://ns.google.com/photos/1.0/panorama/";
-    FilterTinyPlanetRepresentation mParameters = new FilterTinyPlanetRepresentation();
-
     public static final String CROPPED_AREA_IMAGE_WIDTH_PIXELS =
             "CroppedAreaImageWidthPixels";
     public static final String CROPPED_AREA_IMAGE_HEIGHT_PIXELS =
@@ -50,9 +47,19 @@ public class ImageFilterTinyPlanet extends SimpleImageFilter {
             "CroppedAreaLeftPixels";
     public static final String CROPPED_AREA_TOP =
             "CroppedAreaTopPixels";
+    private static final String LOGTAG = ImageFilterTinyPlanet.class.getSimpleName();
+    FilterTinyPlanetRepresentation mParameters = new FilterTinyPlanetRepresentation();
 
     public ImageFilterTinyPlanet() {
         mName = "TinyPlanet";
+    }
+
+    private static int getInt(XMPMeta xmp, String key) throws XMPException {
+        if (xmp.doesPropertyExist(GOOGLE_PANO_NAMESPACE, key)) {
+            return xmp.getPropertyInteger(GOOGLE_PANO_NAMESPACE, key);
+        } else {
+            return 0;
+        }
     }
 
     @Override
@@ -66,11 +73,9 @@ public class ImageFilterTinyPlanet extends SimpleImageFilter {
         return new FilterTinyPlanetRepresentation();
     }
 
-
     native protected void nativeApplyFilter(
             Bitmap bitmapIn, int width, int height, Bitmap bitmapOut, int outSize, float scale,
             float angle);
-
 
     @Override
     public Bitmap apply(Bitmap bitmapIn, float scaleFactor, int quality) {
@@ -82,7 +87,7 @@ public class ImageFilterTinyPlanet extends SimpleImageFilter {
         if (preset != null) {
             XMPMeta xmp = ImageLoader.getXmpObject(MasterImage.getImage().getActivity());
             // Do nothing, just use bitmapIn as is if we don't have XMP.
-            if(xmp != null) {
+            if (xmp != null) {
                 bitmapIn = applyXmp(bitmapIn, xmp, w);
             }
         }
@@ -148,13 +153,5 @@ public class ImageFilterTinyPlanet extends SimpleImageFilter {
             // Do nothing, just use bitmapIn as is.
         }
         return bitmapIn;
-    }
-
-    private static int getInt(XMPMeta xmp, String key) throws XMPException {
-        if (xmp.doesPropertyExist(GOOGLE_PANO_NAMESPACE, key)) {
-            return xmp.getPropertyInteger(GOOGLE_PANO_NAMESPACE, key);
-        } else {
-            return 0;
-        }
     }
 }

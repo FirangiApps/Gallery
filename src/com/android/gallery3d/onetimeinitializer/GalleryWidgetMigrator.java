@@ -38,7 +38,7 @@ import java.util.HashMap;
 import java.util.List;
 
 /**
- * This one-timer migrates local-album gallery app widgets from old paths from prior releases 
+ * This one-timer migrates local-album gallery app widgets from old paths from prior releases
  * to updated paths in the current build version. This migration is needed because of
  * bucket ID (i.e., directory hash) change in JB and JB MR1 (The external storage path has changed
  * from /mnt/sdcard in pre-JB releases, to /storage/sdcard0 in JB, then again
@@ -104,7 +104,7 @@ public class GalleryWidgetMigrator {
     }
 
     private static void migrateLocalEntries(Context context,
-            HashMap<Integer, Entry> entries, WidgetDatabaseHelper dbHelper) {
+                                            HashMap<Integer, Entry> entries, WidgetDatabaseHelper dbHelper) {
         SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(context);
         String oldExtPath = prefs.getString(KEY_EXT_PATH, null);
         if (oldExtPath != null) {
@@ -121,15 +121,16 @@ public class GalleryWidgetMigrator {
     }
 
     private static void migrateLocalEntries(HashMap<Integer, Entry> entries,
-             WidgetDatabaseHelper dbHelper, String oldExtPath) {
+                                            WidgetDatabaseHelper dbHelper, String oldExtPath) {
         File root = Environment.getExternalStorageDirectory();
         // check the DCIM directory first; this should take care of 99% use cases
         updatePath(new File(root, "DCIM"), entries, dbHelper, oldExtPath);
         // check other directories if DCIM doesn't cut it
         if (!entries.isEmpty()) updatePath(root, entries, dbHelper, oldExtPath);
     }
+
     private static void updatePath(File root, HashMap<Integer, Entry> entries,
-            WidgetDatabaseHelper dbHelper, String oldExtStorage) {
+                                   WidgetDatabaseHelper dbHelper, String oldExtStorage) {
         File[] files = root.listFiles();
         if (files != null) {
             for (File file : files) {

@@ -20,26 +20,27 @@ import android.animation.LayoutTransition;
 import android.content.Context;
 import android.content.res.TypedArray;
 import android.database.DataSetObserver;
-import android.graphics.Canvas;
 import android.graphics.Point;
 import android.graphics.Rect;
 import android.util.AttributeSet;
-import android.util.Log;
 import android.view.GestureDetector;
 import android.view.MotionEvent;
 import android.view.View;
-import android.view.ViewGroup;
 import android.widget.Adapter;
 import android.widget.LinearLayout;
-import org.codeaurora.gallery.R;
+
 import com.android.gallery3d.filtershow.FilterShowActivity;
 import com.android.gallery3d.filtershow.editors.ImageOnlyEditor;
 import com.android.gallery3d.filtershow.filters.FilterRepresentation;
 import com.android.gallery3d.filtershow.imageshow.MasterImage;
 
+import org.codeaurora.gallery.R;
+
 public class StatePanelTrack extends LinearLayout implements PanelTrack {
 
     private static final String LOGTAG = "StatePanelTrack";
+    private static final boolean ALLOWS_DRAG = false;
+    private static final boolean ALLOWS_DUPLICATES = false;
     private Point mTouchPoint;
     private StateView mCurrentView;
     private StateView mCurrentSelectedView;
@@ -57,8 +58,6 @@ public class StatePanelTrack extends LinearLayout implements PanelTrack {
     private int mEndElemHeight;
     private long mTouchTime;
     private int mMaxTouchDelay = 300; // 300ms delay for touch
-    private static final boolean ALLOWS_DRAG = false;
-    private static final boolean ALLOWS_DUPLICATES = false;
     private DataSetObserver mObserver = new DataSetObserver() {
         @Override
         public void onChanged() {
@@ -90,11 +89,12 @@ public class StatePanelTrack extends LinearLayout implements PanelTrack {
             mEndElemHeight = mElemEndSize;
         }
         GestureDetector.SimpleOnGestureListener simpleOnGestureListener
-                = new GestureDetector.SimpleOnGestureListener(){
+                = new GestureDetector.SimpleOnGestureListener() {
             @Override
             public void onLongPress(MotionEvent e) {
                 longPress(e);
             }
+
             @Override
             public boolean onDoubleTap(MotionEvent e) {
                 addDuplicate(e);
@@ -130,14 +130,6 @@ public class StatePanelTrack extends LinearLayout implements PanelTrack {
             StateView stateView = (StateView) view;
             stateView.setDuplicateButton(true);
         }
-    }
-
-    public void setAdapter(StateAdapter adapter) {
-        mAdapter = adapter;
-        mAdapter.registerDataSetObserver(mObserver);
-        mAdapter.setOrientation(getOrientation());
-        fillContent(false);
-        requestLayout();
     }
 
     public StateView findChildWithState(State state) {
@@ -214,10 +206,7 @@ public class StatePanelTrack extends LinearLayout implements PanelTrack {
 
     @Override
     public boolean onInterceptTouchEvent(MotionEvent event) {
-        if (mCurrentView != null) {
-            return true;
-        }
-        return false;
+        return mCurrentView != null;
     }
 
     @Override
@@ -354,5 +343,13 @@ public class StatePanelTrack extends LinearLayout implements PanelTrack {
 
     public Adapter getAdapter() {
         return mAdapter;
+    }
+
+    public void setAdapter(StateAdapter adapter) {
+        mAdapter = adapter;
+        mAdapter.registerDataSetObserver(mObserver);
+        mAdapter.setOrientation(getOrientation());
+        fillContent(false);
+        requestLayout();
     }
 }

@@ -37,9 +37,16 @@ import java.lang.reflect.Method;
 public final class HttpClientFactory {
     // TODO: migrate GDataClient to use this util method instead of apache's
     // DefaultHttpClient.
+
+    private static String sUserAgent = null;
+
+    private HttpClientFactory() {
+    }
+
     /**
      * Creates an HttpClient with the userAgent string constructed from the
      * package name contained in the context.
+     *
      * @return the client
      */
     public static HttpClient newHttpClient(Context context) {
@@ -48,6 +55,7 @@ public final class HttpClientFactory {
 
     /**
      * Creates an HttpClient with the specified userAgent string.
+     *
      * @param userAgent the userAgent string
      * @return the client
      */
@@ -103,8 +111,6 @@ public final class HttpClientFactory {
         }
     }
 
-    private static String sUserAgent = null;
-
     private static String getUserAgent(Context context) {
         if (sUserAgent == null) {
             PackageInfo pi;
@@ -126,8 +132,5 @@ public final class HttpClientFactory {
                     Build.VERSION.INCREMENTAL);
         }
         return sUserAgent;
-    }
-
-    private HttpClientFactory() {
     }
 }

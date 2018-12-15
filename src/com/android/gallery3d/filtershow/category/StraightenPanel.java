@@ -37,8 +37,6 @@ import android.view.View;
 import com.android.gallery3d.filtershow.FilterShowActivity;
 import com.android.gallery3d.filtershow.editors.Editor;
 
-import org.codeaurora.gallery.R;
-
 public class StraightenPanel extends BasicGeometryPanel {
     public static final String EDITOR_ID = "editor_id";
     public static final String EDITOR_NAME = "editor_name";

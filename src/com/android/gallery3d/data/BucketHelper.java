@@ -95,7 +95,7 @@ class BucketHelper {
     }
 
     private static void updateBucketEntriesFromTable(JobContext jc,
-            ContentResolver resolver, Uri tableUri, HashMap<Integer, BucketEntry> buckets) {
+                                                     ContentResolver resolver, Uri tableUri, HashMap<Integer, BucketEntry> buckets) {
         Cursor cursor = resolver.query(tableUri, PROJECTION_BUCKET_IN_ONE_TABLE,
                 BUCKET_GROUP_BY_IN_ONE_TABLE, null, null);
         if (cursor == null) {
@@ -181,7 +181,7 @@ class BucketHelper {
 
     private static String getBucketNameInTable(
             ContentResolver resolver, Uri tableUri, int bucketId) {
-        String selectionArgs[] = new String[] {String.valueOf(bucketId)};
+        String[] selectionArgs = new String[]{String.valueOf(bucketId)};
         Uri uri = tableUri.buildUpon()
                 .appendQueryParameter("limit", "1")
                 .build();

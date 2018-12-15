@@ -32,12 +32,13 @@ import android.view.MenuItem;
 import android.view.Window;
 import android.view.WindowManager;
 
-import org.codeaurora.gallery.R;
 import com.android.gallery3d.anim.StateTransitionAnimation;
 import com.android.gallery3d.glrenderer.RawTexture;
 import com.android.gallery3d.ui.GLView;
 import com.android.gallery3d.ui.PreparePageFadeoutTexture;
 import com.android.gallery3d.util.GalleryUtils;
+
+import org.codeaurora.gallery.R;
 
 abstract public class ActivityState {
     protected static final int FLAG_HIDE_ACTION_BAR = 1;
@@ -47,26 +48,30 @@ abstract public class ActivityState {
     protected static final int FLAG_ALLOW_LOCK_WHILE_SCREEN_ON = 16;
     protected static final int FLAG_SHOW_WHEN_LOCKED = 32;
     protected static final int FLAG_SCREEN_FULL = 64;
-
+    private static final String KEY_TRANSITION_IN = "transition-in";
     protected AbstractGalleryActivity mActivity;
     protected Bundle mData;
     protected int mFlags;
-
     protected ResultEntry mReceivedResults;
     protected ResultEntry mResult;
-
-    protected static class ResultEntry {
-        public int requestCode;
-        public int resultCode = Activity.RESULT_CANCELED;
-        public Intent resultData;
-    }
-
+    protected float[] mBackgroundColor;
+    boolean mIsFinishing = false;
     private boolean mDestroyed = false;
     private boolean mPlugged = false;
-    boolean mIsFinishing = false;
+    BroadcastReceiver mPowerIntentReceiver = new BroadcastReceiver() {
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            final String action = intent.getAction();
+            if (Intent.ACTION_BATTERY_CHANGED.equals(action)) {
+                boolean plugged = (0 != intent.getIntExtra(BatteryManager.EXTRA_PLUGGED, 0));
 
-    private static final String KEY_TRANSITION_IN = "transition-in";
-
+                if (plugged != mPlugged) {
+                    mPlugged = plugged;
+                    setScreenFlags();
+                }
+            }
+        }
+    };
     private StateTransitionAnimation.Transition mNextTransition =
             StateTransitionAnimation.Transition.None;
     private StateTransitionAnimation mIntroAnimation;
@@ -113,8 +118,6 @@ abstract public class ActivityState {
     protected void onStateResult(int requestCode, int resultCode, Intent data) {
     }
 
-    protected float[] mBackgroundColor;
-
     protected int getBackgroundColorId() {
         return R.color.default_background;
     }
@@ -130,21 +133,6 @@ abstract public class ActivityState {
 
     protected void clearStateResult() {
     }
-
-    BroadcastReceiver mPowerIntentReceiver = new BroadcastReceiver() {
-        @Override
-        public void onReceive(Context context, Intent intent) {
-            final String action = intent.getAction();
-            if (Intent.ACTION_BATTERY_CHANGED.equals(action)) {
-                boolean plugged = (0 != intent.getIntExtra(BatteryManager.EXTRA_PLUGGED, 0));
-
-                if (plugged != mPlugged) {
-                    mPlugged = plugged;
-                    setScreenFlags();
-                }
-            }
-        }
-    };
 
     private void setScreenFlags() {
         final Window win = mActivity.getWindow();
@@ -175,7 +163,7 @@ abstract public class ActivityState {
     }
 
     protected void transitionOnNextPause(Class<? extends ActivityState> outgoing,
-            Class<? extends ActivityState> incoming, StateTransitionAnimation.Transition hint) {
+                                         Class<? extends ActivityState> incoming, StateTransitionAnimation.Transition hint) {
         if (outgoing == SinglePhotoPage.class && incoming == AlbumPage.class) {
             mNextTransition = StateTransitionAnimation.Transition.Outgoing;
         } else if (outgoing == AlbumPage.class && incoming == SinglePhotoPage.class) {
@@ -192,7 +180,7 @@ abstract public class ActivityState {
 
     protected void onPause() {
         if (0 != (mFlags & FLAG_SCREEN_ON_WHEN_PLUGGED)) {
-            ((Activity) mActivity).unregisterReceiver(mPowerIntentReceiver);
+            mActivity.unregisterReceiver(mPowerIntentReceiver);
         }
         if (mNextTransition != StateTransitionAnimation.Transition.None) {
             mActivity.getTransitionStore().put(KEY_TRANSITION_IN, mNextTransition);
@@ -276,5 +264,11 @@ abstract public class ActivityState {
 
     protected MenuInflater getSupportMenuInflater() {
         return mActivity.getMenuInflater();
+    }
+
+    protected static class ResultEntry {
+        public int requestCode;
+        public int resultCode = Activity.RESULT_CANCELED;
+        public Intent resultData;
     }
 }

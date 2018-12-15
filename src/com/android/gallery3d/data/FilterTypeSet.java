@@ -30,7 +30,7 @@ public class FilterTypeSet extends MediaSet implements ContentListener {
     private final ArrayList<MediaSet> mAlbums = new ArrayList<MediaSet>();
 
     public FilterTypeSet(Path path, DataManager dataManager, MediaSet baseSet,
-            int mediaType) {
+                         int mediaType) {
         super(path, INVALID_DATA_VERSION);
         mDataManager = dataManager;
         mBaseSet = baseSet;
@@ -92,8 +92,8 @@ public class FilterTypeSet extends MediaSet implements ContentListener {
             String filteredPath = basePath + "/{" + set.getPath().toString() + "}";
             MediaSet filteredSet = mDataManager.getMediaSet(filteredPath);
             filteredSet.reload();
-            if (filteredSet instanceof FilterTypeSet && ((FilterTypeSet)filteredSet).getPaths() != null) {
-                mPaths.addAll(((FilterTypeSet)filteredSet).getPaths());
+            if (filteredSet instanceof FilterTypeSet && ((FilterTypeSet) filteredSet).getPaths() != null) {
+                mPaths.addAll(((FilterTypeSet) filteredSet).getPaths());
             }
             if (filteredSet.getMediaItemCount() > 0
                     || filteredSet.getSubMediaSetCount() > 0) {

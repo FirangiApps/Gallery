@@ -35,6 +35,9 @@ import org.codeaurora.gallery.R;
 import java.util.ArrayList;
 
 public class ColorRectView extends View implements ColorListener {
+    public final static float DOT_SIZE = 20;
+    public final static float BORDER_SIZE = 10;
+    ArrayList<ColorListener> mColorListeners = new ArrayList<ColorListener>();
     private float mDpToPix;
     private float mRadius = 80;
     private float mCtrY = 100;
@@ -50,7 +53,7 @@ public class ColorRectView extends View implements ColorListener {
     private float mDotY;
     private int mSliderColor = 0xFF33B5E5;
     private float[] mHSVO = new float[4];
-    private int[] mColors = new int[] {
+    private int[] mColors = new int[]{
             0xFFFF0000,// red
             0xFFFFFF00,// yellow
             0xFF00FF00,// green
@@ -61,8 +64,6 @@ public class ColorRectView extends View implements ColorListener {
     };
     private int mWidth;
     private int mHeight;
-    public final static float DOT_SIZE = 20;
-    public final static float BORDER_SIZE = 10;
 
     public ColorRectView(Context ctx, AttributeSet attrs) {
         super(ctx, attrs);
@@ -130,10 +131,10 @@ public class ColorRectView extends View implements ColorListener {
     private void setUpColorPanel() {
         float val = mHSVO[2];
         int v = 0xFF000000 | 0x10101 * (int) (val * 0xFF);
-        int[] colors = new int[] {
-                0x0000000, v };
-        int[] colors2 = new int[] {
-                0x0000000, 0xFF000000 };
+        int[] colors = new int[]{
+                0x0000000, v};
+        int[] colors2 = new int[]{
+                0x0000000, 0xFF000000};
         int[] wheelColor = new int[mColors.length];
         float[] hsv = new float[3];
         for (int i = 0; i < wheelColor.length; i++) {
@@ -187,10 +188,10 @@ public class ColorRectView extends View implements ColorListener {
     }
 
     private void updateDotPaint() {
-        int[] colors3 = new int[] {
-                mSliderColor, mSliderColor, 0x66000000, 0 };
-        RadialGradient g = new RadialGradient(mDotX, mDotY, mDotRadus, colors3, new float[] {
-                0, .3f, .31f, 1 }, Shader.TileMode.CLAMP);
+        int[] colors3 = new int[]{
+                mSliderColor, mSliderColor, 0x66000000, 0};
+        RadialGradient g = new RadialGradient(mDotX, mDotY, mDotRadus, colors3, new float[]{
+                0, .3f, .31f, 1}, Shader.TileMode.CLAMP);
         mDotPaint.setShader(g);
 
     }
@@ -206,8 +207,6 @@ public class ColorRectView extends View implements ColorListener {
         updateDotPaint();
 
     }
-
-    ArrayList<ColorListener> mColorListeners = new ArrayList<ColorListener>();
 
     public void notifyColorListeners(float[] hsv) {
         for (ColorListener l : mColorListeners) {

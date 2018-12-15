@@ -19,8 +19,9 @@ package com.android.gallery3d.data;
 import android.content.Context;
 import android.graphics.Rect;
 
-import org.codeaurora.gallery.R;
 import com.android.gallery3d.picasasource.PicasaSource;
+
+import org.codeaurora.gallery.R;
 
 import java.util.ArrayList;
 import java.util.TreeMap;
@@ -32,55 +33,6 @@ public class FaceClustering extends Clustering {
     private FaceCluster[] mClusters;
     private String mUntaggedString;
     private Context mContext;
-
-    private class FaceCluster {
-        ArrayList<Path> mPaths = new ArrayList<Path>();
-        String mName;
-        MediaItem mCoverItem;
-        Rect mCoverRegion;
-        int mCoverFaceIndex;
-
-        public FaceCluster(String name) {
-            mName = name;
-        }
-
-        public void add(MediaItem item, int faceIndex) {
-            Path path = item.getPath();
-            mPaths.add(path);
-            Face[] faces = item.getFaces();
-            if (faces != null) {
-                Face face = faces[faceIndex];
-                if (mCoverItem == null) {
-                    mCoverItem = item;
-                    mCoverRegion = face.getPosition();
-                    mCoverFaceIndex = faceIndex;
-                } else {
-                    Rect region = face.getPosition();
-                    if (mCoverRegion.width() < region.width() &&
-                            mCoverRegion.height() < region.height()) {
-                        mCoverItem = item;
-                        mCoverRegion = face.getPosition();
-                        mCoverFaceIndex = faceIndex;
-                    }
-                }
-            }
-        }
-
-        public int size() {
-            return mPaths.size();
-        }
-
-        public MediaItem getCover() {
-            if (mCoverItem != null) {
-                if (PicasaSource.isPicasaImage(mCoverItem)) {
-                    return PicasaSource.getFaceItem(mContext, mCoverItem, mCoverFaceIndex);
-                } else {
-                    return mCoverItem;
-                }
-            }
-            return null;
-        }
-    }
 
     public FaceClustering(Context context) {
         mUntaggedString = context.getResources().getString(R.string.no_faces);
@@ -138,5 +90,54 @@ public class FaceClustering extends Clustering {
     @Override
     public MediaItem getClusterCover(int index) {
         return mClusters[index].getCover();
+    }
+
+    private class FaceCluster {
+        ArrayList<Path> mPaths = new ArrayList<Path>();
+        String mName;
+        MediaItem mCoverItem;
+        Rect mCoverRegion;
+        int mCoverFaceIndex;
+
+        public FaceCluster(String name) {
+            mName = name;
+        }
+
+        public void add(MediaItem item, int faceIndex) {
+            Path path = item.getPath();
+            mPaths.add(path);
+            Face[] faces = item.getFaces();
+            if (faces != null) {
+                Face face = faces[faceIndex];
+                if (mCoverItem == null) {
+                    mCoverItem = item;
+                    mCoverRegion = face.getPosition();
+                    mCoverFaceIndex = faceIndex;
+                } else {
+                    Rect region = face.getPosition();
+                    if (mCoverRegion.width() < region.width() &&
+                            mCoverRegion.height() < region.height()) {
+                        mCoverItem = item;
+                        mCoverRegion = face.getPosition();
+                        mCoverFaceIndex = faceIndex;
+                    }
+                }
+            }
+        }
+
+        public int size() {
+            return mPaths.size();
+        }
+
+        public MediaItem getCover() {
+            if (mCoverItem != null) {
+                if (PicasaSource.isPicasaImage(mCoverItem)) {
+                    return PicasaSource.getFaceItem(mContext, mCoverItem, mCoverFaceIndex);
+                } else {
+                    return mCoverItem;
+                }
+            }
+            return null;
+        }
     }
 }

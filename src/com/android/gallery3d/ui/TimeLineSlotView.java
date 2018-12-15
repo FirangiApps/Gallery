@@ -19,10 +19,8 @@
 package com.android.gallery3d.ui;
 
 import android.graphics.Rect;
-import android.text.TextUtils;
 import android.view.GestureDetector;
 import android.view.MotionEvent;
-import android.view.View;
 import android.view.animation.DecelerateInterpolator;
 
 import com.android.gallery3d.anim.Animation;
@@ -31,54 +29,26 @@ import com.android.gallery3d.common.ApiHelper.SystemProperties;
 import com.android.gallery3d.common.Utils;
 import com.android.gallery3d.glrenderer.GLCanvas;
 
-import java.util.Locale;
-
 public class TimeLineSlotView extends GLView {
-    @SuppressWarnings("unused")
-    private static final String TAG = "TimeLineSlotView";
-
     public static final int INDEX_NONE = -1;
-    private static final int mainKey = SystemProperties.getInt("qemu.hw.mainkeys", 1);
-
     public static final int RENDER_MORE_PASS = 1;
     public static final int RENDER_MORE_FRAME = 2;
-
-    private int mWidth  = 0;
-
-    public interface Listener {
-        public void onDown(int index);
-        public void onUp(boolean followedByLongPress);
-        public void onSingleTapUp(int index, boolean isTitle);
-        public void onLongTap(int index, boolean isTitle);
-        public void onScrollPositionChanged(int position, int total);
-    }
-
-    public static class SimpleListener implements Listener {
-        @Override public void onDown(int index) {}
-        @Override public void onUp(boolean followedByLongPress) {}
-        @Override public void onSingleTapUp(int index, boolean isTitle) {}
-        @Override public void onLongTap(int index, boolean isTitle) {}
-        @Override public void onScrollPositionChanged(int position, int total) {}
-    }
-
+    public static final int OVERSCROLL_3D = 0;
+    @SuppressWarnings("unused")
+    private static final String TAG = "TimeLineSlotView";
+    private static final int mainKey = SystemProperties.getInt("qemu.hw.mainkeys", 1);
     private final GestureDetector mGestureDetector;
     private final ScrollerHelper mScroller;
-
+    private final Layout mLayout = new Layout();
+    private int mWidth = 0;
     private Listener mListener;
     private SlotAnimation mAnimation = null;
-    private final Layout mLayout = new Layout();
     private int mStartIndex = INDEX_NONE;
-
     // whether the down action happened while the view is scrolling.
     private boolean mDownInScrolling;
     private int mOverscrollEffect = OVERSCROLL_3D;
-
     private TimeLineSlotRenderer mRenderer;
-
     private int[] mRequestRenderSlots = new int[16];
-
-    public static final int OVERSCROLL_3D = 0;
-
     // Flag to check whether it is come from Photo Page.
     private boolean isFromPhotoPage = false;
 
@@ -86,6 +56,13 @@ public class TimeLineSlotView extends GLView {
         mGestureDetector = new GestureDetector(activity, new MyGestureListener());
         mScroller = new ScrollerHelper(activity);
         setSlotSpec(spec);
+    }
+
+    private static int[] expandIntArray(int[] array, int capacity) {
+        while (array.length < capacity) {
+            array = new int[array.length * 2];
+        }
+        return array;
     }
 
     public void setSlotRenderer(TimeLineSlotRenderer slotDrawer) {
@@ -136,7 +113,6 @@ public class TimeLineSlotView extends GLView {
     public void setIsFromPhotoPage(boolean flag) {
         isFromPhotoPage = flag;
     }
-
 
     public void setScrollPosition(int position) {
         position = Utils.clamp(position, 0, mLayout.getScrollLimit());
@@ -211,13 +187,6 @@ public class TimeLineSlotView extends GLView {
         mListener = listener;
     }
 
-    private static int[] expandIntArray(int array[], int capacity) {
-        while (array.length < capacity) {
-            array = new int[array.length * 2];
-        }
-        return array;
-    }
-
     @Override
     protected void render(GLCanvas canvas) {
         super.render(canvas);
@@ -255,7 +224,7 @@ public class TimeLineSlotView extends GLView {
         canvas.translate(-mScrollX, -mScrollY);
 
         int requestCount = 0;
-        int requestedSlot[] = expandIntArray(mRequestRenderSlots,
+        int[] requestedSlot = expandIntArray(mRequestRenderSlots,
                 mLayout.getVisibleEnd() - mLayout.getVisibleStart());
 
         for (int i = mLayout.getVisibleEnd() - 1; i >= mLayout.getVisibleStart(); --i) {
@@ -294,132 +263,6 @@ public class TimeLineSlotView extends GLView {
                 canvas, index, pass, rect.right - rect.left, rect.bottom - rect.top);
         canvas.restore();
         return result;
-    }
-
-    public static abstract class SlotAnimation extends Animation {
-        protected float mProgress = 0;
-
-        public SlotAnimation() {
-            setInterpolator(new DecelerateInterpolator(4));
-            setDuration(1500);
-        }
-
-        @Override
-        protected void onCalculate(float progress) {
-            mProgress = progress;
-        }
-
-        abstract public void apply(GLCanvas canvas, int slotIndex, Rect target);
-    }
-
-    public static class RisingAnimation extends SlotAnimation {
-        private static final int RISING_DISTANCE = 128;
-
-        @Override
-        public void apply(GLCanvas canvas, int slotIndex, Rect target) {
-            canvas.translate(0, 0, RISING_DISTANCE * (1 - mProgress));
-        }
-    }
-
-    public static class ScatteringAnimation extends SlotAnimation {
-        private int PHOTO_DISTANCE = 1000;
-        private RelativePosition mCenter;
-
-        public ScatteringAnimation(RelativePosition center) {
-            mCenter = center;
-        }
-
-        @Override
-        public void apply(GLCanvas canvas, int slotIndex, Rect target) {
-            canvas.translate(
-                    (mCenter.getX() - target.centerX()) * (1 - mProgress),
-                    (mCenter.getY() - target.centerY()) * (1 - mProgress),
-                    slotIndex * PHOTO_DISTANCE * (1 - mProgress));
-            canvas.setAlpha(mProgress);
-        }
-    }
-
-    private class MyGestureListener implements GestureDetector.OnGestureListener {
-        private boolean isDown;
-
-        // We call the listener's onDown() when our onShowPress() is called and
-        // call the listener's onUp() when we receive any further event.
-        @Override
-        public void onShowPress(MotionEvent e) {
-            GLRoot root = getGLRoot();
-            root.lockRenderThread();
-            try {
-                if (isDown) return;
-                Slot slot = mLayout.getSlotByPosition(e.getX(), e.getY());
-                if (slot != null) {
-                    isDown = true;
-                    mListener.onDown(slot.index);
-                }
-            } finally {
-                root.unlockRenderThread();
-            }
-        }
-
-        private void cancelDown(boolean byLongPress) {
-            if (!isDown) return;
-            isDown = false;
-            mListener.onUp(byLongPress);
-        }
-
-        @Override
-        public boolean onDown(MotionEvent e) {
-            return false;
-        }
-
-        @Override
-        public boolean onFling(MotionEvent e1,
-                MotionEvent e2, float velocityX, float velocityY) {
-            cancelDown(false);
-            int scrollLimit = mLayout.getScrollLimit();
-            if (scrollLimit == 0) return false;
-            mScroller.fling((int) -velocityY, 0, scrollLimit);
-            invalidate();
-            return true;
-        }
-
-        @Override
-        public boolean onScroll(MotionEvent e1,
-                MotionEvent e2, float distanceX, float distanceY) {
-            cancelDown(false);
-            int overDistance = mScroller.startScroll(
-                    Math.round(distanceY), 0, mLayout.getScrollLimit());
-            if (mOverscrollEffect == OVERSCROLL_3D && overDistance != 0) {
-                //mPaper.overScroll(overDistance);
-            }
-            invalidate();
-            return true;
-        }
-
-        @Override
-        public boolean onSingleTapUp(MotionEvent e) {
-            cancelDown(false);
-            if (mDownInScrolling) return true;
-            Slot slot = mLayout.getSlotByPosition(e.getX(), e.getY());
-            if (slot != null) {
-                mListener.onSingleTapUp(slot.index, slot.isTitle);
-            }
-            return true;
-        }
-
-        @Override
-        public void onLongPress(MotionEvent e) {
-            cancelDown(true);
-            if (mDownInScrolling) return;
-            lockRendering();
-            try {
-                Slot slot = mLayout.getSlotByPosition(e.getX(), e.getY());
-                if (slot != null) {
-                    mListener.onLongTap(slot.index, slot.isTitle);
-                }
-            } finally {
-                unlockRendering();
-            }
-        }
     }
 
     public void setStartIndex(int index) {
@@ -471,6 +314,83 @@ public class TimeLineSlotView extends GLView {
         return mWidth;
     }
 
+    public interface Listener {
+        void onDown(int index);
+
+        void onUp(boolean followedByLongPress);
+
+        void onSingleTapUp(int index, boolean isTitle);
+
+        void onLongTap(int index, boolean isTitle);
+
+        void onScrollPositionChanged(int position, int total);
+    }
+
+    public static class SimpleListener implements Listener {
+        @Override
+        public void onDown(int index) {
+        }
+
+        @Override
+        public void onUp(boolean followedByLongPress) {
+        }
+
+        @Override
+        public void onSingleTapUp(int index, boolean isTitle) {
+        }
+
+        @Override
+        public void onLongTap(int index, boolean isTitle) {
+        }
+
+        @Override
+        public void onScrollPositionChanged(int position, int total) {
+        }
+    }
+
+    public static abstract class SlotAnimation extends Animation {
+        protected float mProgress = 0;
+
+        public SlotAnimation() {
+            setInterpolator(new DecelerateInterpolator(4));
+            setDuration(1500);
+        }
+
+        @Override
+        protected void onCalculate(float progress) {
+            mProgress = progress;
+        }
+
+        abstract public void apply(GLCanvas canvas, int slotIndex, Rect target);
+    }
+
+    public static class RisingAnimation extends SlotAnimation {
+        private static final int RISING_DISTANCE = 128;
+
+        @Override
+        public void apply(GLCanvas canvas, int slotIndex, Rect target) {
+            canvas.translate(0, 0, RISING_DISTANCE * (1 - mProgress));
+        }
+    }
+
+    public static class ScatteringAnimation extends SlotAnimation {
+        private int PHOTO_DISTANCE = 1000;
+        private RelativePosition mCenter;
+
+        public ScatteringAnimation(RelativePosition center) {
+            mCenter = center;
+        }
+
+        @Override
+        public void apply(GLCanvas canvas, int slotIndex, Rect target) {
+            canvas.translate(
+                    (mCenter.getX() - target.centerX()) * (1 - mProgress),
+                    (mCenter.getY() - target.centerY()) * (1 - mProgress),
+                    slotIndex * PHOTO_DISTANCE * (1 - mProgress));
+            canvas.setAlpha(mProgress);
+        }
+    }
+
     // This Spec class is used to specify the size of each slot in the SlotView.
     // There are two ways to do it:
     //
@@ -487,11 +407,107 @@ public class TimeLineSlotView extends GLView {
         public int slotGapLand = -1;
     }
 
+    private static class Slot {
+        public boolean isTitle;
+        public int index;
+        public int col;
+        public int top;
+
+        public Slot(boolean isTitle, int index, int col, int top) {
+            this.isTitle = isTitle;
+            this.index = index;
+            this.col = col;
+            this.top = top;
+        }
+    }
+
+    private class MyGestureListener implements GestureDetector.OnGestureListener {
+        private boolean isDown;
+
+        // We call the listener's onDown() when our onShowPress() is called and
+        // call the listener's onUp() when we receive any further event.
+        @Override
+        public void onShowPress(MotionEvent e) {
+            GLRoot root = getGLRoot();
+            root.lockRenderThread();
+            try {
+                if (isDown) return;
+                Slot slot = mLayout.getSlotByPosition(e.getX(), e.getY());
+                if (slot != null) {
+                    isDown = true;
+                    mListener.onDown(slot.index);
+                }
+            } finally {
+                root.unlockRenderThread();
+            }
+        }
+
+        private void cancelDown(boolean byLongPress) {
+            if (!isDown) return;
+            isDown = false;
+            mListener.onUp(byLongPress);
+        }
+
+        @Override
+        public boolean onDown(MotionEvent e) {
+            return false;
+        }
+
+        @Override
+        public boolean onFling(MotionEvent e1,
+                               MotionEvent e2, float velocityX, float velocityY) {
+            cancelDown(false);
+            int scrollLimit = mLayout.getScrollLimit();
+            if (scrollLimit == 0) return false;
+            mScroller.fling((int) -velocityY, 0, scrollLimit);
+            invalidate();
+            return true;
+        }
+
+        @Override
+        public boolean onScroll(MotionEvent e1,
+                                MotionEvent e2, float distanceX, float distanceY) {
+            cancelDown(false);
+            int overDistance = mScroller.startScroll(
+                    Math.round(distanceY), 0, mLayout.getScrollLimit());
+            if (mOverscrollEffect == OVERSCROLL_3D && overDistance != 0) {
+                //mPaper.overScroll(overDistance);
+            }
+            invalidate();
+            return true;
+        }
+
+        @Override
+        public boolean onSingleTapUp(MotionEvent e) {
+            cancelDown(false);
+            if (mDownInScrolling) return true;
+            Slot slot = mLayout.getSlotByPosition(e.getX(), e.getY());
+            if (slot != null) {
+                mListener.onSingleTapUp(slot.index, slot.isTitle);
+            }
+            return true;
+        }
+
+        @Override
+        public void onLongPress(MotionEvent e) {
+            cancelDown(true);
+            if (mDownInScrolling) return;
+            lockRendering();
+            try {
+                Slot slot = mLayout.getSlotByPosition(e.getX(), e.getY());
+                if (slot != null) {
+                    mListener.onLongTap(slot.index, slot.isTitle);
+                }
+            } finally {
+                unlockRendering();
+            }
+        }
+    }
+
     public class Layout {
+        public int mSlotSize;
         private int mVisibleStart;
         private int mVisibleEnd;
-
-        public int mSlotSize;
         private int mSlotWidth;
         private int mSlotHeight;
         private int mSlotGap;
@@ -545,7 +561,7 @@ public class TimeLineSlotView extends GLView {
 
         private void initLayoutParameters() {
             mUnitCount = (mWidth > mHeight) ? mSpec.colsLand : mSpec.colsPort;
-            mSlotGap = (mWidth > mHeight) ? mSpec.slotGapLand: mSpec.slotGapPort;
+            mSlotGap = (mWidth > mHeight) ? mSpec.slotGapLand : mSpec.slotGapPort;
             mSlotWidth = Math.round((mWidth - (mUnitCount - 1) * mSlotGap) / mUnitCount);
             mSlotHeight = mSlotWidth;
             if (mRenderer != null) {
@@ -648,7 +664,7 @@ public class TimeLineSlotView extends GLView {
                 int rows = (count + mUnitCount - 1) / mUnitCount;
                 h = mSlotHeight * rows + mSlotGap * (rows > 0 ? rows - 1 : 0);
                 if (pos < top + h) {
-                    int row = ((int) pos - top) / (mSlotHeight + mSlotGap);
+                    int row = (pos - top) / (mSlotHeight + mSlotGap);
                     int col = 0;
                     if (roundUp) {
                         int idx = (row + 1) * mUnitCount;
@@ -695,20 +711,6 @@ public class TimeLineSlotView extends GLView {
                 mSlotSize = size;
                 updateVisibleSlotRange();
             }
-        }
-    }
-
-    private static class Slot {
-        public boolean isTitle;
-        public int index;
-        public int col;
-        public int top;
-
-        public Slot(boolean isTitle, int index, int col, int top) {
-            this.isTitle = isTitle;
-            this.index = index;
-            this.col = col;
-            this.top = top;
         }
     }
 }

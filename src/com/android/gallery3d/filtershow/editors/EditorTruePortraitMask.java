@@ -41,20 +41,22 @@ import android.widget.CompoundButton;
 import android.widget.FrameLayout;
 import android.widget.ImageButton;
 import android.widget.LinearLayout;
-import android.widget.TextView;
 import android.widget.Toast;
 import android.widget.ToggleButton;
 
-import org.codeaurora.gallery.R;
 import com.android.gallery3d.filtershow.FilterShowActivity;
 import com.android.gallery3d.filtershow.imageshow.ImageTruePortraitMask;
 import com.android.gallery3d.filtershow.imageshow.MasterImage;
 import com.android.gallery3d.filtershow.ui.AlertMsgDialog;
 
-public class EditorTruePortraitMask extends Editor  {
-    private static final String LOGTAG = "EditorTruePortraitMask";
-    public static final int ID = R.id.editorTruePortraitMask;
+import org.codeaurora.gallery.R;
 
+public class EditorTruePortraitMask extends Editor {
+    public static final int ID = R.id.editorTruePortraitMask;
+    private static final String LOGTAG = "EditorTruePortraitMask";
+    private static final int[] BRUSH_SIZES = {
+            10, 30, 50
+    };
     private AlertMsgDialog mHelpDialog;
     private ImageTruePortraitMask mTruePortraitImage;
     private ToggleButton mForeground;
@@ -65,15 +67,10 @@ public class EditorTruePortraitMask extends Editor  {
     private View mBrushSizeButton;
     private View[] mBrushSizes = new View[3];
     private int mBrushIndex = 0;
-
-    private static final int[] BRUSH_SIZES = {
-        10, 30, 50
-    };
-
     private OnClickListener mDoneClickListener = new OnClickListener() {
         @Override
         public void onClick(View view) {
-            if(view.getId() == R.id.done) {
+            if (view.getId() == R.id.done) {
                 finalApplyCalled();
             }
             FilterShowActivity activity = (FilterShowActivity) mContext;
@@ -90,7 +87,7 @@ public class EditorTruePortraitMask extends Editor  {
     public void createEditor(Context context, FrameLayout frameLayout) {
         super.createEditor(context, frameLayout);
         unpack(R.id.truePortraitMaskEditor, R.layout.filtershow_trueportrait_mask_editor);
-        mTruePortraitImage = (ImageTruePortraitMask)mImageShow;
+        mTruePortraitImage = (ImageTruePortraitMask) mImageShow;
         mTruePortraitImage.setEditor(this);
     }
 
@@ -125,30 +122,30 @@ public class EditorTruePortraitMask extends Editor  {
         maskHelp.setOnClickListener(new OnClickListener() {
             @Override
             public void onClick(View view) {
-                if(mHelpDialog == null)
+                if (mHelpDialog == null)
                     mHelpDialog = new AlertMsgDialog(R.string.help, R.string.trueportrait_edit_help);
 
-                FragmentManager fm = ((FilterShowActivity)mContext).getSupportFragmentManager();
+                FragmentManager fm = ((FilterShowActivity) mContext).getSupportFragmentManager();
                 mHelpDialog.show(fm, "tp_edit_help");
             }
         });
 
-        mForeground = (ToggleButton)accessoryViewList.findViewById(R.id.maskForeground);
+        mForeground = accessoryViewList.findViewById(R.id.maskForeground);
         mForeground.setChecked(true);
         mForeground.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
             public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
-                if(mBackground.isChecked() == isChecked)
+                if (mBackground.isChecked() == isChecked)
                     mBackground.toggle();
                 mTruePortraitImage.invalidate();
                 showToast();
             }
         });
 
-        mBackground = (ToggleButton)accessoryViewList.findViewById(R.id.maskBackground);
+        mBackground = accessoryViewList.findViewById(R.id.maskBackground);
         mBackground.setChecked(false);
         mBackground.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
             public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
-                if(mForeground.isChecked() == isChecked)
+                if (mForeground.isChecked() == isChecked)
                     mForeground.toggle();
             }
         });
@@ -156,8 +153,8 @@ public class EditorTruePortraitMask extends Editor  {
 
     @Override
     public void setUpEditorUI(View editControl, Button stateButton) {
-        mExitButton = (ImageButton) editControl.findViewById(R.id.cancel);
-        mApplyButton = (ImageButton) editControl.findViewById(R.id.done);
+        mExitButton = editControl.findViewById(R.id.cancel);
+        mApplyButton = editControl.findViewById(R.id.done);
         mExitButton.setOnClickListener(mDoneClickListener);
         mApplyButton.setOnClickListener(mDoneClickListener);
 
@@ -192,7 +189,7 @@ public class EditorTruePortraitMask extends Editor  {
 
     private void showToast() {
         Toast toast;
-        if(isBackgroundMode()) {
+        if (isBackgroundMode()) {
             toast = Toast.makeText(mContext, R.string.trueportrait_edit_background_toast, Toast.LENGTH_LONG);
         } else {
             toast = Toast.makeText(mContext, R.string.trueportrait_edit_foreground_toast, Toast.LENGTH_LONG);
@@ -211,7 +208,7 @@ public class EditorTruePortraitMask extends Editor  {
 
     public int cycleBrushSize() {
         mBrushSizes[mBrushIndex].setSelected(false);
-        mBrushIndex = (mBrushIndex+1)%BRUSH_SIZES.length;
+        mBrushIndex = (mBrushIndex + 1) % BRUSH_SIZES.length;
         mBrushSizes[mBrushIndex].setSelected(true);
         return getBrushSize();
     }

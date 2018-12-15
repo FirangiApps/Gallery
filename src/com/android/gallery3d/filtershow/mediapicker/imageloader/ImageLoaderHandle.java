@@ -40,15 +40,13 @@ import java.util.concurrent.locks.ReentrantLock;
 
 class ImageLoaderHandle {
 
-    final ImageLoaderConfig configuration;
-
-    public Executor taskExecutor;
-    public Executor taskDistributor;
-
     public final Map<Integer, String> cacheKeysForImageAwares = Collections
             .synchronizedMap(new HashMap<Integer, String>());
+    final ImageLoaderConfig configuration;
     private final Map<String, ReentrantLock> uriLocks = new WeakHashMap<String, ReentrantLock>();
     private final Object pauseLock = new Object();
+    public Executor taskExecutor;
+    public Executor taskDistributor;
 
     ImageLoaderHandle(ImageLoaderConfig configuration) {
         this.configuration = configuration;
@@ -57,13 +55,19 @@ class ImageLoaderHandle {
         taskDistributor = createTaskDistributor();
     }
 
-    /** Submits task to execution pool */
+    public static Executor createTaskDistributor() {
+        return Executors.newCachedThreadPool(new ThreadFactoryImpl(Thread.NORM_PRIORITY));
+    }
+
+    /**
+     * Submits task to execution pool
+     */
     void submit(final ImageLoaderTask task) {
         taskDistributor.execute(new Runnable() {
             @Override
             public void run() {
                 if (!configuration.customExecutor && ((ExecutorService) taskExecutor).isShutdown()) {
-                    taskExecutor = configuration.createExecutor(configuration.threadPoolSize,
+                    taskExecutor = ImageLoaderConfig.createExecutor(configuration.threadPoolSize,
                             configuration.threadPriority);
                 }
                 taskExecutor.execute(task);
@@ -78,10 +82,6 @@ class ImageLoaderHandle {
             uriLocks.put(uri, lock);
         }
         return lock;
-    }
-
-    public static Executor createTaskDistributor() {
-        return Executors.newCachedThreadPool(new ThreadFactoryImpl(Thread.NORM_PRIORITY));
     }
 
     void prepareDisplayTaskFor(ImageViewImpl imageView, String memoryCacheKey) {

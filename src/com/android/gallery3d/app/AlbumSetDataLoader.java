@@ -45,35 +45,23 @@ public class AlbumSetDataLoader {
     private static final int MSG_LOAD_START = 1;
     private static final int MSG_LOAD_FINISH = 2;
     private static final int MSG_RUN_OBJECT = 3;
-
-    public static interface DataListener {
-        public void onContentChanged(int index);
-        public void onSizeChanged(int size);
-    }
-
     private final MediaSet[] mData;
     private final MediaItem[] mCoverItem;
     private final int[] mTotalCount;
     private final long[] mItemVersion;
     private final long[] mSetVersion;
-
+    private final MediaSet mSource;
+    private final Handler mMainHandler;
+    private final MySourceListener mSourceListener = new MySourceListener();
     private int mActiveStart = 0;
     private int mActiveEnd = 0;
-
     private int mContentStart = 0;
     private int mContentEnd = 0;
-
-    private final MediaSet mSource;
     private long mSourceVersion = MediaObject.INVALID_DATA_VERSION;
     private int mSize;
-
     private ArrayList<DataListener> mDataListener = new ArrayList<>();
     private LoadingListener mLoadingListener;
     private ReloadTask mReloadTask;
-
-    private final Handler mMainHandler;
-
-    private final MySourceListener mSourceListener = new MySourceListener();
 
     public AlbumSetDataLoader(AbstractGalleryActivity activity, MediaSet albumSet, int cacheSize) {
         mSource = Utils.checkNotNull(albumSet);
@@ -217,13 +205,6 @@ public class AlbumSetDataLoader {
         }
     }
 
-    private class MySourceListener implements ContentListener {
-        @Override
-        public void onContentDirty() {
-            mReloadTask.notifyDirty();
-        }
-    }
-
     public void setModelListener(DataListener listener) {
         mDataListener.add(listener);
     }
@@ -236,6 +217,25 @@ public class AlbumSetDataLoader {
         mLoadingListener = listener;
     }
 
+    private <T> T executeAndWait(Callable<T> callable) {
+        FutureTask<T> task = new FutureTask<T>(callable);
+        mMainHandler.sendMessage(
+                mMainHandler.obtainMessage(MSG_RUN_OBJECT, task));
+        try {
+            return task.get();
+        } catch (InterruptedException e) {
+            return null;
+        } catch (ExecutionException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    public interface DataListener {
+        void onContentChanged(int index);
+
+        void onSizeChanged(int size);
+    }
+
     private static class UpdateInfo {
         public long version;
         public int index;
@@ -244,6 +244,13 @@ public class AlbumSetDataLoader {
         public MediaSet item;
         public MediaItem cover;
         public int totalCount;
+    }
+
+    private class MySourceListener implements ContentListener {
+        @Override
+        public void onContentDirty() {
+            mReloadTask.notifyDirty();
+        }
     }
 
     private class GetUpdateInfo implements Callable<UpdateInfo> {
@@ -255,7 +262,7 @@ public class AlbumSetDataLoader {
         }
 
         private int getInvalidIndex(long version) {
-            long setVersion[] = mSetVersion;
+            long[] setVersion = mSetVersion;
             int length = setVersion.length;
             for (int i = mContentStart, n = mContentEnd; i < n; ++i) {
                 int index = i % length;
@@ -317,19 +324,6 @@ public class AlbumSetDataLoader {
                 }
             }
             return null;
-        }
-    }
-
-    private <T> T executeAndWait(Callable<T> callable) {
-        FutureTask<T> task = new FutureTask<T>(callable);
-        mMainHandler.sendMessage(
-                mMainHandler.obtainMessage(MSG_RUN_OBJECT, task));
-        try {
-            return task.get();
-        } catch (InterruptedException e) {
-            return null;
-        } catch (ExecutionException e) {
-            throw new RuntimeException(e);
         }
     }
 

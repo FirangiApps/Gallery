@@ -38,31 +38,12 @@ public class TimeLineSlidingWindow implements TimeLineDataLoader.DataListener {
 
     private static final int MSG_UPDATE_ENTRY = 0;
     private static final int JOB_LIMIT = 2;
-
-    public interface Listener {
-        void onSizeChanged(int[] size);
-        void onContentChanged();
-    }
-
-    public static class AlbumEntry {
-        public MediaItem item;
-        public Path path;
-        public boolean isPanorama;
-        public int rotation;
-        public int mediaType;
-        public boolean isWaitDisplayed;
-        public TiledTexture bitmapTexture;
-        public Texture content;
-        private BitmapLoader contentLoader;
-
-    }
-
     private final TimeLineDataLoader mSource;
-    private final AlbumEntry mData[];
+    private final AlbumEntry[] mData;
     private final SynchronizedHandler mHandler;
     private final JobLimiter mThreadPool;
     private final TiledTexture.Uploader mTileUploader;
-
+    private final TimeLineTitleMaker mTitleMaker;
     private int mSize;
     private int mSlotWidth;
     private int mContentStart = 0;
@@ -72,11 +53,8 @@ public class TimeLineSlidingWindow implements TimeLineDataLoader.DataListener {
     private Listener mListener;
     private int mActiveRequestCount = 0;
     private boolean mIsActive = false;
-
-    private final TimeLineTitleMaker mTitleMaker;
-
     public TimeLineSlidingWindow(AbstractGalleryActivity activity, TimeLineDataLoader source,
-            int cacheSize, TimeLineSlotRenderer.LabelSpec labelSpec, TimeLineSlotView slotView) {
+                                 int cacheSize, TimeLineSlotRenderer.LabelSpec labelSpec, TimeLineSlotView slotView) {
         source.setDataListener(this);
         mSource = source;
         mData = new AlbumEntry[cacheSize];
@@ -151,7 +129,7 @@ public class TimeLineSlidingWindow implements TimeLineDataLoader.DataListener {
         if (!(start <= end && end - start <= mData.length)) {
             Utils.fail("%s, %s, %s, %s", start, end, mData.length, mSize);
         }
-        AlbumEntry data[] = mData;
+        AlbumEntry[] data = mData;
 
         mActiveStart = start;
         mActiveEnd = end;
@@ -239,7 +217,7 @@ public class TimeLineSlidingWindow implements TimeLineDataLoader.DataListener {
     }
 
     private void freeSlotContent(int slotIndex) {
-        AlbumEntry data[] = mData;
+        AlbumEntry[] data = mData;
         int index = slotIndex % data.length;
         AlbumEntry entry = data[index];
         if (entry != null) {
@@ -248,7 +226,6 @@ public class TimeLineSlidingWindow implements TimeLineDataLoader.DataListener {
         }
         data[index] = null;
     }
-
 
     private void prepareSlotContent(int slotIndex) {
         AlbumEntry entry = new AlbumEntry();
@@ -288,54 +265,6 @@ public class TimeLineSlidingWindow implements TimeLineDataLoader.DataListener {
             requestNonactiveImages();
         } else {
             cancelNonactiveImages();
-        }
-    }
-
-    private class ThumbnailLoader extends BitmapLoader {
-        private final int mSlotIndex;
-        private final MediaItem mItem;
-
-        public ThumbnailLoader(int slotIndex, MediaItem item) {
-            mSlotIndex = slotIndex;
-            mItem = item;
-        }
-
-        @Override
-        protected Future<Bitmap> submitBitmapTask(FutureListener<Bitmap> l) {
-            if (mItem.getMediaType() != MediaObject.MEDIA_TYPE_TIMELINE_TITLE) {
-                return mThreadPool.submit(
-                        mItem.requestImage(MediaItem.TYPE_MICROTHUMBNAIL), this);
-            } else if( mItem.getMediaType() == MediaObject.MEDIA_TYPE_TIMELINE_TITLE ){
-                return mThreadPool.submit(
-                        ((TimeLineTitleMediaItem) mItem).requestTitle(
-                                MediaItem.TYPE_MICROTHUMBNAIL, mTitleMaker), this);
-            }
-            return null;
-        }
-
-        @Override
-        protected void onLoadComplete(Bitmap bitmap) {
-            mHandler.obtainMessage(MSG_UPDATE_ENTRY, this).sendToTarget();
-        }
-
-        public void updateEntry() {
-            Bitmap bitmap = getBitmap();
-            if (bitmap == null) return; // error or recycled
-
-                AlbumEntry entry = mData[mSlotIndex % mData.length];
-                if (entry == null)  return;
-                entry.bitmapTexture = new TiledTexture(bitmap);
-                entry.content = entry.bitmapTexture;
-
-                if (isActiveSlot(mSlotIndex)) {
-                    mTileUploader.addTexture(entry.bitmapTexture);
-                    --mActiveRequestCount;
-                    if (mActiveRequestCount == 0) requestNonactiveImages();
-                    if (mListener != null) mListener.onContentChanged();
-                } else {
-                    mTileUploader.addTexture(entry.bitmapTexture);
-                }
-
         }
     }
 
@@ -393,5 +322,72 @@ public class TimeLineSlidingWindow implements TimeLineDataLoader.DataListener {
         updateAllTimelineTitleContent(false);
         updateAllImageRequests();
         updateTextureUploadQueue();
+    }
+
+    public interface Listener {
+        void onSizeChanged(int[] size);
+
+        void onContentChanged();
+    }
+
+    public static class AlbumEntry {
+        public MediaItem item;
+        public Path path;
+        public boolean isPanorama;
+        public int rotation;
+        public int mediaType;
+        public boolean isWaitDisplayed;
+        public TiledTexture bitmapTexture;
+        public Texture content;
+        private BitmapLoader contentLoader;
+
+    }
+
+    private class ThumbnailLoader extends BitmapLoader {
+        private final int mSlotIndex;
+        private final MediaItem mItem;
+
+        public ThumbnailLoader(int slotIndex, MediaItem item) {
+            mSlotIndex = slotIndex;
+            mItem = item;
+        }
+
+        @Override
+        protected Future<Bitmap> submitBitmapTask(FutureListener<Bitmap> l) {
+            if (mItem.getMediaType() != MediaObject.MEDIA_TYPE_TIMELINE_TITLE) {
+                return mThreadPool.submit(
+                        mItem.requestImage(MediaItem.TYPE_MICROTHUMBNAIL), this);
+            } else if (mItem.getMediaType() == MediaObject.MEDIA_TYPE_TIMELINE_TITLE) {
+                return mThreadPool.submit(
+                        ((TimeLineTitleMediaItem) mItem).requestTitle(
+                                MediaItem.TYPE_MICROTHUMBNAIL, mTitleMaker), this);
+            }
+            return null;
+        }
+
+        @Override
+        protected void onLoadComplete(Bitmap bitmap) {
+            mHandler.obtainMessage(MSG_UPDATE_ENTRY, this).sendToTarget();
+        }
+
+        public void updateEntry() {
+            Bitmap bitmap = getBitmap();
+            if (bitmap == null) return; // error or recycled
+
+            AlbumEntry entry = mData[mSlotIndex % mData.length];
+            if (entry == null) return;
+            entry.bitmapTexture = new TiledTexture(bitmap);
+            entry.content = entry.bitmapTexture;
+
+            if (isActiveSlot(mSlotIndex)) {
+                mTileUploader.addTexture(entry.bitmapTexture);
+                --mActiveRequestCount;
+                if (mActiveRequestCount == 0) requestNonactiveImages();
+                if (mListener != null) mListener.onContentChanged();
+            } else {
+                mTileUploader.addTexture(entry.bitmapTexture);
+            }
+
+        }
     }
 }

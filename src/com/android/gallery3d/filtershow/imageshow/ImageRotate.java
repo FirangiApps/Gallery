@@ -27,8 +27,8 @@ import com.android.gallery3d.filtershow.filters.FilterRotateRepresentation;
 import com.android.gallery3d.filtershow.imageshow.GeometryMathUtils.GeometryHolder;
 
 public class ImageRotate extends ImageShow {
-    private EditorRotate mEditorRotate;
     private static final String TAG = ImageRotate.class.getSimpleName();
+    private EditorRotate mEditorRotate;
     private FilterRotateRepresentation mLocalRep = new FilterRotateRepresentation();
     private GeometryHolder mDrawHolder = new GeometryHolder();
 

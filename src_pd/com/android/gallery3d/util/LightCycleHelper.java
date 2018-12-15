@@ -21,18 +21,6 @@ import android.content.Context;
 import android.net.Uri;
 
 public class LightCycleHelper {
-    public static class PanoramaMetadata {
-        // Whether a panorama viewer should be used
-        public final boolean mUsePanoramaViewer;
-        // Whether a panorama is 360 degrees
-        public final boolean mIsPanorama360;
-
-        public PanoramaMetadata(boolean usePanoramaViewer, boolean isPanorama360) {
-            mUsePanoramaViewer = usePanoramaViewer;
-            mIsPanorama360 = isPanorama360;
-        }
-    }
-
     public static final PanoramaMetadata NOT_PANORAMA = new PanoramaMetadata(false, false);
 
     public static PanoramaMetadata getPanoramaMetadata(Context context, Uri uri) {
@@ -51,5 +39,17 @@ public class LightCycleHelper {
      */
     public static long getModifiedTimeFromURI(ContentResolver contentResolver, Uri contentUri) {
         return 0;
+    }
+
+    public static class PanoramaMetadata {
+        // Whether a panorama viewer should be used
+        public final boolean mUsePanoramaViewer;
+        // Whether a panorama is 360 degrees
+        public final boolean mIsPanorama360;
+
+        public PanoramaMetadata(boolean usePanoramaViewer, boolean isPanorama360) {
+            mUsePanoramaViewer = usePanoramaViewer;
+            mIsPanorama360 = isPanorama360;
+        }
     }
 }

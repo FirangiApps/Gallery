@@ -13,9 +13,8 @@ public class StereoAudioHooker extends MovieHooker {
     private static final boolean LOG = true;
 
     private static final int MENU_STEREO_AUDIO = 1;
-    private MenuItem mMenuStereoAudio;
-
     private static final String KEY_STEREO = "EnableStereoOutput";
+    private MenuItem mMenuStereoAudio;
     private boolean mSystemStereoAudio;
     private boolean mCurrentStereoAudio;
     private boolean mIsInitedStereoAudio;
@@ -51,7 +50,7 @@ public class StereoAudioHooker extends MovieHooker {
     @Override
     public boolean onOptionsItemSelected(final MenuItem item) {
         super.onOptionsItemSelected(item);
-        if(getMenuOriginalId(item.getItemId()) == MENU_STEREO_AUDIO) {
+        if (getMenuOriginalId(item.getItemId()) == MENU_STEREO_AUDIO) {
             mCurrentStereoAudio = !mCurrentStereoAudio;
             setStereoAudio(mCurrentStereoAudio);
             return true;
@@ -66,11 +65,7 @@ public class StereoAudioHooker extends MovieHooker {
         }
         final String stereo = mAudioManager.getParameters(KEY_STEREO);
         final String key = KEY_STEREO + "=1";
-        if (stereo != null && stereo.indexOf(key) > -1) {
-            isstereo = true;
-        } else {
-            isstereo = false;
-        }
+        isstereo = stereo != null && stereo.indexOf(key) > -1;
         if (LOG) {
             Log.v(TAG, "getStereoAudio() isstereo=" + isstereo + ", stereo=" + stereo
                     + ", key=" + key);
@@ -91,8 +86,8 @@ public class StereoAudioHooker extends MovieHooker {
 
     private void updateStereoAudioIcon() {
         if (mMenuStereoAudio != null) {
-            mMenuStereoAudio.setTitle(mCurrentStereoAudio?R.string.single_track:R.string.stereo);
-            mMenuStereoAudio.setIcon(mCurrentStereoAudio?R.drawable.ic_menu_single_track:R.drawable.ic_menu_stereo);
+            mMenuStereoAudio.setTitle(mCurrentStereoAudio ? R.string.single_track : R.string.stereo);
+            mMenuStereoAudio.setIcon(mCurrentStereoAudio ? R.drawable.ic_menu_single_track : R.drawable.ic_menu_stereo);
         }
     }
 

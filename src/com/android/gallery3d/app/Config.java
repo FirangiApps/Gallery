@@ -19,12 +19,13 @@ package com.android.gallery3d.app;
 import android.content.Context;
 import android.content.res.Resources;
 
-import org.codeaurora.gallery.R;
 import com.android.gallery3d.ui.AlbumSetSlotRenderer;
 import com.android.gallery3d.ui.AlbumSlotRenderer;
 import com.android.gallery3d.ui.SlotView;
 import com.android.gallery3d.ui.TimeLineSlotRenderer;
 import com.android.gallery3d.ui.TimeLineSlotView;
+
+import org.codeaurora.gallery.R;
 
 final class Config {
     public static class AlbumSetPage {
@@ -41,13 +42,6 @@ final class Config {
         public int paddingBottomLand;
         public int paddingLeftLand;
         public int paddingRightLand;
-
-        public static synchronized AlbumSetPage get(Context context) {
-            if (sInstance == null) {
-                sInstance = new AlbumSetPage(context);
-            }
-            return sInstance;
-        }
 
         private AlbumSetPage(Context context) {
             Resources r = context.getResources();
@@ -102,6 +96,13 @@ final class Config {
             labelSpec.titleColor = r.getColor(R.color.albumset_label_title);
             labelSpec.countColor = r.getColor(R.color.albumset_label_count);
         }
+
+        public static synchronized AlbumSetPage get(Context context) {
+            if (sInstance == null) {
+                sInstance = new AlbumSetPage(context);
+            }
+            return sInstance;
+        }
     }
 
     public static class AlbumPage {
@@ -117,13 +118,6 @@ final class Config {
         public int paddingBottomLand;
         public int paddingLeftLand;
         public int paddingRightLand;
-
-        public static synchronized AlbumPage get(Context context) {
-            if (sInstance == null) {
-                sInstance = new AlbumPage(context);
-            }
-            return sInstance;
-        }
 
         private AlbumPage(Context context) {
             Resources r = context.getResources();
@@ -152,6 +146,13 @@ final class Config {
             paddingLeftLand = r.getDimensionPixelSize(R.dimen.album_padding_left_land);
             paddingRightLand = r.getDimensionPixelSize(R.dimen.album_padding_right_land);
         }
+
+        public static synchronized AlbumPage get(Context context) {
+            if (sInstance == null) {
+                sInstance = new AlbumPage(context);
+            }
+            return sInstance;
+        }
     }
 
     public static class ManageCachePage extends AlbumSetPage {
@@ -160,18 +161,18 @@ final class Config {
         public final int cachePinSize;
         public final int cachePinMargin;
 
-        public static synchronized ManageCachePage get(Context context) {
-            if (sInstance == null) {
-                sInstance = new ManageCachePage(context);
-            }
-            return sInstance;
-        }
-
         public ManageCachePage(Context context) {
             super(context);
             Resources r = context.getResources();
             cachePinSize = r.getDimensionPixelSize(R.dimen.cache_pin_size);
             cachePinMargin = r.getDimensionPixelSize(R.dimen.cache_pin_margin);
+        }
+
+        public static synchronized ManageCachePage get(Context context) {
+            if (sInstance == null) {
+                sInstance = new ManageCachePage(context);
+            }
+            return sInstance;
         }
     }
 
@@ -185,13 +186,6 @@ final class Config {
         public int paddingLeft;
         public int paddingRight;
         public int placeholderColor;
-
-        public static synchronized AlbumPageList get(Context context) {
-            if (sInstance == null) {
-                sInstance = new AlbumPageList(context);
-            }
-            return sInstance;
-        }
 
         private AlbumPageList(Context context) {
             Resources r = context.getResources();
@@ -226,21 +220,22 @@ final class Config {
                     .getColor(R.color.albumset_label_background);
             labelSpec.titleColor = r.getColor(R.color.albumlist_label_title);
         }
+
+        public static synchronized AlbumPageList get(Context context) {
+            if (sInstance == null) {
+                sInstance = new AlbumPageList(context);
+            }
+            return sInstance;
+        }
     }
 
-   public static class TimeLinePage {
+    public static class TimeLinePage {
         private static TimeLinePage sInstance;
 
         public TimeLineSlotView.Spec slotViewSpec;
         public TimeLineSlotRenderer.LabelSpec labelSpec;
         public int placeholderColor;
 
-        public static synchronized TimeLinePage get(Context context) {
-            if (sInstance == null) {
-                sInstance = new TimeLinePage(context);
-            }
-            return sInstance;
-        }
         private TimeLinePage(Context context) {
             Resources r = context.getResources();
 
@@ -262,6 +257,13 @@ final class Config {
             labelSpec.timeLineTitleTextColor = r.getColor(R.color.timeline_title_text_color);
             labelSpec.timeLineNumberTextColor = r.getColor(R.color.timeline_title_number_text_color);
             labelSpec.timeLineTitleBackgroundColor = r.getColor(R.color.timeline_title_background_color);
+        }
+
+        public static synchronized TimeLinePage get(Context context) {
+            if (sInstance == null) {
+                sInstance = new TimeLinePage(context);
+            }
+            return sInstance;
         }
     }
 }

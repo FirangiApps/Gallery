@@ -45,13 +45,13 @@ public class DownloadCache {
 
     private static final String TABLE_NAME = DownloadEntry.SCHEMA.getTableName();
 
-    private static final String QUERY_PROJECTION[] = {Columns.ID, Columns.DATA};
+    private static final String[] QUERY_PROJECTION = {Columns.ID, Columns.DATA};
     private static final String WHERE_HASH_AND_URL = String.format(
             "%s = ? AND %s = ?", Columns.HASH_CODE, Columns.CONTENT_URL);
     private static final int QUERY_INDEX_ID = 0;
     private static final int QUERY_INDEX_DATA = 1;
 
-    private static final String FREESPACE_PROJECTION[] = {
+    private static final String[] FREESPACE_PROJECTION = {
             Columns.ID, Columns.DATA, Columns.CONTENT_URL, Columns.CONTENT_SIZE};
     private static final String FREESPACE_ORDER_BY =
             String.format("%s ASC", Columns.LAST_ACCESS);
@@ -62,7 +62,7 @@ public class DownloadCache {
 
     private static final String ID_WHERE = Columns.ID + " = ?";
 
-    private static final String SUM_PROJECTION[] =
+    private static final String[] SUM_PROJECTION =
             {String.format("sum(%s)", Columns.CONTENT_SIZE)};
     private static final int SUM_INDEX_SUM = 0;
 
@@ -88,7 +88,7 @@ public class DownloadCache {
 
     private Entry findEntryInDatabase(String stringUrl) {
         long hash = Utils.crc64Long(stringUrl);
-        String whereArgs[] = {String.valueOf(hash), stringUrl};
+        String[] whereArgs = {String.valueOf(hash), stringUrl};
         Cursor cursor = mDatabase.query(TABLE_NAME, QUERY_PROJECTION,
                 WHERE_HASH_AND_URL, whereArgs, null, null, null);
         try {
@@ -152,7 +152,7 @@ public class DownloadCache {
         ContentValues values = new ContentValues();
         values.put(Columns.LAST_ACCESS, System.currentTimeMillis());
         mDatabase.update(TABLE_NAME, values,
-                ID_WHERE, new String[] {String.valueOf(id)});
+                ID_WHERE, new String[]{String.valueOf(id)});
     }
 
     private synchronized void freeSomeSpaceIfNeed(int maxDeleteFileCount) {
@@ -220,6 +220,40 @@ public class DownloadCache {
         if (mTotalBytes > mCapacity) freeSomeSpaceIfNeed(MAX_DELETE_COUNT);
     }
 
+    public static class TaskProxy {
+        private DownloadTask mTask;
+        private boolean mIsCancelled = false;
+        private Entry mEntry;
+
+        synchronized void setResult(Entry entry) {
+            if (mIsCancelled) return;
+            mEntry = entry;
+            notifyAll();
+        }
+
+        public synchronized Entry get(JobContext jc) {
+            jc.setCancelListener(new CancelListener() {
+                @Override
+                public void onCancel() {
+                    mTask.removeProxy(TaskProxy.this);
+                    synchronized (TaskProxy.this) {
+                        mIsCancelled = true;
+                        TaskProxy.this.notifyAll();
+                    }
+                }
+            });
+            while (!mIsCancelled && mEntry == null) {
+                try {
+                    wait();
+                } catch (InterruptedException e) {
+                    Log.w(TAG, "ignore interrupt", e);
+                }
+            }
+            jc.setCancelListener(null);
+            return mEntry;
+        }
+    }
+
     private final class DatabaseHelper extends SQLiteOpenHelper {
         public static final String DATABASE_NAME = "download.db";
         public static final int DATABASE_VERSION = 2;
@@ -258,9 +292,9 @@ public class DownloadCache {
     }
 
     private class DownloadTask implements Job<File>, FutureListener<File> {
+        private final String mUrl;
         private HashSet<TaskProxy> mProxySet = new HashSet<TaskProxy>();
         private Future<File> mFuture;
-        private final String mUrl;
 
         public DownloadTask(String url) {
             mUrl = Utils.checkNotNull(url);
@@ -331,40 +365,6 @@ public class DownloadCache {
             }
             if (tempFile != null) tempFile.delete();
             return null;
-        }
-    }
-
-    public static class TaskProxy {
-        private DownloadTask mTask;
-        private boolean mIsCancelled = false;
-        private Entry mEntry;
-
-        synchronized void setResult(Entry entry) {
-            if (mIsCancelled) return;
-            mEntry = entry;
-            notifyAll();
-        }
-
-        public synchronized Entry get(JobContext jc) {
-            jc.setCancelListener(new CancelListener() {
-                @Override
-                public void onCancel() {
-                    mTask.removeProxy(TaskProxy.this);
-                    synchronized (TaskProxy.this) {
-                        mIsCancelled = true;
-                        TaskProxy.this.notifyAll();
-                    }
-                }
-            });
-            while (!mIsCancelled && mEntry == null) {
-                try {
-                    wait();
-                } catch (InterruptedException e) {
-                    Log.w(TAG, "ignore interrupt", e);
-                }
-            }
-            jc.setCancelListener(null);
-            return mEntry;
         }
     }
 }

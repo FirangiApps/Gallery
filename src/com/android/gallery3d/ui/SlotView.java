@@ -25,7 +25,6 @@ import android.view.MotionEvent;
 import android.view.View;
 import android.view.animation.DecelerateInterpolator;
 
-import org.codeaurora.gallery.R;
 import com.android.gallery3d.anim.Animation;
 import com.android.gallery3d.app.AbstractGalleryActivity;
 import com.android.gallery3d.common.Utils;
@@ -34,66 +33,32 @@ import com.android.gallery3d.glrenderer.GLCanvas;
 import java.util.Locale;
 
 public class SlotView extends GLView {
-    @SuppressWarnings("unused")
-    private static final String TAG = "SlotView";
-
-    private static final boolean WIDE = false;
-    private static final int INDEX_NONE = -1;
-
     public static final int RENDER_MORE_PASS = 1;
     public static final int RENDER_MORE_FRAME = 2;
-
-    public interface Listener {
-        public void onDown(int index);
-        public void onUp(boolean followedByLongPress);
-        public void onSingleTapUp(int index);
-        public void onLongTap(int index);
-        public void onScrollPositionChanged(int position, int total);
-    }
-
-    public static class SimpleListener implements Listener {
-        @Override public void onDown(int index) {}
-        @Override public void onUp(boolean followedByLongPress) {}
-        @Override public void onSingleTapUp(int index) {}
-        @Override public void onLongTap(int index) {}
-        @Override public void onScrollPositionChanged(int position, int total) {}
-    }
-
-    public static interface SlotRenderer {
-        public void prepareDrawing();
-        public void onVisibleRangeChanged(int visibleStart, int visibleEnd);
-        public void onSlotSizeChanged(int width, int height);
-        public int renderSlot(GLCanvas canvas, int index, int pass, int width, int height);
-    }
-
-    private final GestureDetector mGestureDetector;
-    private final ScrollerHelper mScroller;
-    private final Paper mPaper = new Paper();
-
-    private Listener mListener;
-    private UserInteractionListener mUIListener;
-
-    private boolean mMoreAnimation = false;
-    private SlotAnimation mAnimation = null;
-    private final Layout mLayout = new Layout();
-    private int mStartIndex = INDEX_NONE;
-
-    // whether the down action happened while the view is scrolling.
-    private boolean mDownInScrolling;
-    private int mOverscrollEffect = OVERSCROLL_3D;
-    private final Handler mHandler;
-
-    private SlotRenderer mRenderer;
-
-    private int[] mRequestRenderSlots = new int[16];
-
     public static final int OVERSCROLL_3D = 0;
     public static final int OVERSCROLL_SYSTEM = 1;
     public static final int OVERSCROLL_NONE = 2;
-
+    @SuppressWarnings("unused")
+    private static final String TAG = "SlotView";
+    private static final boolean WIDE = false;
+    private static final int INDEX_NONE = -1;
+    private final GestureDetector mGestureDetector;
+    private final ScrollerHelper mScroller;
+    private final Paper mPaper = new Paper();
+    private final Layout mLayout = new Layout();
+    private final Handler mHandler;
     // to prevent allocating memory
     private final Rect mTempRect = new Rect();
-
+    private Listener mListener;
+    private UserInteractionListener mUIListener;
+    private boolean mMoreAnimation = false;
+    private SlotAnimation mAnimation = null;
+    private int mStartIndex = INDEX_NONE;
+    // whether the down action happened while the view is scrolling.
+    private boolean mDownInScrolling;
+    private int mOverscrollEffect = OVERSCROLL_3D;
+    private SlotRenderer mRenderer;
+    private int[] mRequestRenderSlots = new int[16];
     // Flag to check whether it is come from Photo Page.
     private boolean isFromPhotoPage = false;
     private Activity mActivity;
@@ -104,6 +69,13 @@ public class SlotView extends GLView {
         mHandler = new SynchronizedHandler(activity.getGLRoot());
         mActivity = activity;
         setSlotSpec(spec);
+    }
+
+    private static int[] expandIntArray(int[] array, int capacity) {
+        while (array.length < capacity) {
+            array = new int[array.length * 2];
+        }
+        return array;
     }
 
     public void setSlotRenderer(SlotRenderer slotDrawer) {
@@ -246,13 +218,6 @@ public class SlotView extends GLView {
         mScroller.setOverfling(kind == OVERSCROLL_SYSTEM);
     }
 
-    private static int[] expandIntArray(int array[], int capacity) {
-        while (array.length < capacity) {
-            array = new int[array.length * 2];
-        }
-        return array;
-    }
-
     @Override
     protected void render(GLCanvas canvas) {
         super.render(canvas);
@@ -292,7 +257,7 @@ public class SlotView extends GLView {
         canvas.translate(-mScrollX, -mScrollY);
 
         int requestCount = 0;
-        int requestedSlot[] = expandIntArray(mRequestRenderSlots,
+        int[] requestedSlot = expandIntArray(mRequestRenderSlots,
                 mLayout.mVisibleEnd - mLayout.mVisibleStart);
 
         for (int i = mLayout.mVisibleEnd - 1; i >= mLayout.mVisibleStart; --i) {
@@ -344,6 +309,101 @@ public class SlotView extends GLView {
                 canvas, index, pass, rect.right - rect.left, rect.bottom - rect.top);
         canvas.restore();
         return result;
+    }
+
+    public void setStartIndex(int index) {
+        mStartIndex = index;
+    }
+
+    // Return true if the layout parameters have been changed
+    public boolean setSlotCount(int slotCount) {
+        boolean changed = mLayout.setSlotCount(slotCount);
+
+        // mStartIndex is applied the first time setSlotCount is called.
+        if (mStartIndex != INDEX_NONE) {
+            setCenterIndex(mStartIndex);
+            mStartIndex = INDEX_NONE;
+        }
+        // Reset the scroll position to avoid scrolling over the updated limit.
+        setScrollPosition(WIDE ? mScrollX : mScrollY);
+        return changed;
+    }
+
+    public int getVisibleStart() {
+        return mLayout.getVisibleStart();
+    }
+
+    public int getVisibleEnd() {
+        return mLayout.getVisibleEnd();
+    }
+
+    public int getScrollX() {
+        return mScrollX;
+    }
+
+    public int getScrollY() {
+        return mScrollY;
+    }
+
+    public Rect getSlotRect(int slotIndex, GLView rootPane) {
+        // Get slot rectangle relative to this root pane.
+        Rect offset = new Rect();
+        rootPane.getBoundsOf(this, offset);
+        Rect r = getSlotRect(slotIndex);
+        r.offset(offset.left - getScrollX(),
+                offset.top - getScrollY());
+        return r;
+    }
+
+    /**
+     * Get the SlotView's max scroll value.
+     */
+    public int getScrollLimit() {
+        return mLayout.getScrollLimit();
+    }
+
+    public interface Listener {
+        void onDown(int index);
+
+        void onUp(boolean followedByLongPress);
+
+        void onSingleTapUp(int index);
+
+        void onLongTap(int index);
+
+        void onScrollPositionChanged(int position, int total);
+    }
+
+    public interface SlotRenderer {
+        void prepareDrawing();
+
+        void onVisibleRangeChanged(int visibleStart, int visibleEnd);
+
+        void onSlotSizeChanged(int width, int height);
+
+        int renderSlot(GLCanvas canvas, int index, int pass, int width, int height);
+    }
+
+    public static class SimpleListener implements Listener {
+        @Override
+        public void onDown(int index) {
+        }
+
+        @Override
+        public void onUp(boolean followedByLongPress) {
+        }
+
+        @Override
+        public void onSingleTapUp(int index) {
+        }
+
+        @Override
+        public void onLongTap(int index) {
+        }
+
+        @Override
+        public void onScrollPositionChanged(int position, int total) {
+        }
     }
 
     public static abstract class SlotAnimation extends Animation {
@@ -411,6 +471,44 @@ public class SlotView extends GLView {
         public int slotGapLand = -1;
         public int colsLand = -1;
         public int colsPort = -1;
+    }
+
+    private static class IntegerAnimation extends Animation {
+        private int mTarget;
+        private int mCurrent = 0;
+        private int mFrom = 0;
+        private boolean mEnabled = false;
+
+        public void setEnabled(boolean enabled) {
+            mEnabled = enabled;
+        }
+
+        public void startAnimateTo(int target) {
+            if (!mEnabled) {
+                mTarget = mCurrent = target;
+                return;
+            }
+            if (target == mTarget) return;
+
+            mFrom = mCurrent;
+            mTarget = target;
+            setDuration(180);
+            start();
+        }
+
+        public int get() {
+            return mCurrent;
+        }
+
+        public int getTarget() {
+            return mTarget;
+        }
+
+        @Override
+        protected void onCalculate(float progress) {
+            mCurrent = Math.round(mFrom + progress * (mTarget - mFrom));
+            if (progress == 1f) mEnabled = false;
+        }
     }
 
     public class Layout {
@@ -519,7 +617,7 @@ public class SlotView extends GLView {
 
             // If the content length is less then the screen width, put
             // extra padding in left and right.
-            padding[1] = 0 ;//Math.max(0, (majorLength - mContentLength) / 2);
+            padding[1] = 0;//Math.max(0, (majorLength - mContentLength) / 2);
         }
 
         private void initLayoutParameters() {
@@ -527,10 +625,10 @@ public class SlotView extends GLView {
             if (mSpec.slotWidth != -1) {
                 mSlotGap = (mWidth > mHeight) ? mSpec.slotGapLand : mSpec.slotGap;
                 int cols = (mWidth > mHeight) ? mSpec.colsLand : mSpec.colsPort;
-                mSlotHeight = Math.max(1, (mWidth - (cols - 1) * mSlotGap) / cols) ;
-                mSlotWidth = mSlotHeight ;//mSpec.slotWidth;
+                mSlotHeight = Math.max(1, (mWidth - (cols - 1) * mSlotGap) / cols);
+                mSlotWidth = mSlotHeight;//mSpec.slotWidth;
             } else {
-                mSlotGap = (mWidth > mHeight) ? mSpec.slotGapLand : mSpec.slotGap;;
+                mSlotGap = (mWidth > mHeight) ? mSpec.slotGapLand : mSpec.slotGap;
                 mSlotHeight = mSpec.slotHeight;//Math.max(1, (mHeight - (rows - 1) * mSlotGap) / rows);
                 mSlotWidth = mWidth;//mSlotHeight - mSpec.slotHeightAdditional;
             }
@@ -702,7 +800,7 @@ public class SlotView extends GLView {
 
         @Override
         public boolean onFling(MotionEvent e1,
-                MotionEvent e2, float velocityX, float velocityY) {
+                               MotionEvent e2, float velocityX, float velocityY) {
             cancelDown(false);
             int scrollLimit = mLayout.getScrollLimit();
             if (scrollLimit == 0) return false;
@@ -715,7 +813,7 @@ public class SlotView extends GLView {
 
         @Override
         public boolean onScroll(MotionEvent e1,
-                MotionEvent e2, float distanceX, float distanceY) {
+                                MotionEvent e2, float distanceX, float distanceY) {
             cancelDown(false);
             float distance = WIDE ? distanceX : distanceY;
             int overDistance = mScroller.startScroll(
@@ -748,94 +846,5 @@ public class SlotView extends GLView {
                 unlockRendering();
             }
         }
-    }
-
-    public void setStartIndex(int index) {
-        mStartIndex = index;
-    }
-
-    // Return true if the layout parameters have been changed
-    public boolean setSlotCount(int slotCount) {
-        boolean changed = mLayout.setSlotCount(slotCount);
-
-        // mStartIndex is applied the first time setSlotCount is called.
-        if (mStartIndex != INDEX_NONE) {
-            setCenterIndex(mStartIndex);
-            mStartIndex = INDEX_NONE;
-        }
-        // Reset the scroll position to avoid scrolling over the updated limit.
-        setScrollPosition(WIDE ? mScrollX : mScrollY);
-        return changed;
-    }
-
-    public int getVisibleStart() {
-        return mLayout.getVisibleStart();
-    }
-
-    public int getVisibleEnd() {
-        return mLayout.getVisibleEnd();
-    }
-
-    public int getScrollX() {
-        return mScrollX;
-    }
-
-    public int getScrollY() {
-        return mScrollY;
-    }
-
-    public Rect getSlotRect(int slotIndex, GLView rootPane) {
-        // Get slot rectangle relative to this root pane.
-        Rect offset = new Rect();
-        rootPane.getBoundsOf(this, offset);
-        Rect r = getSlotRect(slotIndex);
-        r.offset(offset.left - getScrollX(),
-                offset.top - getScrollY());
-        return r;
-    }
-
-    private static class IntegerAnimation extends Animation {
-        private int mTarget;
-        private int mCurrent = 0;
-        private int mFrom = 0;
-        private boolean mEnabled = false;
-
-        public void setEnabled(boolean enabled) {
-            mEnabled = enabled;
-        }
-
-        public void startAnimateTo(int target) {
-            if (!mEnabled) {
-                mTarget = mCurrent = target;
-                return;
-            }
-            if (target == mTarget) return;
-
-            mFrom = mCurrent;
-            mTarget = target;
-            setDuration(180);
-            start();
-        }
-
-        public int get() {
-            return mCurrent;
-        }
-
-        public int getTarget() {
-            return mTarget;
-        }
-
-        @Override
-        protected void onCalculate(float progress) {
-            mCurrent = Math.round(mFrom + progress * (mTarget - mFrom));
-            if (progress == 1f) mEnabled = false;
-        }
-    }
-
-    /**
-     * Get the SlotView's max scroll value.
-     */
-    public int getScrollLimit() {
-        return mLayout.getScrollLimit();
     }
 }

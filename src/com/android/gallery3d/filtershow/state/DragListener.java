@@ -24,8 +24,8 @@ import android.widget.LinearLayout;
 class DragListener implements View.OnDragListener {
 
     private static final String LOGTAG = "DragListener";
-    private PanelTrack mStatePanelTrack;
     private static float sSlope = 0.2f;
+    private PanelTrack mStatePanelTrack;
 
     public DragListener(PanelTrack statePanelTrack) {
         mStatePanelTrack = statePanelTrack;
@@ -56,7 +56,7 @@ class DragListener implements View.OnDragListener {
                 if (mStatePanelTrack.getCurrentView() != null) {
                     setState(event);
                     View over = mStatePanelTrack.findChildAt((int) event.getX(),
-                                                             (int) event.getY());
+                            (int) event.getY());
                     if (over != null && over != mStatePanelTrack.getCurrentView()) {
                         StateView stateView = (StateView) over;
                         if (stateView != mStatePanelTrack.getCurrentView()) {

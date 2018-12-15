@@ -26,8 +26,8 @@ public class SingleItemAlbum extends MediaSet {
 
     public SingleItemAlbum(Path path, MediaItem item) {
         super(path, nextVersionNumber());
-        mItem =  item;
-        mName = "SingleItemAlbum("+mItem.getClass().getSimpleName()+")";
+        mItem = item;
+        mName = "SingleItemAlbum(" + mItem.getClass().getSimpleName() + ")";
     }
 
     @Override

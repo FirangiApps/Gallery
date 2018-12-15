@@ -33,33 +33,11 @@ public class PhotoFallbackEffect extends Animation implements SlotFilter {
 
     private static final int ANIM_DURATION = 300;
     private static final Interpolator ANIM_INTERPOLATE = new DecelerateInterpolator(1.5f);
-
-    public static class Entry {
-        public int index;
-        public Path path;
-        public Rect source;
-        public Rect dest;
-        public RawTexture texture;
-
-        public Entry(Path path, Rect source, RawTexture texture) {
-            this.path = path;
-            this.source = source;
-            this.texture = texture;
-        }
-    }
-
-    public interface PositionProvider {
-        public Rect getPosition(int index);
-        public int getItemIndex(Path path);
-    }
-
     private RectF mSource = new RectF();
     private RectF mTarget = new RectF();
     private float mProgress;
     private PositionProvider mPositionProvider;
-
     private ArrayList<Entry> mList = new ArrayList<Entry>();
-
     public PhotoFallbackEffect() {
         setDuration(ANIM_DURATION);
         setInterpolator(ANIM_INTERPOLATE);
@@ -175,5 +153,25 @@ public class PhotoFallbackEffect extends Animation implements SlotFilter {
             if (entry.index == index) return false;
         }
         return true;
+    }
+
+    public interface PositionProvider {
+        Rect getPosition(int index);
+
+        int getItemIndex(Path path);
+    }
+
+    public static class Entry {
+        public int index;
+        public Path path;
+        public Rect source;
+        public Rect dest;
+        public RawTexture texture;
+
+        public Entry(Path path, Rect source, RawTexture texture) {
+            this.path = path;
+            this.source = source;
+            this.texture = texture;
+        }
     }
 }

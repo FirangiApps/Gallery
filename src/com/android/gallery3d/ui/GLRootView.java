@@ -26,10 +26,8 @@ import android.os.Process;
 import android.os.SystemClock;
 import android.util.AttributeSet;
 import android.view.MotionEvent;
-import android.view.SurfaceHolder;
 import android.view.View;
 
-import org.codeaurora.gallery.R;
 import com.android.gallery3d.anim.CanvasAnimation;
 import com.android.gallery3d.common.ApiHelper;
 import com.android.gallery3d.common.Utils;
@@ -42,9 +40,10 @@ import com.android.gallery3d.util.GalleryUtils;
 import com.android.gallery3d.util.MotionEventHelper;
 import com.android.gallery3d.util.Profile;
 
+import org.codeaurora.gallery.R;
+
 import java.util.ArrayDeque;
 import java.util.ArrayList;
-import java.util.concurrent.locks.Condition;
 import java.util.concurrent.locks.ReentrantLock;
 
 import javax.microedition.khronos.egl.EGLConfig;
@@ -64,26 +63,25 @@ public class GLRootView extends GLSurfaceView
     private static final String TAG = "GLRootView";
 
     private static final boolean DEBUG_FPS = false;
-    private int mFrameCount = 0;
-    private long mFrameCountingStart = 0;
-
     private static final boolean DEBUG_INVALIDATE = false;
-    private int mInvalidateColor = 0;
-
     private static final boolean DEBUG_DRAWING_STAT = false;
-
     private static final boolean DEBUG_PROFILE = false;
     private static final boolean DEBUG_PROFILE_SLOW_ONLY = false;
-
     private static final int FLAG_INITIALIZED = 1;
     private static final int FLAG_NEED_LAYOUT = 2;
-
     private static final long FRAME_INTERVAL = 16000000;
-
+    private final ArrayList<CanvasAnimation> mAnimations =
+            new ArrayList<CanvasAnimation>();
+    private final ArrayDeque<OnGLIdleListener> mIdleListeners =
+            new ArrayDeque<OnGLIdleListener>();
+    private final IdleRunner mIdleRunner = new IdleRunner();
+    private final ReentrantLock mRenderLock = new ReentrantLock();
+    private int mFrameCount = 0;
+    private long mFrameCountingStart = 0;
+    private int mInvalidateColor = 0;
     private GL11 mGL;
     private GLCanvas mCanvas;
     private GLView mContentView;
-
     private OrientationSource mOrientationSource;
     // mCompensation is the difference between the UI orientation on GLCanvas
     // and the framework orientation. See OrientationManager for details.
@@ -92,25 +90,19 @@ public class GLRootView extends GLSurfaceView
     // with mCompensation.
     private Matrix mCompensationMatrix = new Matrix();
     private int mDisplayRotation;
-
     private int mFlags = FLAG_NEED_LAYOUT;
     private volatile boolean mRenderRequested = false;
-
-    private final ArrayList<CanvasAnimation> mAnimations =
-            new ArrayList<CanvasAnimation>();
-
-    private final ArrayDeque<OnGLIdleListener> mIdleListeners =
-            new ArrayDeque<OnGLIdleListener>();
-
-    private final IdleRunner mIdleRunner = new IdleRunner();
-
-    private final ReentrantLock mRenderLock = new ReentrantLock();
-
     private long mLastDrawFinishTime;
     private boolean mInDownState = false;
     private boolean mFirstDraw = true;
 
     private long mDueTime;
+    private Runnable mRequestRenderOnAnimationFrame = new Runnable() {
+        @Override
+        public void run() {
+            superRequestRender();
+        }
+    };
 
     public GLRootView(Context context) {
         this(context, null);
@@ -196,13 +188,6 @@ public class GLRootView extends GLSurfaceView
             super.requestRender();
         }
     }
-
-    private Runnable mRequestRenderOnAnimationFrame = new Runnable() {
-        @Override
-        public void run() {
-            superRequestRender();
-        }
-    };
 
     private void superRequestRender() {
         super.requestRender();
@@ -361,13 +346,13 @@ public class GLRootView extends GLSurfaceView
         if (mFirstDraw) {
             mFirstDraw = false;
             post(new Runnable() {
-                    @Override
-                    public void run() {
-                        View root = getRootView();
-                        View cover = root.findViewById(R.id.gl_root_cover);
-                        cover.setVisibility(GONE);
-                    }
-                });
+                @Override
+                public void run() {
+                    View root = getRootView();
+                    View cover = root.findViewById(R.id.gl_root_cover);
+                    cover.setVisibility(GONE);
+                }
+            });
         }
 
         if (DEBUG_PROFILE_SLOW_ONLY) {
@@ -406,7 +391,7 @@ public class GLRootView extends GLSurfaceView
         mCanvas.save(GLCanvas.SAVE_FLAG_ALL);
         rotateCanvas(-mCompensation);
         if (mContentView != null) {
-           mContentView.render(mCanvas);
+            mContentView.render(mCanvas);
         } else {
             // Make sure we always draw something to prevent displaying garbage
             mCanvas.clearBuffer();
@@ -484,45 +469,6 @@ public class GLRootView extends GLSurfaceView
         }
     }
 
-    private class IdleRunner implements Runnable {
-        // true if the idle runner is in the queue
-        private boolean mActive = false;
-
-        @Override
-        public void run() {
-            OnGLIdleListener listener;
-            synchronized (mIdleListeners) {
-                mActive = false;
-                if (mIdleListeners.isEmpty()) return;
-                listener = mIdleListeners.removeFirst();
-            }
-            mRenderLock.lock();
-            boolean keepInQueue = false;
-            try {
-                if (mCanvas != null) {
-                    long t = System.nanoTime();
-                    if (mDueTime < t) {
-                        mDueTime = t + FRAME_INTERVAL / 2;
-                    }
-                    keepInQueue = listener.onGLIdle(mCanvas, mRenderRequested, mDueTime);
-                }
-            } finally {
-                mRenderLock.unlock();
-            }
-            synchronized (mIdleListeners) {
-                if (keepInQueue) mIdleListeners.addLast(listener);
-                if (!mRenderRequested && !mIdleListeners.isEmpty()) enable();
-            }
-        }
-
-        public void enable() {
-            // Who gets the flag can add it to the queue
-            if (mActive) return;
-            mActive = true;
-            queueEvent(this);
-        }
-    }
-
     @Override
     public void lockRenderThread() {
         mRenderLock.lock();
@@ -564,7 +510,6 @@ public class GLRootView extends GLSurfaceView
         return mCompensationMatrix;
     }
 
-
     @Override
     @TargetApi(Build.VERSION_CODES.JELLY_BEAN)
     public void setLightsOutMode(boolean enabled) {
@@ -578,6 +523,45 @@ public class GLRootView extends GLSurfaceView
             }
         }
         setSystemUiVisibility(flags);
+    }
+
+    private class IdleRunner implements Runnable {
+        // true if the idle runner is in the queue
+        private boolean mActive = false;
+
+        @Override
+        public void run() {
+            OnGLIdleListener listener;
+            synchronized (mIdleListeners) {
+                mActive = false;
+                if (mIdleListeners.isEmpty()) return;
+                listener = mIdleListeners.removeFirst();
+            }
+            mRenderLock.lock();
+            boolean keepInQueue = false;
+            try {
+                if (mCanvas != null) {
+                    long t = System.nanoTime();
+                    if (mDueTime < t) {
+                        mDueTime = t + FRAME_INTERVAL / 2;
+                    }
+                    keepInQueue = listener.onGLIdle(mCanvas, mRenderRequested, mDueTime);
+                }
+            } finally {
+                mRenderLock.unlock();
+            }
+            synchronized (mIdleListeners) {
+                if (keepInQueue) mIdleListeners.addLast(listener);
+                if (!mRenderRequested && !mIdleListeners.isEmpty()) enable();
+            }
+        }
+
+        public void enable() {
+            // Who gets the flag can add it to the queue
+            if (mActive) return;
+            mActive = true;
+            queueEvent(this);
+        }
     }
 
 }

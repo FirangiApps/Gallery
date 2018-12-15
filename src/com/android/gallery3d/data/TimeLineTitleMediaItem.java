@@ -22,9 +22,7 @@ package com.android.gallery3d.data;
 import android.graphics.Bitmap;
 import android.graphics.BitmapRegionDecoder;
 
-import com.android.gallery3d.common.Utils;
 import com.android.gallery3d.ui.TimeLineTitleMaker;
-import com.android.gallery3d.util.GalleryUtils;
 import com.android.gallery3d.util.ThreadPool.Job;
 
 public class TimeLineTitleMediaItem extends MediaItem {
@@ -48,6 +46,7 @@ public class TimeLineTitleMediaItem extends MediaItem {
     public void setTitle(String title) {
         mTitle = title;
     }
+
     public Job<Bitmap> requestImage(int type) {
         return null;
     }

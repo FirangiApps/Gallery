@@ -16,13 +16,6 @@
 
 package com.android.gallery3d.filtershow;
 
-import java.io.File;
-import java.lang.ref.WeakReference;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Locale;
-import java.util.Vector;
-
 import android.app.ActionBar;
 import android.app.AlertDialog;
 import android.app.ProgressDialog;
@@ -85,8 +78,6 @@ import android.widget.ShareActionProvider;
 import android.widget.ShareActionProvider.OnShareTargetSelectedListener;
 import android.widget.Toast;
 
-import org.codeaurora.gallery.R;
-
 import com.android.gallery3d.app.AbstractPermissionActivity;
 import com.android.gallery3d.app.PhotoPage;
 import com.android.gallery3d.data.LocalAlbum;
@@ -101,9 +92,9 @@ import com.android.gallery3d.filtershow.category.StraightenPanel;
 import com.android.gallery3d.filtershow.category.SwipableView;
 import com.android.gallery3d.filtershow.category.TruePortraitMaskEditorPanel;
 import com.android.gallery3d.filtershow.category.TrueScannerPanel;
+import com.android.gallery3d.filtershow.category.WaterMarkView;
 import com.android.gallery3d.filtershow.data.FilterPresetSource;
 import com.android.gallery3d.filtershow.data.FilterPresetSource.SaveOption;
-import com.android.gallery3d.filtershow.category.WaterMarkView;
 import com.android.gallery3d.filtershow.data.UserPresetsManager;
 import com.android.gallery3d.filtershow.editors.Editor;
 import com.android.gallery3d.filtershow.editors.EditorCrop;
@@ -159,54 +150,50 @@ import com.thundersoft.hz.selfportrait.detect.FaceDetect;
 import com.thundersoft.hz.selfportrait.detect.FaceInfo;
 import com.thundersoft.hz.selfportrait.makeup.engine.MakeupEngine;
 
+import org.codeaurora.gallery.R;
+
+import java.io.File;
+import java.lang.ref.WeakReference;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Locale;
+import java.util.Vector;
+
 public class FilterShowActivity extends AbstractPermissionActivity implements OnItemClickListener,
-OnShareTargetSelectedListener, DialogInterface.OnShowListener,
-DialogInterface.OnDismissListener, PopupMenu.OnDismissListener{
-
-    private String mAction = "";
-    MasterImage mMasterImage = null;
-
-    private static final long LIMIT_SUPPORTS_HIGHRES = 134217728; // 128Mb
+        OnShareTargetSelectedListener, DialogInterface.OnShowListener,
+        DialogInterface.OnDismissListener, PopupMenu.OnDismissListener {
 
     public static final String TINY_PLANET_ACTION = "com.android.camera.action.TINY_PLANET";
     public static final String LAUNCH_FULLSCREEN = "launch-fullscreen";
+    public static final int SELECT_FUSION_UNDERLAY = 2;
+    private static final long LIMIT_SUPPORTS_HIGHRES = 134217728; // 128Mb
+    private static final int SELECT_PICTURE = 1;
+    private static final String LOGTAG = "FilterShowActivity";
+    private final Vector<ImageShow> mImageViews = new Vector<ImageShow>();
+    public Point mHintTouchPoint = new Point();
+    MasterImage mMasterImage = null;
+    RelativeLayout rlImageContainer;
+    private String mAction = "";
     private ImageShow mImageShow = null;
-
     private View mSaveButton = null;
-
     private EditorPlaceHolder mEditorPlaceHolder = new EditorPlaceHolder(this);
     private Editor mCurrentEditor = null;
-
     private MediaPickerFragment mMediaPicker;
-
-    private static final int SELECT_PICTURE = 1;
-    public static final int SELECT_FUSION_UNDERLAY = 2;
-    private static final String LOGTAG = "FilterShowActivity";
-
     private boolean mShowingTinyPlanet = false;
     private boolean mShowingImageStatePanel = false;
     private boolean mShowingVersionsPanel = false;
     private boolean mShowingFilterGenerator = false;
-
-    private final Vector<ImageShow> mImageViews = new Vector<ImageShow>();
-
     private ShareActionProvider mShareActionProvider;
     private File mSharedOutputFile = null;
-
     private boolean mSharingImage = false;
-
     private WeakReference<ProgressDialog> mSavingProgressDialog;
-
     private LoadBitmapTask mLoadBitmapTask;
     private LoadHighresBitmapTask mHiResBitmapTask;
     private ParseDepthMapTask mParseDepthMapTask;
     private LoadTruePortraitTask mLoadTruePortraitTask;
-
     private Uri mOriginalImageUri = null;
     private ImagePreset mOriginalPreset = null;
-
     private Uri mSelectedImageUri = null;
-
     private ArrayList<Action> mActions = new ArrayList<Action>();
     private UserPresetsManager mUserPresetsManager = null;
     private UserPresetsAdapter mUserPresetsAdapter = null;
@@ -227,33 +214,17 @@ DialogInterface.OnDismissListener, PopupMenu.OnDismissListener{
     private Vector<FilterUserPresetRepresentation> mVersions =
             new Vector<FilterUserPresetRepresentation>();
     private int mVersionsCounter = 0;
-
     private boolean mHandlingSwipeButton = false;
     private View mHandledSwipeView = null;
     private float mHandledSwipeViewLastDelta = 0;
     private float mSwipeStartX = 0;
     private float mSwipeStartY = 0;
-
     private ProcessingService mBoundService;
     private boolean mIsBound = false;
     private Menu mMenu;
     private DialogInterface mCurrentDialog = null;
     private PopupMenu mCurrentMenu = null;
     private boolean mReleaseDualCam = false;
-    private ImageButton imgComparison;
-    private String mPopUpText, mCancel;
-    RelativeLayout rlImageContainer;
-    private int mEditrCropButtonSelect = 0;
-    private boolean isComingFromEditorScreen;
-    private boolean mIsReloadByConfigurationChanged;
-    private AlertDialog.Builder mBackAlertDialogBuilder;
-
-    private ProgressDialog mLoadingDialog;
-    private long mRequestId = -1;
-    private WaterMarkView mWaterMarkView;
-    private boolean hasWaterMark;
-    private String locationStr;
-    private String temperature;
     protected Handler handler = new Handler() {
         @Override
         public void handleMessage(Message msg) {
@@ -267,33 +238,23 @@ DialogInterface.OnDismissListener, PopupMenu.OnDismissListener{
             super.handleMessage(msg);
         }
     };
+    private ImageButton imgComparison;
+    private String mPopUpText, mCancel;
+    private int mEditrCropButtonSelect = 0;
+    private boolean isComingFromEditorScreen;
+    private boolean mIsReloadByConfigurationChanged;
+    private AlertDialog.Builder mBackAlertDialogBuilder;
+    private ProgressDialog mLoadingDialog;
+    private long mRequestId = -1;
+    private WaterMarkView mWaterMarkView;
+    private boolean hasWaterMark;
+    private String locationStr;
+    private String temperature;
     private SaveWaterMark mSaveWaterMark = new SaveWaterMark();
-
     private PresetManagementDialog mPresetDialog;
     private FilterPresetSource mFilterPresetSource;
-    private ArrayList <SaveOption>  tempFilterArray = new ArrayList<SaveOption>();
+    private ArrayList<SaveOption> tempFilterArray = new ArrayList<SaveOption>();
     private boolean mChangeable = false;
-    private int mOrientation;
-
-    public ProcessingService getProcessingService() {
-        return mBoundService;
-    }
-
-    public boolean isSimpleEditAction() {
-        return !PhotoPage.ACTION_NEXTGEN_EDIT.equalsIgnoreCase(mAction);
-    }
-
-    public long getRequestId() {
-        return mRequestId;
-    }
-
-    private void registerFilter() {
-        IntentFilter filter = new IntentFilter();
-        filter.addAction(ProcessingService.SAVE_IMAGE_COMPLETE_ACTION);
-        filter.addAction(Intent.ACTION_LOCALE_CHANGED);
-        registerReceiver(mHandlerReceiver, filter);
-    }
-
     private final BroadcastReceiver mHandlerReceiver = new BroadcastReceiver() {
         @Override
         public void onReceive(Context context, Intent intent) {
@@ -314,7 +275,7 @@ DialogInterface.OnDismissListener, PopupMenu.OnDismissListener{
             }
         }
     };
-
+    private int mOrientation;
     private boolean canUpdataUI = false;
     private ServiceConnection mConnection = new ServiceConnection() {
         @Override
@@ -326,7 +287,7 @@ DialogInterface.OnDismissListener, PopupMenu.OnDismissListener{
              * service that we know is running in our own process, we can
              * cast its IBinder to a concrete class and directly access it.
              */
-            mBoundService = ((ProcessingService.LocalBinder)service).getService();
+            mBoundService = ((ProcessingService.LocalBinder) service).getService();
             updateUIAfterServiceStarted();
         }
 
@@ -343,6 +304,37 @@ DialogInterface.OnDismissListener, PopupMenu.OnDismissListener{
             MasterImage.setMaster(null);
         }
     };
+
+    public static boolean completeSaveFilters(FilterPresetSource mFilterPresetSource,
+                                              ArrayList<SaveOption> tempFilterArray) {
+
+        for (int i = 0; i < tempFilterArray.size(); i++) {
+            String name = tempFilterArray.get(i).name;
+            String filteredUri = tempFilterArray.get(i).Uri;
+            if (mFilterPresetSource.insertPreset(name, filteredUri) == false) return false;
+        }
+        tempFilterArray.clear();
+        return true;
+    }
+
+    public ProcessingService getProcessingService() {
+        return mBoundService;
+    }
+
+    public boolean isSimpleEditAction() {
+        return !PhotoPage.ACTION_NEXTGEN_EDIT.equalsIgnoreCase(mAction);
+    }
+
+    public long getRequestId() {
+        return mRequestId;
+    }
+
+    private void registerFilter() {
+        IntentFilter filter = new IntentFilter();
+        filter.addAction(ProcessingService.SAVE_IMAGE_COMPLETE_ACTION);
+        filter.addAction(Intent.ACTION_LOCALE_CHANGED);
+        registerReceiver(mHandlerReceiver, filter);
+    }
 
     void doBindService() {
         /*
@@ -497,7 +489,7 @@ DialogInterface.OnDismissListener, PopupMenu.OnDismissListener{
             }.run();
             return;
         }
-        if(currentId == EditorTruePortraitMask.ID) {
+        if (currentId == EditorTruePortraitMask.ID) {
             new Runnable() {
                 @Override
                 public void run() {
@@ -628,10 +620,10 @@ DialogInterface.OnDismissListener, PopupMenu.OnDismissListener{
         mCancel = r.getString(R.string.cancel).toUpperCase(Locale.getDefault());
         int marginTop = r.getDimensionPixelSize(R.dimen.compare_margin_top);
         int marginRight = r.getDimensionPixelSize(R.dimen.compare_margin_right);
-        imgComparison = (ImageButton) findViewById(R.id.imgComparison);
-        rlImageContainer = (RelativeLayout) findViewById(R.id.imageContainer);
+        imgComparison = findViewById(R.id.imgComparison);
+        rlImageContainer = findViewById(R.id.imageContainer);
 
-        mImageShow = (ImageShow) findViewById(R.id.imageShow);
+        mImageShow = findViewById(R.id.imageShow);
         mImageViews.add(mImageShow);
 
         setupEditors();
@@ -727,11 +719,11 @@ DialogInterface.OnDismissListener, PopupMenu.OnDismissListener{
         actionBar.setBackgroundDrawable(new ColorDrawable(getResources()
                 .getColor(R.color.edit_actionbar_background)));
         actionBar.setCustomView(R.layout.filtershow_actionbar_effects);
-        ImageButton cancelButton = (ImageButton) actionBar.getCustomView()
+        ImageButton cancelButton = actionBar.getCustomView()
                 .findViewById(R.id.cancelFilter);
-        ImageButton applyButton = (ImageButton) actionBar.getCustomView()
+        ImageButton applyButton = actionBar.getCustomView()
                 .findViewById(R.id.applyFilter);
-        Button editTitle = (Button) actionBar.getCustomView().findViewById(
+        Button editTitle = actionBar.getCustomView().findViewById(
                 R.id.applyEffect);
         editTitle.setTransformationMethod(null);
         View actionControl = actionBar.getCustomView().findViewById(
@@ -754,7 +746,7 @@ DialogInterface.OnDismissListener, PopupMenu.OnDismissListener{
         });
 
         if (currentEditor != null) {
-            if(!currentEditor.showsActionBarControls()) {
+            if (!currentEditor.showsActionBarControls()) {
                 cancelButton.setVisibility(View.GONE);
                 applyButton.setVisibility(View.GONE);
             }
@@ -768,7 +760,7 @@ DialogInterface.OnDismissListener, PopupMenu.OnDismissListener{
 
     private void showActionBar(boolean show) {
         ActionBar actionBar = getActionBar();
-        if (actionBar != null ) {
+        if (actionBar != null) {
             if (show) {
                 if (!actionBar.isShowing()) {
                     actionBar.show();
@@ -789,7 +781,7 @@ DialogInterface.OnDismissListener, PopupMenu.OnDismissListener{
         masterImage.onHistoryItemClick(position);
         invalidateViews();
 
-        if(!masterImage.hasFusionApplied()) {
+        if (!masterImage.hasFusionApplied()) {
             masterImage.setFusionUnderlay(null);
             masterImage.setScaleFactor(1);
             masterImage.resetTranslation();
@@ -896,27 +888,27 @@ DialogInterface.OnDismissListener, PopupMenu.OnDismissListener{
         }
         mUserPresetsManager.delete(rep.getId());
         updateUserPresetsFromManager();
-     }
+    }
 
-    public void handlePreset(Action action,View view,int i) {
+    public void handlePreset(Action action, View view, int i) {
         mChangeable = true;
         mHandledSwipeView = view;
         final Action ac = action;
         mFilterPresetSource = new FilterPresetSource(this);
         switch (i) {
             case R.id.renameButton:
-                final View layout = View.inflate(this,R.layout.filtershow_default_edittext,null);
+                final View layout = View.inflate(this, R.layout.filtershow_default_edittext, null);
                 AlertDialog.Builder renameAlertDialogBuilder = new AlertDialog.Builder(this);
                 renameAlertDialogBuilder.setTitle(R.string.rename_before_exit);
                 renameAlertDialogBuilder.setView(layout);
                 renameAlertDialogBuilder.setPositiveButton(R.string.ok,
-                        new DialogInterface.OnClickListener(){
+                        new DialogInterface.OnClickListener() {
                             @Override
-                            public void onClick(DialogInterface dialog, int id){
-                                EditText mEditText = (EditText) layout.findViewById(
+                            public void onClick(DialogInterface dialog, int id) {
+                                EditText mEditText = layout.findViewById(
                                         R.id.filtershow_default_edit);
                                 String name = String.valueOf(mEditText.getText());
-                                if ( (name.trim().length() == 0)|| name.isEmpty()) {
+                                if ((name.trim().length() == 0) || name.isEmpty()) {
                                     Toast.makeText(getApplicationContext(),
                                             getString(R.string.filter_name_notification),
                                             Toast.LENGTH_SHORT).show();
@@ -934,7 +926,7 @@ DialogInterface.OnDismissListener, PopupMenu.OnDismissListener{
                 renameAlertDialogBuilder.setNegativeButton(mCancel,
                         new DialogInterface.OnClickListener() {
                             @Override
-                            public void onClick (DialogInterface dialog, int id){
+                            public void onClick(DialogInterface dialog, int id) {
 
                             }
                         }
@@ -945,13 +937,13 @@ DialogInterface.OnDismissListener, PopupMenu.OnDismissListener{
             case R.id.deleteButton:
                 String name = action.getName();
                 AlertDialog.Builder deleteAlertDialogBuilder = new AlertDialog.Builder(this);
-                String textview ="Do you want to delete "+name+"?";
+                String textview = "Do you want to delete " + name + "?";
                 deleteAlertDialogBuilder.setMessage(textview)
                         .setTitle(R.string.delete_before_exit);
                 deleteAlertDialogBuilder.setPositiveButton(R.string.ok,
-                        new DialogInterface.OnClickListener(){
+                        new DialogInterface.OnClickListener() {
                             @Override
-                            public void onClick(DialogInterface dialog, int id){
+                            public void onClick(DialogInterface dialog, int id) {
                                 ((SwipableView) mHandledSwipeView).delete();
                                 dialog.dismiss();
                             }
@@ -960,7 +952,7 @@ DialogInterface.OnDismissListener, PopupMenu.OnDismissListener{
                 deleteAlertDialogBuilder.setNegativeButton(mCancel,
                         new DialogInterface.OnClickListener() {
                             @Override
-                            public void onClick (DialogInterface dialog, int id){
+                            public void onClick(DialogInterface dialog, int id) {
                                 dialog.dismiss();
 
                             }
@@ -973,7 +965,7 @@ DialogInterface.OnDismissListener, PopupMenu.OnDismissListener{
 
     public void removePreset(Action action) {
         FilterPresetRepresentation rep =
-                (FilterPresetRepresentation)action.getRepresentation();
+                (FilterPresetRepresentation) action.getRepresentation();
         if (rep == null) {
             return;
         }
@@ -992,7 +984,7 @@ DialogInterface.OnDismissListener, PopupMenu.OnDismissListener{
 
     public void renamePreset(Action action, String name) {
         FilterPresetRepresentation rep =
-                (FilterPresetRepresentation)action.getRepresentation();
+                (FilterPresetRepresentation) action.getRepresentation();
         if (rep == null) {
             return;
         }
@@ -1005,7 +997,7 @@ DialogInterface.OnDismissListener, PopupMenu.OnDismissListener{
                 }
             }
         }
-        mFilterPresetSource.updatePresetName(rep.getId(),name);
+        mFilterPresetSource.updatePresetName(rep.getId(), name);
         fillLooks();
     }
 
@@ -1044,7 +1036,7 @@ DialogInterface.OnDismissListener, PopupMenu.OnDismissListener{
     }
 
     private void fillMakeup() {
-        if(!SimpleMakeupImageFilter.HAS_TS_MAKEUP) {
+        if (!SimpleMakeupImageFilter.HAS_TS_MAKEUP) {
             return;
         }
 
@@ -1095,11 +1087,11 @@ DialogInterface.OnDismissListener, PopupMenu.OnDismissListener{
     private void fillPresetFilter() {
         FiltersManager filtersManager = FiltersManager.getManager();
         ArrayList<FilterRepresentation> filtersRepresentations = filtersManager.getFilterPreset();
-        if(mChangeable) {
+        if (mChangeable) {
             ArrayList<FilterRepresentation> mFilterPreset = new ArrayList<FilterRepresentation>();
             ArrayList<SaveOption> ret = mFilterPresetSource.getAllUserPresets();
             if (ret == null) return;
-            for (int id = 0; id < ret.size(); id ++) {
+            for (int id = 0; id < ret.size(); id++) {
                 FilterPresetRepresentation representation = new FilterPresetRepresentation(
                         ret.get(id).name, ret.get(id)._id, id + 1);
                 Uri filteredUri = Uri.parse(ret.get(id).Uri);
@@ -1107,8 +1099,8 @@ DialogInterface.OnDismissListener, PopupMenu.OnDismissListener{
                 representation.setSerializationName("Custom");
                 mFilterPreset.add(representation);
             }
-            if (tempFilterArray.size() != 0){
-                for (int id = 0; id < tempFilterArray.size(); id ++) {
+            if (tempFilterArray.size() != 0) {
+                for (int id = 0; id < tempFilterArray.size(); id++) {
                     FilterPresetRepresentation representation = new FilterPresetRepresentation(
                             tempFilterArray.get(id).name, tempFilterArray.get(id)._id, id + 1);
                     Uri filteredUri = Uri.parse(tempFilterArray.get(id).Uri);
@@ -1123,7 +1115,7 @@ DialogInterface.OnDismissListener, PopupMenu.OnDismissListener{
 
         if (filtersRepresentations == null) return;
         for (FilterRepresentation representation : filtersRepresentations) {
-            mCategoryLooksAdapter.add(new Action(this, representation, Action.FULL_VIEW,true));
+            mCategoryLooksAdapter.add(new Action(this, representation, Action.FULL_VIEW, true));
         }
     }
 
@@ -1225,7 +1217,7 @@ DialogInterface.OnDismissListener, PopupMenu.OnDismissListener{
     }
 
     private void setupEditors() {
-        FrameLayout editorContainer = (FrameLayout) findViewById(R.id.editorContainer);
+        FrameLayout editorContainer = findViewById(R.id.editorContainer);
         mEditorPlaceHolder.setContainer(editorContainer);
         EditorManager.addEditors(mEditorPlaceHolder);
         mEditorPlaceHolder.setOldViews(mImageViews);
@@ -1258,7 +1250,7 @@ DialogInterface.OnDismissListener, PopupMenu.OnDismissListener{
         mParseDepthMapTask = new ParseDepthMapTask();
         mParseDepthMapTask.execute(uri);
 
-        if(TruePortraitNativeEngine.getInstance().isLibLoaded()) {
+        if (TruePortraitNativeEngine.getInstance().isLibLoaded()) {
             mLoadTruePortraitTask = new LoadTruePortraitTask();
             mLoadTruePortraitTask.execute(uri);
         }
@@ -1460,15 +1452,15 @@ DialogInterface.OnDismissListener, PopupMenu.OnDismissListener{
         if (representation.getFilterType() == FilterRepresentation.TYPE_DUALCAM) {
             DisplayMetrics dm = getResources().getDisplayMetrics();
             float[] mTmpPoint = new float[2];
-            mTmpPoint[0] = dm.widthPixels/2;
-            mTmpPoint[1] = dm.heightPixels/2;
+            mTmpPoint[0] = dm.widthPixels / 2;
+            mTmpPoint[1] = dm.heightPixels / 2;
             Matrix m = MasterImage.getImage().getScreenToImageMatrix(true);
             m.mapPoints(mTmpPoint);
             if (representation instanceof FilterDualCamBasicRepresentation) {
-                ((FilterDualCamBasicRepresentation)representation).setPoint((int)mTmpPoint[0],(int)mTmpPoint[1]);
+                ((FilterDualCamBasicRepresentation) representation).setPoint((int) mTmpPoint[0], (int) mTmpPoint[1]);
             }
             if (representation instanceof FilterDualCamFusionRepresentation) {
-                ((FilterDualCamFusionRepresentation)representation).setPoint((int)mTmpPoint[0],(int)mTmpPoint[1]);
+                ((FilterDualCamFusionRepresentation) representation).setPoint((int) mTmpPoint[0], (int) mTmpPoint[1]);
             }
         }
         if (representation.getFilterType() == FilterRepresentation.TYPE_WATERMARK) {
@@ -1501,7 +1493,7 @@ DialogInterface.OnDismissListener, PopupMenu.OnDismissListener{
 
     private void showWaterMark(FilterRepresentation representation) {
         FilterWatermarkRepresentation watermarkRepresentation =
-                (FilterWatermarkRepresentation)representation;
+                (FilterWatermarkRepresentation) representation;
         if (mWaterMarkView != null) {
             rlImageContainer.removeView(mWaterMarkView);
             hasWaterMark = false;
@@ -1558,6 +1550,10 @@ DialogInterface.OnDismissListener, PopupMenu.OnDismissListener{
         return mEditorPlaceHolder.getEditor(editorID);
     }
 
+    public int getCurrentPanel() {
+        return mCurrentPanel;
+    }
+
     public void setCurrentPanel(int currentPanel) {
         mCurrentPanel = currentPanel;
         if (mMasterImage == null) {
@@ -1565,10 +1561,6 @@ DialogInterface.OnDismissListener, PopupMenu.OnDismissListener{
         }
         HistoryManager adapter = mMasterImage.getHistory();
         adapter.setActiveFilter(currentPanel);
-    }
-
-    public int getCurrentPanel() {
-        return mCurrentPanel;
     }
 
     public void updateCategories() {
@@ -1596,7 +1588,7 @@ DialogInterface.OnDismissListener, PopupMenu.OnDismissListener{
     }
 
     @Override
-    public void onDismiss(PopupMenu popupMenu){
+    public void onDismiss(PopupMenu popupMenu) {
         if (mCurrentMenu == null) {
             return;
         }
@@ -1629,13 +1621,13 @@ DialogInterface.OnDismissListener, PopupMenu.OnDismissListener{
     public void onMediaPickerResult(Uri selImg) {
         mFilterPresetSource = new FilterPresetSource(this);
         int id = nameFilter(mFilterPresetSource, tempFilterArray);
-        FilterPresetRepresentation fp= new FilterPresetRepresentation(
+        FilterPresetRepresentation fp = new FilterPresetRepresentation(
                 getString(R.string.filtershow_preset_title) + id, id, id);
         fp.setSerializationName("Custom");
         fp.setUri(selImg);
         ImagePreset preset = new ImagePreset();
         preset.addFilter(fp);
-        SaveOption sp= new SaveOption();
+        SaveOption sp = new SaveOption();
         sp._id = id;
         sp.name = "Custom" + id;
         sp.Uri = selImg.toString();
@@ -1653,9 +1645,9 @@ DialogInterface.OnDismissListener, PopupMenu.OnDismissListener{
         removeSeekBarPanel();
         showActionBar(true);
         loadMainPanel();
-        if(mEditorPlaceHolder != null)
+        if (mEditorPlaceHolder != null)
             mEditorPlaceHolder.hide();
-        if(mImageShow != null)
+        if (mImageShow != null)
             mImageShow.setVisibility(View.VISIBLE);
         updateCategories();
         mCategoryLooksAdapter.setSelected(pos);
@@ -1689,7 +1681,7 @@ DialogInterface.OnDismissListener, PopupMenu.OnDismissListener{
     }
 
     public FilterRepresentation createUserPresentaion(Uri selImg, int index) {
-        FilterPresetRepresentation fp= new FilterPresetRepresentation(
+        FilterPresetRepresentation fp = new FilterPresetRepresentation(
                 getString(R.string.filtershow_preset_title) + index, index, index);
         fp.setSerializationName("Custom");
         fp.setUri(selImg);
@@ -1701,64 +1693,6 @@ DialogInterface.OnDismissListener, PopupMenu.OnDismissListener{
         return preset.getLastRepresentation();
     }
 
-    private class LoadHighresBitmapTask extends AsyncTask<Void, Void, Boolean> {
-        @Override
-        protected Boolean doInBackground(Void... params) {
-            MasterImage master = MasterImage.getImage();
-            if (master.supportsHighRes()) {
-                int highresPreviewSize = Math.min(MasterImage.MAX_BITMAP_DIM, getScreenImageSize());
-                Log.d(LOGTAG, "FilterShowActivity.LoadHighresBitmapTask.doInBackground(): after, highresPreviewSize is " + highresPreviewSize);
-                Rect bounds = new Rect();
-                Bitmap originalHires = ImageLoader.loadOrientedConstrainedBitmap(master.getUri(),
-                        master.getActivity(), highresPreviewSize,
-                        master.getOrientation(), bounds);
-
-                // Force the bitmap to even width and height which is required by beautification algo
-                Bitmap tempBmp = MasterImage.convertToEvenNumberWidthImage(originalHires);
-                if(tempBmp != null && originalHires != null) {
-                    if(!originalHires.isRecycled() && originalHires != tempBmp) {
-                        originalHires.recycle();
-                    }
-                    originalHires = tempBmp;
-                }
-
-                master.setOriginalBounds(bounds);
-                master.setOriginalBitmapHighres(originalHires);
-                Log.d(LOGTAG, "FilterShowActivity.LoadHighresBitmapTask.doInBackground(): originalHires.WH is (" + originalHires.getWidth()
-                        + ", " + originalHires.getHeight() +"), bounds is " + bounds.toString());
-                mBoundService.setOriginalBitmapHighres(originalHires);
-                master.warnListeners();
-            }
-            return true;
-        }
-
-        @Override
-        protected void onPostExecute(Boolean result) {
-            Bitmap highresBitmap = MasterImage.getImage().getOriginalBitmapHighres();
-            if (highresBitmap != null) {
-                float highResPreviewScale = (float) highresBitmap.getWidth()
-                        / (float) MasterImage.getImage().getOriginalBounds().width();
-                Log.d(LOGTAG, "FilterShowActivity.LoadHighresBitmapTask.onPostExecute(): highResPreviewScale is " + highResPreviewScale);
-                mBoundService.setHighresPreviewScaleFactor(highResPreviewScale);
-            }
-
-            MasterImage.getImage().warnListeners();
-        }
-    }
-
-    private class ParseDepthMapTask extends AsyncTask<Uri, Void, Boolean> {
-        @Override
-        protected Boolean doInBackground(Uri... params) {
-            return MasterImage.getImage().parseDepthMap(FilterShowActivity.this, params[0]);
-        }
-
-        @Override
-        protected void onPostExecute(Boolean result) {
-            showDualCameraButton(result);
-            stopLoadingIndicator();
-        }
-    }
-
     public boolean isLoadingVisible() {
         if (mLoadingDialog != null) {
             return mLoadingDialog.isShowing();
@@ -1768,7 +1702,7 @@ DialogInterface.OnDismissListener, PopupMenu.OnDismissListener{
     }
 
     public void startLoadingIndicator() {
-        if(mLoadingDialog == null) {
+        if (mLoadingDialog == null) {
             mLoadingDialog = new ProgressDialog(this);
             mLoadingDialog.setMessage(getString(R.string.loading_image));
             mLoadingDialog.setProgressStyle(ProgressDialog.STYLE_SPINNER);
@@ -1792,148 +1726,6 @@ DialogInterface.OnDismissListener, PopupMenu.OnDismissListener{
         }
     }
 
-    private class LoadTruePortraitTask extends AsyncTask<Uri, Void, Boolean> {
-
-        @Override
-        protected Boolean doInBackground(Uri... params) {
-            boolean result = false;
-            Bitmap src = ImageLoader.loadBitmap(FilterShowActivity.this, params[0], null);
-            if(src == null) {
-                return false;
-            }
-
-            FaceInfo[] faceInfos = null;
-            FaceDetect fDetect = new FaceDetect();
-            if (fDetect.isLibLoaded()) {
-                fDetect.initialize();
-                faceInfos = fDetect.dectectFeatures(src);
-                fDetect.uninitialize();
-            }
-
-            if(faceInfos != null && faceInfos.length > 0) {
-                Rect[] faces = new Rect[faceInfos.length];
-                for(int i=0; i<faceInfos.length; i++) {
-                    faces[i] = faceInfos[i].face;
-                }
-
-                result = TruePortraitNativeEngine.getInstance().init(FilterShowActivity.this, src, faces);
-            } else {
-                TruePortraitNativeEngine.getInstance().setFacesDetected(false);
-            }
-
-            src.recycle();
-            src = null;
-
-            return result;
-        }
-
-        @Override
-        protected void onPostExecute(Boolean result) {
-        }
-    }
-
-    private class LoadBitmapTask extends AsyncTask<Uri, Boolean, Boolean> {
-        int mBitmapSize;
-
-        public LoadBitmapTask() {
-            mBitmapSize = getScreenImageSize();
-            Log.d(LOGTAG, "FilterShowActivity.LoadBitmapTask(): mBitmapSize is " + mBitmapSize);
-        }
-
-        @Override
-        protected Boolean doInBackground(Uri... params) {
-            if (!MasterImage.getImage().loadBitmap(params[0], mBitmapSize)) {
-                return false;
-            }
-            publishProgress(ImageLoader.queryLightCycle360(MasterImage.getImage().getActivity()));
-            return true;
-        }
-
-        @Override
-        protected void onProgressUpdate(Boolean... values) {
-            super.onProgressUpdate(values);
-            if (isCancelled()) {
-                return;
-            }
-            if (values[0]) {
-                mShowingTinyPlanet = true;
-            }
-        }
-
-        @Override
-        protected void onPostExecute(Boolean result) {
-            MasterImage.setMaster(mMasterImage);
-            if (isCancelled()) {
-                return;
-            }
-
-            if (!result) {
-                if (mOriginalImageUri != null
-                        && !mOriginalImageUri.equals(mSelectedImageUri)) {
-                    mOriginalImageUri = mSelectedImageUri;
-                    mOriginalPreset = null;
-                    Toast.makeText(FilterShowActivity.this,
-                            R.string.cannot_edit_original, Toast.LENGTH_SHORT).show();
-                    startLoadBitmap(mOriginalImageUri);
-                } else {
-                    cannotLoadImage();
-                }
-                return;
-            }
-
-            if (null == CachingPipeline.getRenderScriptContext()) {
-                Log.v(LOGTAG, "RenderScript context destroyed during load");
-                return;
-            }
-            final View imageShow = findViewById(R.id.imageShow);
-            imageShow.setVisibility(View.VISIBLE);
-
-            Bitmap largeBitmap = MasterImage.getImage().getOriginalBitmapLarge();
-            mBoundService.setOriginalBitmap(largeBitmap);
-
-            float previewScale = (float) largeBitmap.getWidth()
-                    / (float) MasterImage.getImage().getOriginalBounds().width();
-            Log.d(LOGTAG, "FilterShowActivity.LoadBitmapTask.onPostExecute(): previewScale is " + previewScale);
-            mBoundService.setPreviewScaleFactor(previewScale);
-            if (!mShowingTinyPlanet) {
-                mCategoryFiltersAdapter.removeTinyPlanet();
-            }
-            mCategoryLooksAdapter.imageLoaded();
-            mCategoryBordersAdapter.imageLoaded();
-            mCategoryGeometryAdapter.imageLoaded();
-            mCategoryFiltersAdapter.imageLoaded();
-            mCategoryDualCamAdapter.imageLoaded();
-            mCategoryTruePortraitAdapter.imageLoaded();
-            if(mCategoryMakeupAdapter != null) {
-                mCategoryMakeupAdapter.imageLoaded();
-            }
-            mLoadBitmapTask = null;
-
-            MasterImage.getImage().warnListeners();
-            loadActions();
-
-            if (mOriginalPreset != null) {
-                MasterImage.getImage().setLoadedPreset(mOriginalPreset);
-                MasterImage.getImage().setPreset(mOriginalPreset,
-                        mOriginalPreset.getLastRepresentation(), true);
-                mOriginalPreset = null;
-            } else {
-                setDefaultPreset();
-            }
-
-            MasterImage.getImage().resetGeometryImages(true);
-
-            if (mAction.equals(TINY_PLANET_ACTION)) {
-                showRepresentation(mCategoryFiltersAdapter.getTinyPlanet());
-            }
-            mHiResBitmapTask = new LoadHighresBitmapTask();
-            mHiResBitmapTask.execute();
-            MasterImage.getImage().warnListeners();
-            super.onPostExecute(result);
-        }
-
-    }
-
     private void clearGalleryBitmapPool() {
         (new AsyncTask<Void, Void, Void>() {
             @Override
@@ -1951,20 +1743,20 @@ DialogInterface.OnDismissListener, PopupMenu.OnDismissListener{
             mLoadBitmapTask.cancel(false);
         }
 
-        if(mHiResBitmapTask != null) {
+        if (mHiResBitmapTask != null) {
             mHiResBitmapTask.cancel(false);
         }
 
-        if(mParseDepthMapTask != null) {
+        if (mParseDepthMapTask != null) {
             mParseDepthMapTask.cancel(false);
         }
 
-        if(mLoadTruePortraitTask != null) {
+        if (mLoadTruePortraitTask != null) {
             mLoadTruePortraitTask.cancel(false);
         }
 
         mUserPresetsManager.close();
-        if (mFilterPresetSource !=null) {
+        if (mFilterPresetSource != null) {
             mFilterPresetSource.close();
         }
 
@@ -2072,13 +1864,13 @@ DialogInterface.OnDismissListener, PopupMenu.OnDismissListener{
         mMenu = menu;
         setupMenu();
 
-        if(mCurrentEditor != null) {
+        if (mCurrentEditor != null) {
             mCurrentEditor.onPrepareOptionsMenu(menu);
         }
         return true;
     }
 
-    private void setupMenu(){
+    private void setupMenu() {
         if (mMenu == null || mMasterImage == null) {
             return;
         }
@@ -2128,27 +1920,27 @@ DialogInterface.OnDismissListener, PopupMenu.OnDismissListener{
                 invalidateViews();
                 return true;
             }*/
-        case R.id.resetHistoryButton: {
-            clearWaterMark();
-            resetHistory();
-            return true;
-        }
+            case R.id.resetHistoryButton: {
+                clearWaterMark();
+                resetHistory();
+                return true;
+            }
         /*case R.id.showImageStateButton: {
                 toggleImageStatePanel();
                 return true;
             }*/
-        case R.id.exportFlattenButton: {
-            showExportOptionsDialog();
-            return true;
-        }
-        case android.R.id.home: {
-            saveImage();
-            return true;
-        }
-        case R.id.manageUserPresets: {
-            manageUserPresets();
-            return true;
-        }
+            case R.id.exportFlattenButton: {
+                showExportOptionsDialog();
+                return true;
+            }
+            case android.R.id.home: {
+                saveImage();
+                return true;
+            }
+            case R.id.manageUserPresets: {
+                manageUserPresets();
+                return true;
+            }
         }
         return false;
     }
@@ -2159,7 +1951,7 @@ DialogInterface.OnDismissListener, PopupMenu.OnDismissListener{
         try {
             printer.printBitmap("ImagePrint", bitmap);
         } catch (RuntimeException e) {
-            Log.e(LOGTAG,"Print failure,",e);
+            Log.e(LOGTAG, "Print failure,", e);
         }
     }
 
@@ -2293,10 +2085,6 @@ DialogInterface.OnDismissListener, PopupMenu.OnDismissListener{
         mMasterImage.setPreset(preset, preset.getLastRepresentation(), true);
     }
 
-    // //////////////////////////////////////////////////////////////////////////////
-    // Some utility functions
-    // TODO: finish the cleanup.
-
     public void invalidateViews() {
         for (ImageShow views : mImageViews) {
             views.updateImage();
@@ -2311,7 +2099,8 @@ DialogInterface.OnDismissListener, PopupMenu.OnDismissListener{
     }
 
     // //////////////////////////////////////////////////////////////////////////////
-    // imageState panel...
+    // Some utility functions
+    // TODO: finish the cleanup.
 
     public void toggleImageStatePanel() {
         invalidateOptionsMenu();
@@ -2336,6 +2125,9 @@ DialogInterface.OnDismissListener, PopupMenu.OnDismissListener{
             mainPanel.loadCategoryVersionsPanel();
         }
     }
+
+    // //////////////////////////////////////////////////////////////////////////////
+    // imageState panel...
 
     @Override
     public void onConfigurationChanged(Configuration newConfig) {
@@ -2441,11 +2233,11 @@ DialogInterface.OnDismissListener, PopupMenu.OnDismissListener{
     }
 
     public void showDefaultImageView() {
-        if(mEditorPlaceHolder != null)
+        if (mEditorPlaceHolder != null)
             mEditorPlaceHolder.hide();
-        if(mImageShow != null)
+        if (mImageShow != null)
             mImageShow.setVisibility(View.VISIBLE);
-        if(MasterImage.getImage() != null) {
+        if (MasterImage.getImage() != null) {
             MasterImage.getImage().setCurrentFilter(null);
             MasterImage.getImage().setCurrentFilterRepresentation(null);
         }
@@ -2502,26 +2294,24 @@ DialogInterface.OnDismissListener, PopupMenu.OnDismissListener{
                 R.string.save_before_exit);
         mBackAlertDialogBuilder.setPositiveButton(mPopUpText,
                 new DialogInterface.OnClickListener() {
-            @Override
-            public void onClick(DialogInterface dialog, int id) {
-                done();
-            }
-        });
+                    @Override
+                    public void onClick(DialogInterface dialog, int id) {
+                        done();
+                    }
+                });
         mBackAlertDialogBuilder.setNegativeButton(mCancel,
                 new DialogInterface.OnClickListener() {
-            @Override
-            public void onClick(DialogInterface dialog, int id) {
-                dialog.dismiss();
-            }
-        });
+                    @Override
+                    public void onClick(DialogInterface dialog, int id) {
+                        dialog.dismiss();
+                    }
+                });
     }
 
     public void cannotLoadImage() {
         Toast.makeText(this, R.string.cannot_load_image, Toast.LENGTH_SHORT).show();
         finish();
     }
-
-    // //////////////////////////////////////////////////////////////////////////////
 
     public float getPixelsFromDip(float value) {
         Resources r = getResources();
@@ -2531,10 +2321,12 @@ DialogInterface.OnDismissListener, PopupMenu.OnDismissListener{
 
     @Override
     public void onItemClick(AdapterView<?> parent, View view, int position,
-            long id) {
+                            long id) {
         mMasterImage.onHistoryItemClick(position);
         invalidateViews();
     }
+
+    // //////////////////////////////////////////////////////////////////////////////
 
     public void pickImage(int requestCode) {
         Intent intent = new Intent();
@@ -2553,8 +2345,8 @@ DialogInterface.OnDismissListener, PopupMenu.OnDismissListener{
             } else if (requestCode == SELECT_FUSION_UNDERLAY) {
                 Uri underlayImageUri = data.getData();
                 // find fusion representation
-                if(mCurrentEditor instanceof EditorDualCamFusion) {
-                    EditorDualCamFusion editor = (EditorDualCamFusion)mCurrentEditor;
+                if (mCurrentEditor instanceof EditorDualCamFusion) {
+                    EditorDualCamFusion editor = (EditorDualCamFusion) mCurrentEditor;
                     editor.setUnderlayImageUri(underlayImageUri);
                 } else if (mCurrentEditor instanceof EditorTruePortraitFusion) {
                     if (checkExtensionValidity(this, underlayImageUri)) {
@@ -2562,7 +2354,7 @@ DialogInterface.OnDismissListener, PopupMenu.OnDismissListener{
                                 Toast.LENGTH_SHORT).show();
                         pickImage(SELECT_FUSION_UNDERLAY);
                     } else {
-                        EditorTruePortraitFusion editor = (EditorTruePortraitFusion)mCurrentEditor;
+                        EditorTruePortraitFusion editor = (EditorTruePortraitFusion) mCurrentEditor;
                         editor.setUnderlayImageUri(underlayImageUri);
                     }
                 }
@@ -2572,8 +2364,9 @@ DialogInterface.OnDismissListener, PopupMenu.OnDismissListener{
 
     /**
      * check whether the extension of the given uri is supported to be underlay
+     *
      * @param context context for get ContentResolver
-     * @param uri uri need to check
+     * @param uri     uri need to check
      * @return validity of uri's extension, true means unsupported, false means supported
      */
     private boolean checkExtensionValidity(final Context context, final Uri uri) {
@@ -2587,7 +2380,7 @@ DialogInterface.OnDismissListener, PopupMenu.OnDismissListener{
             filePath = uri.getPath();
         } else if (ContentResolver.SCHEME_CONTENT.equals(scheme)) {
             Cursor cursor = context.getContentResolver().query(
-                    uri, new String[] {MediaStore.Images.ImageColumns.DATA}, null, null, null);
+                    uri, new String[]{MediaStore.Images.ImageColumns.DATA}, null, null, null);
             if (null != cursor) {
                 if (cursor.moveToFirst()) {
                     int index = cursor.getColumnIndex(MediaStore.Images.ImageColumns.DATA);
@@ -2610,8 +2403,8 @@ DialogInterface.OnDismissListener, PopupMenu.OnDismissListener{
     }
 
     private int nameFilter(FilterPresetSource source,
-                                            ArrayList <SaveOption> tempFilterArray) {
-        String s,s1,s2;
+                           ArrayList<SaveOption> tempFilterArray) {
+        String s, s1, s2;
         ArrayList<SaveOption> sp = source.getAllUserPresets();
         ArrayList<Integer> temp = new ArrayList<Integer>();
         if (sp != null) {
@@ -2633,7 +2426,7 @@ DialogInterface.OnDismissListener, PopupMenu.OnDismissListener{
             }
         }
 
-        if (tempFilterArray.size() != 0 ){
+        if (tempFilterArray.size() != 0) {
             for (int i = 0; i < tempFilterArray.size(); i++) {
                 s = tempFilterArray.get(i).name;
                 if (s.length() > "Custom".length()) {
@@ -2655,26 +2448,13 @@ DialogInterface.OnDismissListener, PopupMenu.OnDismissListener{
 
         if (temp != null) {
             Collections.sort(temp);
-            for (int i = 1; i <= temp.size(); i++){
-                if (temp.get(i-1)!= i){
+            for (int i = 1; i <= temp.size(); i++) {
+                if (temp.get(i - 1) != i) {
                     return i;
                 }
             }
         }
-        return temp.size()+1;
-    }
-
-
-    public static boolean completeSaveFilters (FilterPresetSource mFilterPresetSource,
-                                               ArrayList<SaveOption> tempFilterArray) {
-
-        for (int i = 0; i < tempFilterArray.size(); i++){
-            String name = tempFilterArray.get(i).name;
-            String filteredUri = tempFilterArray.get(i).Uri;
-            if (mFilterPresetSource.insertPreset(name,filteredUri) == false) return false;
-        }
-        tempFilterArray.clear();
-        return true;
+        return temp.size() + 1;
     }
 
     public void saveImage() {
@@ -2697,7 +2477,6 @@ DialogInterface.OnDismissListener, PopupMenu.OnDismissListener{
             done();
         }
     }
-
 
     public void done() {
         hideSavingProgress();
@@ -2722,11 +2501,7 @@ DialogInterface.OnDismissListener, PopupMenu.OnDismissListener{
     }
 
     public void setHandlesSwipeForView(View view, float startX, float startY) {
-        if (view != null) {
-            mHandlingSwipeButton = true;
-        } else {
-            mHandlingSwipeButton = false;
-        }
+        mHandlingSwipeButton = view != null;
         mHandledSwipeView = view;
         int[] location = new int[2];
         view.getLocationInWindow(location);
@@ -2734,7 +2509,7 @@ DialogInterface.OnDismissListener, PopupMenu.OnDismissListener{
         mSwipeStartY = location[1] + startY;
     }
 
-    public boolean dispatchTouchEvent (MotionEvent ev) {
+    public boolean dispatchTouchEvent(MotionEvent ev) {
         if (mHandlingSwipeButton) {
             int direction = CategoryView.HORIZONTAL;
             if (mHandledSwipeView instanceof CategoryView) {
@@ -2768,16 +2543,14 @@ DialogInterface.OnDismissListener, PopupMenu.OnDismissListener{
                 if (mHandledSwipeViewLastDelta > distance) {
                     ((SwipableView) mHandledSwipeView).delete();
                 }
-           }
+            }
             return true;
         }
         return super.dispatchTouchEvent(ev);
     }
 
-    public Point mHintTouchPoint = new Point();
-
     public Point hintTouchPoint(View view) {
-        int location[] = new int[2];
+        int[] location = new int[2];
         view.getLocationOnScreen(location);
         int x = mHintTouchPoint.x - location[0];
         int y = mHintTouchPoint.y - location[1];
@@ -2785,7 +2558,7 @@ DialogInterface.OnDismissListener, PopupMenu.OnDismissListener{
     }
 
     public void startTouchAnimation(View target, float x, float y) {
-        int location[] = new int[2];
+        int[] location = new int[2];
         target.getLocationOnScreen(location);
         mHintTouchPoint.x = (int) (location[0] + x);
         mHintTouchPoint.y = (int) (location[1] + y);
@@ -2829,5 +2602,205 @@ DialogInterface.OnDismissListener, PopupMenu.OnDismissListener{
         if (canUpdataUI) {
             updateUIAfterServiceStarted();
         }
+    }
+
+    private class LoadHighresBitmapTask extends AsyncTask<Void, Void, Boolean> {
+        @Override
+        protected Boolean doInBackground(Void... params) {
+            MasterImage master = MasterImage.getImage();
+            if (master.supportsHighRes()) {
+                int highresPreviewSize = Math.min(MasterImage.MAX_BITMAP_DIM, getScreenImageSize());
+                Log.d(LOGTAG, "FilterShowActivity.LoadHighresBitmapTask.doInBackground(): after, highresPreviewSize is " + highresPreviewSize);
+                Rect bounds = new Rect();
+                Bitmap originalHires = ImageLoader.loadOrientedConstrainedBitmap(master.getUri(),
+                        master.getActivity(), highresPreviewSize,
+                        master.getOrientation(), bounds);
+
+                // Force the bitmap to even width and height which is required by beautification algo
+                Bitmap tempBmp = MasterImage.convertToEvenNumberWidthImage(originalHires);
+                if (tempBmp != null && originalHires != null) {
+                    if (!originalHires.isRecycled() && originalHires != tempBmp) {
+                        originalHires.recycle();
+                    }
+                    originalHires = tempBmp;
+                }
+
+                master.setOriginalBounds(bounds);
+                master.setOriginalBitmapHighres(originalHires);
+                Log.d(LOGTAG, "FilterShowActivity.LoadHighresBitmapTask.doInBackground(): originalHires.WH is (" + originalHires.getWidth()
+                        + ", " + originalHires.getHeight() + "), bounds is " + bounds.toString());
+                mBoundService.setOriginalBitmapHighres(originalHires);
+                master.warnListeners();
+            }
+            return true;
+        }
+
+        @Override
+        protected void onPostExecute(Boolean result) {
+            Bitmap highresBitmap = MasterImage.getImage().getOriginalBitmapHighres();
+            if (highresBitmap != null) {
+                float highResPreviewScale = (float) highresBitmap.getWidth()
+                        / (float) MasterImage.getImage().getOriginalBounds().width();
+                Log.d(LOGTAG, "FilterShowActivity.LoadHighresBitmapTask.onPostExecute(): highResPreviewScale is " + highResPreviewScale);
+                mBoundService.setHighresPreviewScaleFactor(highResPreviewScale);
+            }
+
+            MasterImage.getImage().warnListeners();
+        }
+    }
+
+    private class ParseDepthMapTask extends AsyncTask<Uri, Void, Boolean> {
+        @Override
+        protected Boolean doInBackground(Uri... params) {
+            return MasterImage.getImage().parseDepthMap(FilterShowActivity.this, params[0]);
+        }
+
+        @Override
+        protected void onPostExecute(Boolean result) {
+            showDualCameraButton(result);
+            stopLoadingIndicator();
+        }
+    }
+
+    private class LoadTruePortraitTask extends AsyncTask<Uri, Void, Boolean> {
+
+        @Override
+        protected Boolean doInBackground(Uri... params) {
+            boolean result = false;
+            Bitmap src = ImageLoader.loadBitmap(FilterShowActivity.this, params[0], null);
+            if (src == null) {
+                return false;
+            }
+
+            FaceInfo[] faceInfos = null;
+            FaceDetect fDetect = new FaceDetect();
+            if (fDetect.isLibLoaded()) {
+                fDetect.initialize();
+                faceInfos = fDetect.dectectFeatures(src);
+                fDetect.uninitialize();
+            }
+
+            if (faceInfos != null && faceInfos.length > 0) {
+                Rect[] faces = new Rect[faceInfos.length];
+                for (int i = 0; i < faceInfos.length; i++) {
+                    faces[i] = faceInfos[i].face;
+                }
+
+                result = TruePortraitNativeEngine.getInstance().init(FilterShowActivity.this, src, faces);
+            } else {
+                TruePortraitNativeEngine.getInstance().setFacesDetected(false);
+            }
+
+            src.recycle();
+            src = null;
+
+            return result;
+        }
+
+        @Override
+        protected void onPostExecute(Boolean result) {
+        }
+    }
+
+    private class LoadBitmapTask extends AsyncTask<Uri, Boolean, Boolean> {
+        int mBitmapSize;
+
+        public LoadBitmapTask() {
+            mBitmapSize = getScreenImageSize();
+            Log.d(LOGTAG, "FilterShowActivity.LoadBitmapTask(): mBitmapSize is " + mBitmapSize);
+        }
+
+        @Override
+        protected Boolean doInBackground(Uri... params) {
+            if (!MasterImage.getImage().loadBitmap(params[0], mBitmapSize)) {
+                return false;
+            }
+            publishProgress(ImageLoader.queryLightCycle360(MasterImage.getImage().getActivity()));
+            return true;
+        }
+
+        @Override
+        protected void onProgressUpdate(Boolean... values) {
+            super.onProgressUpdate(values);
+            if (isCancelled()) {
+                return;
+            }
+            if (values[0]) {
+                mShowingTinyPlanet = true;
+            }
+        }
+
+        @Override
+        protected void onPostExecute(Boolean result) {
+            MasterImage.setMaster(mMasterImage);
+            if (isCancelled()) {
+                return;
+            }
+
+            if (!result) {
+                if (mOriginalImageUri != null
+                        && !mOriginalImageUri.equals(mSelectedImageUri)) {
+                    mOriginalImageUri = mSelectedImageUri;
+                    mOriginalPreset = null;
+                    Toast.makeText(FilterShowActivity.this,
+                            R.string.cannot_edit_original, Toast.LENGTH_SHORT).show();
+                    startLoadBitmap(mOriginalImageUri);
+                } else {
+                    cannotLoadImage();
+                }
+                return;
+            }
+
+            if (null == CachingPipeline.getRenderScriptContext()) {
+                Log.v(LOGTAG, "RenderScript context destroyed during load");
+                return;
+            }
+            final View imageShow = findViewById(R.id.imageShow);
+            imageShow.setVisibility(View.VISIBLE);
+
+            Bitmap largeBitmap = MasterImage.getImage().getOriginalBitmapLarge();
+            mBoundService.setOriginalBitmap(largeBitmap);
+
+            float previewScale = (float) largeBitmap.getWidth()
+                    / (float) MasterImage.getImage().getOriginalBounds().width();
+            Log.d(LOGTAG, "FilterShowActivity.LoadBitmapTask.onPostExecute(): previewScale is " + previewScale);
+            mBoundService.setPreviewScaleFactor(previewScale);
+            if (!mShowingTinyPlanet) {
+                mCategoryFiltersAdapter.removeTinyPlanet();
+            }
+            mCategoryLooksAdapter.imageLoaded();
+            mCategoryBordersAdapter.imageLoaded();
+            mCategoryGeometryAdapter.imageLoaded();
+            mCategoryFiltersAdapter.imageLoaded();
+            mCategoryDualCamAdapter.imageLoaded();
+            mCategoryTruePortraitAdapter.imageLoaded();
+            if (mCategoryMakeupAdapter != null) {
+                mCategoryMakeupAdapter.imageLoaded();
+            }
+            mLoadBitmapTask = null;
+
+            MasterImage.getImage().warnListeners();
+            loadActions();
+
+            if (mOriginalPreset != null) {
+                MasterImage.getImage().setLoadedPreset(mOriginalPreset);
+                MasterImage.getImage().setPreset(mOriginalPreset,
+                        mOriginalPreset.getLastRepresentation(), true);
+                mOriginalPreset = null;
+            } else {
+                setDefaultPreset();
+            }
+
+            MasterImage.getImage().resetGeometryImages(true);
+
+            if (mAction.equals(TINY_PLANET_ACTION)) {
+                showRepresentation(mCategoryFiltersAdapter.getTinyPlanet());
+            }
+            mHiResBitmapTask = new LoadHighresBitmapTask();
+            mHiResBitmapTask.execute();
+            MasterImage.getImage().warnListeners();
+            super.onPostExecute(result);
+        }
+
     }
 }

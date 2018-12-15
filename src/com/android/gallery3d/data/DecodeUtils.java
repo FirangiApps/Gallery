@@ -27,10 +27,10 @@ import android.os.Build;
 import com.android.gallery3d.common.ApiHelper;
 import com.android.gallery3d.common.BitmapUtils;
 import com.android.gallery3d.common.Utils;
-import com.android.photos.data.GalleryBitmapPool;
 import com.android.gallery3d.ui.Log;
 import com.android.gallery3d.util.ThreadPool.CancelListener;
 import com.android.gallery3d.util.ThreadPool.JobContext;
+import com.android.photos.data.GalleryBitmapPool;
 
 import java.io.FileDescriptor;
 import java.io.FileInputStream;
@@ -38,19 +38,6 @@ import java.io.InputStream;
 
 public class DecodeUtils {
     private static final String TAG = "DecodeUtils";
-
-    private static class DecodeCanceller implements CancelListener {
-        Options mOptions;
-
-        public DecodeCanceller(Options options) {
-            mOptions = options;
-        }
-
-        @Override
-        public void onCancel() {
-            mOptions.requestCancelDecode();
-        }
-    }
 
     @TargetApi(ApiHelper.VERSION_CODES.HONEYCOMB)
     public static void setOptionsMutable(Options options) {
@@ -66,7 +53,7 @@ public class DecodeUtils {
     }
 
     public static void decodeBounds(JobContext jc, FileDescriptor fd,
-            Options options) {
+                                    Options options) {
         Utils.assertTrue(options != null);
         options.inJustDecodeBounds = true;
         jc.setCancelListener(new DecodeCanceller(options));
@@ -79,7 +66,7 @@ public class DecodeUtils {
     }
 
     public static Bitmap decode(JobContext jc, byte[] bytes, int offset,
-            int length, Options options) {
+                                int length, Options options) {
         if (options == null) options = new Options();
         jc.setCancelListener(new DecodeCanceller(options));
         setOptionsMutable(options);
@@ -88,7 +75,7 @@ public class DecodeUtils {
     }
 
     public static void decodeBounds(JobContext jc, byte[] bytes, int offset,
-            int length, Options options) {
+                                    int length, Options options) {
         Utils.assertTrue(options != null);
         options.inJustDecodeBounds = true;
         jc.setCancelListener(new DecodeCanceller(options));
@@ -163,12 +150,12 @@ public class DecodeUtils {
     /**
      * Decodes the bitmap from the given byte array if the image size is larger than the given
      * requirement.
-     *
+     * <p>
      * Note: The returned image may be resized down. However, both width and height must be
      * larger than the <code>targetSize</code>.
      */
     public static Bitmap decodeIfBigEnough(JobContext jc, byte[] data,
-            Options options, int targetSize) {
+                                           Options options, int targetSize) {
         if (options == null) options = new Options();
         jc.setCancelListener(new DecodeCanceller(options));
 
@@ -209,7 +196,7 @@ public class DecodeUtils {
         try {
             return BitmapRegionDecoder.newInstance(
                     bytes, offset, length, shareable);
-        } catch (Throwable t)  {
+        } catch (Throwable t) {
             Log.w(TAG, t);
             return null;
         }
@@ -219,7 +206,7 @@ public class DecodeUtils {
             JobContext jc, String filePath, boolean shareable) {
         try {
             return BitmapRegionDecoder.newInstance(filePath, shareable);
-        } catch (Throwable t)  {
+        } catch (Throwable t) {
             Log.w(TAG, t);
             return null;
         }
@@ -229,7 +216,7 @@ public class DecodeUtils {
             JobContext jc, FileDescriptor fd, boolean shareable) {
         try {
             return BitmapRegionDecoder.newInstance(fd, shareable);
-        } catch (Throwable t)  {
+        } catch (Throwable t) {
             Log.w(TAG, t);
             return null;
         }
@@ -239,7 +226,7 @@ public class DecodeUtils {
             JobContext jc, InputStream is, boolean shareable) {
         try {
             return BitmapRegionDecoder.newInstance(is, shareable);
-        } catch (Throwable t)  {
+        } catch (Throwable t) {
             // We often cancel the creating of bitmap region decoder,
             // so just log one line.
             Log.w(TAG, "requestCreateBitmapRegionDecoder: " + t);
@@ -249,7 +236,7 @@ public class DecodeUtils {
 
     @TargetApi(Build.VERSION_CODES.HONEYCOMB)
     public static Bitmap decodeUsingPool(JobContext jc, byte[] data, int offset,
-            int length, BitmapFactory.Options options) {
+                                         int length, BitmapFactory.Options options) {
         if (options == null) options = new BitmapFactory.Options();
         if (options.inSampleSize < 1) options.inSampleSize = 1;
         options.inPreferredConfig = Bitmap.Config.ARGB_8888;
@@ -276,7 +263,7 @@ public class DecodeUtils {
     // from a file descriptor instead of a byte array.
     @TargetApi(Build.VERSION_CODES.HONEYCOMB)
     public static Bitmap decodeUsingPool(JobContext jc,
-            FileDescriptor fileDescriptor, Options options) {
+                                         FileDescriptor fileDescriptor, Options options) {
         if (options == null) options = new BitmapFactory.Options();
         if (options.inSampleSize < 1) options.inSampleSize = 1;
         options.inPreferredConfig = Bitmap.Config.ARGB_8888;
@@ -300,14 +287,27 @@ public class DecodeUtils {
     }
 
     private static Bitmap findCachedBitmap(JobContext jc, byte[] data,
-            int offset, int length, Options options) {
+                                           int offset, int length, Options options) {
         decodeBounds(jc, data, offset, length, options);
         return GalleryBitmapPool.getInstance().get(options.outWidth, options.outHeight);
     }
 
     private static Bitmap findCachedBitmap(JobContext jc, FileDescriptor fileDescriptor,
-            Options options) {
+                                           Options options) {
         decodeBounds(jc, fileDescriptor, options);
         return GalleryBitmapPool.getInstance().get(options.outWidth, options.outHeight);
+    }
+
+    private static class DecodeCanceller implements CancelListener {
+        Options mOptions;
+
+        public DecodeCanceller(Options options) {
+            mOptions = options;
+        }
+
+        @Override
+        public void onCancel() {
+            mOptions.requestCancelDecode();
+        }
     }
 }

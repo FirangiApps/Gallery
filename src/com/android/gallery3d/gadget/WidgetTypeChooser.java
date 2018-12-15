@@ -44,10 +44,10 @@ public class WidgetTypeChooser extends Activity {
         super.onCreate(savedInstanceState);
         setTitle(R.string.widget_type);
         setContentView(R.layout.choose_widget_type);
-        RadioGroup rg = (RadioGroup) findViewById(R.id.widget_type);
+        RadioGroup rg = findViewById(R.id.widget_type);
         rg.setOnCheckedChangeListener(mListener);
 
-        Button cancel = (Button) findViewById(R.id.cancel);
+        Button cancel = findViewById(R.id.cancel);
         cancel.setOnClickListener(new OnClickListener() {
             @Override
             public void onClick(View v) {

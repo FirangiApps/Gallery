@@ -49,10 +49,7 @@ public abstract class FilterPointRepresentation extends FilterRepresentation {
 
     @Override
     public boolean isNil() {
-        if (getCandidates() != null && getCandidates().size() > 0) {
-            return false;
-        }
-        return true;
+        return getCandidates() == null || getCandidates().size() <= 0;
     }
 
     public Object getCandidate(int index) {

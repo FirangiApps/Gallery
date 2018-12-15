@@ -39,11 +39,12 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 
-import org.codeaurora.gallery.R;
 import com.android.gallery3d.filtershow.FilterShowActivity;
 import com.android.gallery3d.filtershow.editors.EditorTruePortraitMask;
 import com.android.gallery3d.filtershow.ui.DoNotShowAgainDialog;
 import com.android.gallery3d.util.GalleryUtils;
+
+import org.codeaurora.gallery.R;
 
 public class TruePortraitMaskEditorPanel extends Fragment {
     private View mMainView;
@@ -58,7 +59,7 @@ public class TruePortraitMaskEditorPanel extends Fragment {
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
-            Bundle savedInstanceState) {
+                             Bundle savedInstanceState) {
         mMainView = inflater.inflate(R.layout.filtershow_trueportrait_editor_panel, container, false);
         if (mEditor != null) {
             mEditor.setUpEditorUI(mMainView, null);
@@ -72,11 +73,11 @@ public class TruePortraitMaskEditorPanel extends Fragment {
         Context context = getActivity();
         boolean skipIntro = GalleryUtils.getBooleanPref(context,
                 context.getString(R.string.pref_trueportrait_edit_intro_show_key), false);
-        if(!skipIntro) {
+        if (!skipIntro) {
             FragmentManager fm = getFragmentManager();
             DoNotShowAgainDialog dialog =
                     (DoNotShowAgainDialog) fm.findFragmentByTag("trueportrait_edit_intro");
-            if(dialog == null) {
+            if (dialog == null) {
                 dialog = new DoNotShowAgainDialog(
                         R.string.trueportrait_touch_up, R.string.trueportrait_edit_intro,
                         R.string.pref_trueportrait_edit_intro_show_key);

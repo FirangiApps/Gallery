@@ -32,7 +32,6 @@ import android.content.Context;
 import android.content.res.Resources;
 import android.content.res.TypedArray;
 import android.graphics.Canvas;
-import android.graphics.Color;
 import android.graphics.Paint;
 import android.graphics.RectF;
 import android.util.AttributeSet;
@@ -44,7 +43,6 @@ import android.widget.FrameLayout;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
-import java.lang.Math;
 
 import org.codeaurora.gallery.R;
 
@@ -56,38 +54,24 @@ public class Knob extends FrameLayout {
     private static final float LABEL_SIZE = 0.09f;
     private static final float LABEL_WIDTH = 0.80f;
     private static final float INDICATOR_RADIUS = 0.38f;
-
-    public interface OnKnobChangeListener {
-        void onValueChanged(Knob knob, int value, boolean fromUser);
-        boolean onSwitchChanged(Knob knob, boolean on);
-    }
-
+    private final Paint mPaint;
+    private final TextView mLabelTV;
+    private final TextView mProgressTV;
+    private final ImageView mKnobOn;
+    private final ImageView mKnobOff;
     private OnKnobChangeListener mOnKnobChangeListener = null;
-
     private float mProgress = 0.0f;
     private int mMax = 100;
     private boolean mOn = false;
     private boolean mEnabled = false;
-
     private int mHighlightColor;
     private int mLowlightColor;
     private int mDisabledColor;
-
-    private final Paint mPaint;
-
-    private final TextView mLabelTV;
-    private final TextView mProgressTV;
-
-    private final ImageView mKnobOn;
-    private final ImageView mKnobOff;
-
     private float mLastX;
     private float mLastY;
     private boolean mMoved;
-
     private int mWidth = 0;
     private int mIndicatorWidth = 0;
-
     private RectF mRectF;
 
     public Knob(Context context, AttributeSet attrs, int defStyle) {
@@ -114,14 +98,14 @@ public class Knob extends FrameLayout {
         mDisabledColor = res.getColor(R.color.disabled_knob);
 
         ((ImageView) findViewById(R.id.knob_foreground)).setImageResource(foreground);
-        ((ImageView) findViewById(R.id.knob_foreground)).setAlpha(0.35f);
+        findViewById(R.id.knob_foreground).setAlpha(0.35f);
 
-        mLabelTV = (TextView) findViewById(R.id.knob_label);
+        mLabelTV = findViewById(R.id.knob_label);
         mLabelTV.setText(label);
-        mProgressTV = (TextView) findViewById(R.id.knob_value);
+        mProgressTV = findViewById(R.id.knob_value);
 
-        mKnobOn = (ImageView) findViewById(R.id.knob_toggle_on);
-        mKnobOff = (ImageView) findViewById(R.id.knob_toggle_off);
+        mKnobOn = findViewById(R.id.knob_toggle_on);
+        mKnobOff = findViewById(R.id.knob_toggle_off);
 
         mPaint = new Paint(Paint.ANTI_ALIAS_FLAG);
         mPaint.setColor(mHighlightColor);
@@ -144,18 +128,14 @@ public class Knob extends FrameLayout {
         mOnKnobChangeListener = l;
     }
 
-    public void setValue(int value) {
-        if (mMax != 0) {
-            setProgress(((float) value) / mMax);
-        }
-    }
-
     public int getValue() {
         return (int) (mProgress * mMax);
     }
 
-    public void setProgress(float progress) {
-        setProgress(progress, false);
+    public void setValue(int value) {
+        if (mMax != 0) {
+            setProgress(((float) value) / mMax);
+        }
     }
 
     private void setProgressText(boolean on) {
@@ -189,6 +169,10 @@ public class Knob extends FrameLayout {
 
     public float getProgress() {
         return mProgress;
+    }
+
+    public void setProgress(float progress) {
+        setProgress(progress, false);
     }
 
     private void drawIndicator() {
@@ -250,7 +234,7 @@ public class Knob extends FrameLayout {
         mLabelTV.setTextSize(TypedValue.COMPLEX_UNIT_PX, size * LABEL_SIZE);
         mLabelTV.setPadding(0, (int) (size * LABEL_PADDING), 0, 0);
         mLabelTV.setLayoutParams(new LinearLayout.LayoutParams((int) (w * LABEL_WIDTH),
-                    LayoutParams.WRAP_CONTENT));
+                LayoutParams.WRAP_CONTENT));
         mLabelTV.setVisibility(View.VISIBLE);
     }
 
@@ -334,5 +318,11 @@ public class Knob extends FrameLayout {
             angle += 270;
         }
         return angle;
+    }
+
+    public interface OnKnobChangeListener {
+        void onValueChanged(Knob knob, int value, boolean fromUser);
+
+        boolean onSwitchChanged(Knob knob, boolean on);
     }
 }

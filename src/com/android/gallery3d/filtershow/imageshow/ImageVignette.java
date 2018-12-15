@@ -27,13 +27,11 @@ import com.android.gallery3d.filtershow.filters.FilterVignetteRepresentation;
 
 public class ImageVignette extends ImageShow {
     private static final String LOGTAG = "ImageVignette";
-
+    EclipseControl mElipse;
     private FilterVignetteRepresentation mVignetteRep;
     private EditorVignette mEditorVignette;
     private OvalSpaceAdapter mScreenOval = new OvalSpaceAdapter();
     private int mActiveHandle = -1;
-
-    EclipseControl mElipse;
 
     public ImageVignette(Context context) {
         super(context);
@@ -43,97 +41,6 @@ public class ImageVignette extends ImageShow {
     public ImageVignette(Context context, AttributeSet attrs) {
         super(context, attrs);
         mElipse = new EclipseControl(context);
-    }
-
-    static class OvalSpaceAdapter implements Oval {
-        private Oval mOval;
-        Matrix mToScr;
-        Matrix mToImage;
-        int mImgWidth;
-        int mImgHeight;
-        float[] mTmp = new float[2];
-        float mTmpRadiusX;
-        float mTmpRadiusY;
-
-        public void setImageOval(Oval oval) {
-            mOval = oval;
-        }
-
-        public void setTransform(Matrix toScr, Matrix toImage, int imgWidth, int imgHeight) {
-            mToScr = toScr;
-            mToImage = toImage;
-            mImgWidth = imgWidth;
-            mImgHeight = imgHeight;
-            mTmpRadiusX = getRadiusX();
-            mTmpRadiusY = getRadiusY();
-        }
-
-        @Override
-        public void setCenter(float x, float y) {
-            mTmp[0] = x;
-            mTmp[1] = y;
-            mToImage.mapPoints(mTmp);
-            mOval.setCenter(mTmp[0] / mImgWidth, mTmp[1] / mImgHeight);
-        }
-
-        @Override
-        public void setRadius(float w, float h) {
-            mTmp[0] = mTmpRadiusX = w;
-            mTmp[1] = mTmpRadiusY = h;
-            mToImage.mapVectors(mTmp);
-            mOval.setRadius(mTmp[0] / mImgWidth, mTmp[1] / mImgHeight);
-        }
-
-        @Override
-        public float getCenterX() {
-            mTmp[0] = mOval.getCenterX() * mImgWidth;
-            mTmp[1] = mOval.getCenterY() * mImgHeight;
-            mToScr.mapPoints(mTmp);
-
-            return mTmp[0];
-        }
-
-        @Override
-        public float getCenterY() {
-            mTmp[0] = mOval.getCenterX() * mImgWidth;
-            mTmp[1] = mOval.getCenterY() * mImgHeight;
-            mToScr.mapPoints(mTmp);
-            return mTmp[1];
-        }
-
-        @Override
-        public float getRadiusX() {
-            mTmp[0] = mOval.getRadiusX() * mImgWidth;
-            mTmp[1] = mOval.getRadiusY() * mImgHeight;
-            mToScr.mapVectors(mTmp);
-            return Math.abs(mTmp[0]);
-        }
-
-        @Override
-        public float getRadiusY() {
-            mTmp[0] = mOval.getRadiusX() * mImgWidth;
-            mTmp[1] = mOval.getRadiusY() * mImgHeight;
-            mToScr.mapVectors(mTmp);
-            return Math.abs(mTmp[1]);
-        }
-
-        @Override
-        public void setRadiusY(float y) {
-            mTmp[0] = mTmpRadiusX;
-            mTmp[1] = mTmpRadiusY = y;
-            mToImage.mapVectors(mTmp);
-            mOval.setRadiusX(mTmp[0] / mImgWidth);
-            mOval.setRadiusY(mTmp[1] / mImgHeight);
-        }
-
-        @Override
-        public void setRadiusX(float x) {
-            mTmp[0] = mTmpRadiusX = x;
-            mTmp[1] = mTmpRadiusY;
-            mToImage.mapVectors(mTmp);
-            mOval.setRadiusX(mTmp[0] / mImgWidth);
-            mOval.setRadiusY(mTmp[1] / mImgHeight);
-        }
     }
 
     @Override
@@ -235,6 +142,97 @@ public class ImageVignette extends ImageShow {
         mElipse.setRadius(mScreenOval.getRadiusX(), mScreenOval.getRadiusY());
 
         mElipse.draw(canvas);
+    }
+
+    static class OvalSpaceAdapter implements Oval {
+        Matrix mToScr;
+        Matrix mToImage;
+        int mImgWidth;
+        int mImgHeight;
+        float[] mTmp = new float[2];
+        float mTmpRadiusX;
+        float mTmpRadiusY;
+        private Oval mOval;
+
+        public void setImageOval(Oval oval) {
+            mOval = oval;
+        }
+
+        public void setTransform(Matrix toScr, Matrix toImage, int imgWidth, int imgHeight) {
+            mToScr = toScr;
+            mToImage = toImage;
+            mImgWidth = imgWidth;
+            mImgHeight = imgHeight;
+            mTmpRadiusX = getRadiusX();
+            mTmpRadiusY = getRadiusY();
+        }
+
+        @Override
+        public void setCenter(float x, float y) {
+            mTmp[0] = x;
+            mTmp[1] = y;
+            mToImage.mapPoints(mTmp);
+            mOval.setCenter(mTmp[0] / mImgWidth, mTmp[1] / mImgHeight);
+        }
+
+        @Override
+        public void setRadius(float w, float h) {
+            mTmp[0] = mTmpRadiusX = w;
+            mTmp[1] = mTmpRadiusY = h;
+            mToImage.mapVectors(mTmp);
+            mOval.setRadius(mTmp[0] / mImgWidth, mTmp[1] / mImgHeight);
+        }
+
+        @Override
+        public float getCenterX() {
+            mTmp[0] = mOval.getCenterX() * mImgWidth;
+            mTmp[1] = mOval.getCenterY() * mImgHeight;
+            mToScr.mapPoints(mTmp);
+
+            return mTmp[0];
+        }
+
+        @Override
+        public float getCenterY() {
+            mTmp[0] = mOval.getCenterX() * mImgWidth;
+            mTmp[1] = mOval.getCenterY() * mImgHeight;
+            mToScr.mapPoints(mTmp);
+            return mTmp[1];
+        }
+
+        @Override
+        public float getRadiusX() {
+            mTmp[0] = mOval.getRadiusX() * mImgWidth;
+            mTmp[1] = mOval.getRadiusY() * mImgHeight;
+            mToScr.mapVectors(mTmp);
+            return Math.abs(mTmp[0]);
+        }
+
+        @Override
+        public void setRadiusX(float x) {
+            mTmp[0] = mTmpRadiusX = x;
+            mTmp[1] = mTmpRadiusY;
+            mToImage.mapVectors(mTmp);
+            mOval.setRadiusX(mTmp[0] / mImgWidth);
+            mOval.setRadiusY(mTmp[1] / mImgHeight);
+        }
+
+        @Override
+        public float getRadiusY() {
+            mTmp[0] = mOval.getRadiusX() * mImgWidth;
+            mTmp[1] = mOval.getRadiusY() * mImgHeight;
+            mToScr.mapVectors(mTmp);
+            return Math.abs(mTmp[1]);
+        }
+
+        @Override
+        public void setRadiusY(float y) {
+            mTmp[0] = mTmpRadiusX;
+            mTmp[1] = mTmpRadiusY = y;
+            mToImage.mapVectors(mTmp);
+            mOval.setRadiusX(mTmp[0] / mImgWidth);
+            mOval.setRadiusY(mTmp[1] / mImgHeight);
+        }
     }
 
 }

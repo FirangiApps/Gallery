@@ -30,13 +30,14 @@ import android.widget.GridView;
 import android.widget.ImageView;
 import android.widget.TextView;
 
-import org.codeaurora.gallery.R;
 import com.android.gallery3d.app.GalleryActivity;
 import com.android.photos.adapters.PhotoThumbnailAdapter;
 import com.android.photos.data.PhotoSetLoader;
 import com.android.photos.shims.LoaderCompatShim;
 import com.android.photos.shims.MediaItemsLoader;
 import com.android.photos.views.HeaderGridView;
+
+import org.codeaurora.gallery.R;
 
 import java.util.ArrayList;
 
@@ -51,6 +52,7 @@ public class AlbumFragment extends MultiSelectGridFragment implements LoaderCall
     private String mAlbumPath;
     private String mAlbumTitle;
     private View mHeaderView;
+    private ArrayList<Uri> mSubItemUriTemp = new ArrayList<Uri>(1);
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -66,7 +68,7 @@ public class AlbumFragment extends MultiSelectGridFragment implements LoaderCall
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
-            Bundle savedInstanceState) {
+                             Bundle savedInstanceState) {
         getLoaderManager().initLoader(LOADER_ALBUM, null, this);
         return inflater.inflate(R.layout.album_content, container, false);
     }
@@ -87,9 +89,9 @@ public class AlbumFragment extends MultiSelectGridFragment implements LoaderCall
             // TODO remove this when the data model stabilizes
             mHeaderView.setMinimumHeight(200);
         }
-        ImageView iv = (ImageView) mHeaderView.findViewById(R.id.album_header_image);
-        TextView title = (TextView) mHeaderView.findViewById(R.id.album_header_title);
-        TextView subtitle = (TextView) mHeaderView.findViewById(R.id.album_header_subtitle);
+        ImageView iv = mHeaderView.findViewById(R.id.album_header_image);
+        TextView title = mHeaderView.findViewById(R.id.album_header_title);
+        TextView subtitle = mHeaderView.findViewById(R.id.album_header_subtitle);
         title.setText(mAlbumTitle);
         int count = mAdapter.getCount();
         subtitle.setText(getActivity().getResources().getQuantityString(
@@ -123,7 +125,7 @@ public class AlbumFragment extends MultiSelectGridFragment implements LoaderCall
 
     @Override
     public void onLoadFinished(Loader<Cursor> loader,
-            Cursor data) {
+                               Cursor data) {
         mAdapter.swapCursor(data);
         updateHeaderView();
         setAdapter(mAdapter);
@@ -143,7 +145,6 @@ public class AlbumFragment extends MultiSelectGridFragment implements LoaderCall
         return ((Cursor) item).getInt(PhotoSetLoader.INDEX_SUPPORTED_OPERATIONS);
     }
 
-    private ArrayList<Uri> mSubItemUriTemp = new ArrayList<Uri>(1);
     @Override
     public ArrayList<Uri> getSubItemUrisForItem(Object item) {
         mSubItemUriTemp.clear();

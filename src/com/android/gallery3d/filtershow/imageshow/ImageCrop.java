@@ -32,13 +32,14 @@ import com.android.gallery3d.filtershow.FilterShowActivity;
 import com.android.gallery3d.filtershow.crop.CropDrawingUtils;
 import com.android.gallery3d.filtershow.crop.CropMath;
 import com.android.gallery3d.filtershow.crop.CropObject;
-import com.android.gallery3d.filtershow.editors.EditorCrop;
 import com.android.gallery3d.filtershow.filters.FilterCropRepresentation;
 import com.android.gallery3d.filtershow.imageshow.GeometryMathUtils.GeometryHolder;
+
 import org.codeaurora.gallery.R;
 
 public class ImageCrop extends ImageShow {
     private static final String TAG = ImageCrop.class.getSimpleName();
+    FilterCropRepresentation mLocalRep = new FilterCropRepresentation();
     private RectF mImageBounds = new RectF();
     private RectF mScreenCropBounds = new RectF();
     private Paint mPaint = new Paint();
@@ -55,13 +56,8 @@ public class ImageCrop extends ImageShow {
     private float mPrevY = 0;
     private int mMinSideSize = 90;
     private int mTouchTolerance = 40;
-    private enum Mode {
-        NONE, MOVE
-    }
     private Mode mState = Mode.NONE;
     private boolean mValidDraw = false;
-    FilterCropRepresentation mLocalRep = new FilterCropRepresentation();
-
     public ImageCrop(Context context) {
         super(context);
         setup(context);
@@ -364,5 +360,9 @@ public class ImageCrop extends ImageShow {
             Log.w(TAG, "could not invert display matrix");
             mDisplayMatrixInverse = null;
         }
+    }
+
+    private enum Mode {
+        NONE, MOVE
     }
 }

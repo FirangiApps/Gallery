@@ -26,10 +26,11 @@ import android.os.Bundle;
 import android.util.Log;
 import android.widget.Toast;
 
-import org.codeaurora.gallery.R;
 import com.android.gallery3d.app.GalleryActivity;
 import com.android.gallery3d.app.PhotoPage;
 import com.android.gallery3d.common.ApiHelper;
+
+import org.codeaurora.gallery.R;
 
 public class WidgetClickHandler extends Activity {
     private static final String TAG = "PhotoAppWidgetClickHandler";
@@ -70,8 +71,8 @@ public class WidgetClickHandler extends Activity {
         if (tediousBack) {
             intent.setFlags(
                     Intent.FLAG_ACTIVITY_NEW_TASK |
-                    Intent.FLAG_ACTIVITY_CLEAR_TASK |
-                    Intent.FLAG_ACTIVITY_TASK_ON_HOME);
+                            Intent.FLAG_ACTIVITY_CLEAR_TASK |
+                            Intent.FLAG_ACTIVITY_TASK_ON_HOME);
         }
         startActivity(intent);
         finish();

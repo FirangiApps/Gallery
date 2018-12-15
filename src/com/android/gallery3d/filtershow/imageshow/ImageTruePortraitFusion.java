@@ -58,7 +58,7 @@ public class ImageTruePortraitFusion extends ImageShow {
     public void setUnderlay(Uri uri) {
         mRepresentation.setUnderlay(uri);
 
-        if(mUnderlay != null) {
+        if (mUnderlay != null) {
             mUnderlay.recycle();
             mUnderlay = null;
             MasterImage.getImage().setFusionUnderlay(null);

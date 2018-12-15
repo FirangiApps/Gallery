@@ -18,7 +18,6 @@ package com.android.gallery3d.filtershow.pipeline;
 
 import android.content.res.Resources;
 import android.graphics.Bitmap;
-import android.graphics.Rect;
 import android.net.Uri;
 
 import com.android.gallery3d.app.GalleryActivity;
@@ -32,39 +31,6 @@ import java.io.File;
 
 public class ImageSavingTask extends ProcessingTask {
     private ProcessingService mProcessingService;
-
-    static class SaveRequest implements Request {
-        Uri sourceUri;
-        Uri selectedUri;
-        File destinationFile;
-        ImagePreset preset;
-        boolean flatten;
-        int quality;
-        float sizeFactor;
-        Bitmap previewImage;
-        boolean exit;
-        long requsetId;
-    }
-
-    static class UpdateBitmap implements Update {
-        Bitmap bitmap;
-    }
-
-    static class UpdateProgress implements Update {
-        int max;
-        int current;
-    }
-
-    static class UpdatePreviewSaved implements Update {
-        Uri uri;
-        boolean exit;
-    }
-
-    static class URIResult implements Result {
-        Uri uri;
-        boolean exit;
-        long requestId;
-    }
 
     public ImageSavingTask(ProcessingService service) {
         mProcessingService = service;
@@ -106,7 +72,7 @@ public class ImageSavingTask extends ProcessingTask {
                 selectedUri, destinationFile, previewImage,
                 new SaveImage.Callback() {
                     @Override
-                    public void onPreviewSaved(Uri uri){
+                    public void onPreviewSaved(Uri uri) {
                         UpdatePreviewSaved previewSaved = new UpdatePreviewSaved();
                         previewSaved.uri = uri;
                         previewSaved.exit = exit;
@@ -165,6 +131,39 @@ public class ImageSavingTask extends ProcessingTask {
                 notificationBitmapSize, null, true);
         CachingPipeline pipeline = new CachingPipeline(FiltersManager.getManager(), "Thumb");
         return pipeline.renderFinalImage(bitmap, preset);
+    }
+
+    static class SaveRequest implements Request {
+        Uri sourceUri;
+        Uri selectedUri;
+        File destinationFile;
+        ImagePreset preset;
+        boolean flatten;
+        int quality;
+        float sizeFactor;
+        Bitmap previewImage;
+        boolean exit;
+        long requsetId;
+    }
+
+    static class UpdateBitmap implements Update {
+        Bitmap bitmap;
+    }
+
+    static class UpdateProgress implements Update {
+        int max;
+        int current;
+    }
+
+    static class UpdatePreviewSaved implements Update {
+        Uri uri;
+        boolean exit;
+    }
+
+    static class URIResult implements Result {
+        Uri uri;
+        boolean exit;
+        long requestId;
     }
 
 }

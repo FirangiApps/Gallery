@@ -21,8 +21,9 @@ import android.view.View;
 import android.view.View.OnClickListener;
 import android.widget.Button;
 
-import org.codeaurora.gallery.R;
 import com.android.gallery3d.ui.PopupList.OnPopupItemClickListener;
+
+import org.codeaurora.gallery.R;
 
 public class SelectionMenu implements OnClickListener {
     @SuppressWarnings("unused")

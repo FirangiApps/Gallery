@@ -28,6 +28,7 @@ import android.graphics.RectF;
 import android.graphics.Typeface;
 import android.util.AttributeSet;
 import android.view.View;
+
 import org.codeaurora.gallery.R;
 
 public class IconView extends View {
@@ -87,10 +88,7 @@ public class IconView extends View {
     }
 
     public boolean needsCenterText() {
-        if (mOrientation == HORIZONTAL) {
-            return true;
-        }
-        return false;
+        return mOrientation == HORIZONTAL;
     }
 
     protected void drawText(Canvas canvas, String text) {
@@ -98,7 +96,7 @@ public class IconView extends View {
             return;
         }
         float textWidth = mPaint.measureText(text);
-        int x = (int) (canvas.getWidth() - textWidth - 2*mMargin);
+        int x = (int) (canvas.getWidth() - textWidth - 2 * mMargin);
         if (needsCenterText()) {
             x = (int) ((canvas.getWidth() - textWidth) / 2.0f);
         }
@@ -111,10 +109,10 @@ public class IconView extends View {
         canvas.drawText(text, x, y, mPaint);
     }
 
-    private int getTextHeight(Paint paint){
+    private int getTextHeight(Paint paint) {
         paint.setTextSize(mTextSize);
         Paint.FontMetrics fontMetrics = paint.getFontMetrics();
-        return (int)(Math.ceil(fontMetrics.descent - fontMetrics.ascent) + 2);
+        return (int) (Math.ceil(fontMetrics.descent - fontMetrics.ascent) + 2);
     }
 
     protected void drawOutlinedText(Canvas canvas, String text) {
@@ -159,12 +157,12 @@ public class IconView extends View {
         return mBackgroundColor;
     }
 
-    public void setText(String text) {
-        mText = text;
-    }
-
     public String getText() {
         return mText;
+    }
+
+    public void setText(String text) {
+        mText = text;
     }
 
     public void setBitmap(Bitmap bitmap) {
@@ -180,7 +178,7 @@ public class IconView extends View {
     }
 
     @Override
-    public CharSequence getContentDescription () {
+    public CharSequence getContentDescription() {
         return mText;
     }
 

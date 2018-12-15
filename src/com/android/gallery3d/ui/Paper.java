@@ -120,7 +120,7 @@ class EdgeAnimation {
     }
 
     private void startAnimation(float start, float finish, long duration,
-            int newState) {
+                                int newState) {
         mValueStart = start;
         mValueFinish = finish;
         mDuration = duration;
@@ -152,7 +152,7 @@ class EdgeAnimation {
         if (mState == STATE_IDLE) return false;
         if (mState == STATE_PULL) return true;
 
-        float t = Utils.clamp((float)(now() - mStartTime) / mDuration, 0.0f, 1.0f);
+        float t = Utils.clamp((float) (now() - mStartTime) / mDuration, 0.0f, 1.0f);
         /* Use linear interpolation for absorb, quadratic for others */
         float interp = (mState == STATE_ABSORB)
                 ? t : mInterpolator.getInterpolation(t);

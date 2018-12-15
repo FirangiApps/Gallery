@@ -32,13 +32,9 @@ import com.android.gallery3d.filtershow.filters.ImageFilterRedEye;
 public abstract class ImagePoint extends ImageShow {
 
     private static final String LOGTAG = "ImageRedEyes";
+    protected static float mTouchPadding = 80;
     protected EditorRedEye mEditorRedEye;
     protected FilterRedEyeRepresentation mRedEyeRep;
-    protected static float mTouchPadding = 80;
-
-    public static void setTouchPadding(float padding) {
-        mTouchPadding = padding;
-    }
 
     public ImagePoint(Context context, AttributeSet attrs) {
         super(context, attrs);
@@ -46,6 +42,10 @@ public abstract class ImagePoint extends ImageShow {
 
     public ImagePoint(Context context) {
         super(context);
+    }
+
+    public static void setTouchPadding(float padding) {
+        mTouchPadding = padding;
     }
 
     @Override

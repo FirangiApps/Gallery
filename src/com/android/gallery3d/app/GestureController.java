@@ -52,41 +52,6 @@ public class GestureController {
                 new GestureDetector(context, new GestureListener(gestureControlListener));
     }
 
-    public interface GestureControlListener {
-        void onGestureDone(boolean notStart);
-        /**
-         * change current windows brightness by add adjustPercent.
-         *
-         * @param adjustPercent: -1.0f ~ 1.0f, increase if adjustPercent > 0,
-         *            decrease if adjustPercent < 0;
-         */
-        void adjustBrightness(double adjustPercent);
-
-        /**
-         * change volume level by add adjustPercent.
-         *
-         * @param adjustPercent: -1.0f ~ 1.0f, increase if adjustPercent > 0,
-         *            decrease if adjustPercent < 0;
-         */
-        void adjustVolumeLevel(double adjustPercent);
-
-        /**
-         * change video position by add adjustPercent.
-         *
-         * @param adjustPercent: -1.0f ~ 1.0f, increase if adjustPercent > 0,
-         *            decrease if adjustPercent < 0;
-         * @param forwardDirection: true if direction is forward.
-         */
-        void adjustVideoPosition(double adjustPercent, boolean forwardDirection);
-    }
-
-    private enum Type {
-        NONE,
-        BRIGHTNESS,
-        VOLUME,
-        SEEK,
-    }
-
     public void setRect(Rect rect) {
         this.setRect(rect.left, rect.top, rect.right, rect.bottom);
     }
@@ -106,45 +71,6 @@ public class GestureController {
         mVolumeRect.top = t;
         mVolumeRect.right = r;
         mVolumeRect.bottom = b;
-    }
-
-    private class GestureListener extends GestureDetector.SimpleOnGestureListener {
-        private GestureControlListener mGestureControlListener;
-
-        public GestureListener(GestureControlListener controlListener) {
-            mGestureControlListener = controlListener;
-        }
-
-        @Override
-        public boolean onScroll(MotionEvent start, MotionEvent end,
-                                float distanceX, float distanceY) {
-            if (mGestureControlListener == null) {
-                return super.onScroll(start, end, distanceX, distanceY);
-            }
-            // function depends on start position. (volume or brightness or play position.)
-            double yDistance = end.getY() - start.getY();
-            double xDistance = end.getX() - start.getX();
-
-            if (mType == Type.BRIGHTNESS) {
-                // use half of BrightnessRect's height to calc percent.
-                if (mBrightnessRect.height() != 0) {
-                    double percent = yDistance / (mBrightnessRect.height() / 2.0f) * -1.0f;
-                    mGestureControlListener.adjustBrightness(percent);
-                }
-            } else if (mType == Type.VOLUME) {
-                // use half of VolumeRect's height to calc percent.
-                if (mVolumeRect.height() != 0) {
-                    double percent = yDistance / (mVolumeRect.height() / 2.0f) * -1.0f;
-                    mGestureControlListener.adjustVolumeLevel(percent);
-                }
-            } else if (mType == Type.SEEK) {
-                if (mFullRect.width() != 0) {
-                    double percent = xDistance / mFullRect.width();
-                    mGestureControlListener.adjustVideoPosition(percent, distanceX < 0);
-                }
-            }
-            return true;
-        }
     }
 
     private boolean isEventValid(MotionEvent event) {
@@ -199,5 +125,80 @@ public class GestureController {
             }
         }
         return Type.NONE;
+    }
+
+    private enum Type {
+        NONE,
+        BRIGHTNESS,
+        VOLUME,
+        SEEK,
+    }
+
+    public interface GestureControlListener {
+        void onGestureDone(boolean notStart);
+
+        /**
+         * change current windows brightness by add adjustPercent.
+         *
+         * @param adjustPercent: -1.0f ~ 1.0f, increase if adjustPercent > 0,
+         *                       decrease if adjustPercent < 0;
+         */
+        void adjustBrightness(double adjustPercent);
+
+        /**
+         * change volume level by add adjustPercent.
+         *
+         * @param adjustPercent: -1.0f ~ 1.0f, increase if adjustPercent > 0,
+         *                       decrease if adjustPercent < 0;
+         */
+        void adjustVolumeLevel(double adjustPercent);
+
+        /**
+         * change video position by add adjustPercent.
+         *
+         * @param adjustPercent:    -1.0f ~ 1.0f, increase if adjustPercent > 0,
+         *                          decrease if adjustPercent < 0;
+         * @param forwardDirection: true if direction is forward.
+         */
+        void adjustVideoPosition(double adjustPercent, boolean forwardDirection);
+    }
+
+    private class GestureListener extends GestureDetector.SimpleOnGestureListener {
+        private GestureControlListener mGestureControlListener;
+
+        public GestureListener(GestureControlListener controlListener) {
+            mGestureControlListener = controlListener;
+        }
+
+        @Override
+        public boolean onScroll(MotionEvent start, MotionEvent end,
+                                float distanceX, float distanceY) {
+            if (mGestureControlListener == null) {
+                return super.onScroll(start, end, distanceX, distanceY);
+            }
+            // function depends on start position. (volume or brightness or play position.)
+            double yDistance = end.getY() - start.getY();
+            double xDistance = end.getX() - start.getX();
+
+            if (mType == Type.BRIGHTNESS) {
+                // use half of BrightnessRect's height to calc percent.
+                if (mBrightnessRect.height() != 0) {
+                    double percent = yDistance / (mBrightnessRect.height() / 2.0f) * -1.0f;
+                    mGestureControlListener.adjustBrightness(percent);
+                }
+            } else if (mType == Type.VOLUME) {
+                // use half of VolumeRect's height to calc percent.
+                if (mVolumeRect.height() != 0) {
+                    double percent = yDistance / (mVolumeRect.height() / 2.0f) * -1.0f;
+                    mGestureControlListener.adjustVolumeLevel(percent);
+                }
+            } else if (mType == Type.SEEK) {
+                if (mFullRect.width() != 0) {
+                    double percent = xDistance / mFullRect.width();
+                    mGestureControlListener.adjustVideoPosition(percent, distanceX < 0);
+                }
+            }
+            return true;
+        }
     }
 }

@@ -36,24 +36,20 @@ import java.util.ArrayList;
 
 public class ColorCompareView extends View implements ColorListener {
 
+    public final static float BORDER_SIZE = 0;
+    ArrayList<ColorListener> mColorListeners = new ArrayList<ColorListener>();
     private float mRadius;
     private float mWidth;
     private Paint mBarPaint1;
     private Paint mOrigBarPaint1;
     private Paint mCheckPaint;
-
     private float mHeight;
-
     private int mBgcolor = 0;
-
     private float mBorder;
-
     private float[] mHSVO = new float[4];
     private float[] mOrigHSVO = new float[4];
     private Path mRegion;
     private Path mOrigRegion;
-
-    public final static float BORDER_SIZE = 0;
     private int mCheckDim = 8;
 
     public ColorCompareView(Context ctx, AttributeSet attrs) {
@@ -96,13 +92,13 @@ public class ColorCompareView extends View implements ColorListener {
         }
         float x = event.getX();
         float y = event.getY();
-        if (x> mWidth-2*mHeight) {
+        if (x > mWidth - 2 * mHeight) {
             resetToOriginal();
         }
         return true;
     }
 
-    public void resetToOriginal(){
+    public void resetToOriginal() {
         System.arraycopy(mOrigHSVO, 0, mHSVO, 0, mOrigHSVO.length);
         updatePaint();
         notifyColorListeners(mHSVO);
@@ -157,8 +153,6 @@ public class ColorCompareView extends View implements ColorListener {
         updatePaint();
         invalidate();
     }
-
-    ArrayList<ColorListener> mColorListeners = new ArrayList<ColorListener>();
 
     public void notifyColorListeners(float[] hsvo) {
         for (ColorListener l : mColorListeners) {

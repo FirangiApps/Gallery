@@ -13,37 +13,31 @@ public class GifDecoder {
     public static final int STATUS_FORMAT_ERROR = 1;
     public static final int STATUS_OPEN_ERROR = 2;
     public static final int STATUS_FINISH = -1;
-
-    private InputStream mIS;
-    private int mStatus;
-
+    // max decoder pixel stack size
+    private static final int MaxStackSize = 4096;
     public int mWidth; // full image width
     public int mHeight; // full image height
+    private InputStream mIS;
+    private int mStatus;
     private boolean mGctFlag; // global color table used
     private int mGctSize; // size of global color table
     private int mLoopCount = 1; // iterations; 0 = repeat forever
-
     private int[] mGct; // global color table
     private int[] mLct; // local color table
     private int[] mAct; // active color table
-
     private int mBgIndex; // background color index
     private int mBgColor; // background color
     private int mLastBgColor; // previous bg color
     private int mPixelAspect; // pixel aspect ratio
-
     private boolean mLctFlag; // local color table flag
     private boolean mInterlace; // interlace flag
     private int mLctSize; // local color table size
-
     private int mIx, mIy, mIw, mIh; // current image rectangle
     private int mLrx, mLry, mLrw, mLrh;
     private Bitmap mImage; // current frame
     private Bitmap mLastImage; // previous frame
     private GifFrame mCurrentFrame = null;
-
     private boolean mIsShow = false;
-
     private byte[] mBlock = new byte[256]; // current data block
     private int mBlockSize = 0; // block size
     private int mDispose = 0;
@@ -51,10 +45,6 @@ public class GifDecoder {
     private boolean mTransparency = false; // use transparent color
     private int mDelay = 0; // delay in milliseconds
     private int mTransIndex; // transparent color index
-
-    // max decoder pixel stack size
-    private static final int MaxStackSize = 4096;
-
     // LZW decoder working arrays
     private short[] mPrefix;
     private byte[] mSuffix;
@@ -354,7 +344,7 @@ public class GifDecoder {
 
         // Decode GIF pixel stream.
         datum = bits = count = first = top = pi = bi = 0;
-        for (i = 0; i < npix;) {
+        for (i = 0; i < npix; ) {
             if (top == 0) {
                 if (bits < code_size) {
                     // Load bytes until there are enough bits for a code.

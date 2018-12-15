@@ -34,7 +34,7 @@ import android.content.res.Resources;
 import android.graphics.Bitmap;
 import android.graphics.Rect;
 import android.net.Uri;
-import com.android.gallery3d.app.Log;
+
 import com.android.gallery3d.filtershow.cache.ImageLoader;
 import com.android.gallery3d.filtershow.imageshow.MasterImage;
 import com.android.gallery3d.filtershow.tools.FilterGeneratorNativeEngine;
@@ -48,14 +48,15 @@ public class ImageFilterPreset extends ImageFilter {
     private int mPresetBitmapId = 0;
     private Uri filterImageUri;
 
-    public ImageFilterPreset() {    }
+    public ImageFilterPreset() {
+    }
 
     @Override
 
     public void freeResources() {
         if (mPresetBitmap != null) mPresetBitmap.recycle();
         mPresetBitmap = null;
-        }
+    }
 
     @Override
     public FilterRepresentation getDefaultRepresentation() {
@@ -89,7 +90,7 @@ public class ImageFilterPreset extends ImageFilter {
                 MasterImage.getImage().getActivity(), highresPreviewSize,
                 MasterImage.getImage().getOrientation(), new Rect());
 
-        FilterGeneratorNativeEngine.getInstance().filterGeneratorProcess(bitmap,filter,bitmap);
+        FilterGeneratorNativeEngine.getInstance().filterGeneratorProcess(bitmap, filter, bitmap);
         return bitmap;
     }
 

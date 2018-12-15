@@ -36,13 +36,14 @@ import android.view.View;
 import android.view.View.OnClickListener;
 import android.widget.LinearLayout;
 
-import org.codeaurora.gallery.R;
 import com.android.gallery3d.filtershow.FilterShowActivity;
 import com.android.gallery3d.filtershow.filters.FilterRepresentation;
 
-public class EditorTruePortraitBasic extends BasicEditor  {
-    private static final String LOGTAG = "EditorTruePortraitBasic";
+import org.codeaurora.gallery.R;
+
+public class EditorTruePortraitBasic extends BasicEditor {
     public static final int ID = R.id.editorTruePortraitBasic;
+    private static final String LOGTAG = "EditorTruePortraitBasic";
 
     public EditorTruePortraitBasic() {
         super(ID);
@@ -72,7 +73,7 @@ public class EditorTruePortraitBasic extends BasicEditor  {
             public void onClick(View view) {
                 FilterRepresentation representation = new FilterRepresentation("");
                 representation.setEditorId(EditorTruePortraitMask.ID);
-                ((FilterShowActivity)mContext).loadEditorPanel(representation);
+                ((FilterShowActivity) mContext).loadEditorPanel(representation);
             }
         });
     }

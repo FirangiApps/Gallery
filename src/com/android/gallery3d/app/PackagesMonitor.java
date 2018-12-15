@@ -28,50 +28,13 @@ import android.os.Build;
 import android.preference.PreferenceManager;
 
 import com.android.gallery3d.picasasource.PicasaSource;
-import com.android.gallery3d.util.LightCycleHelper;
 
 public class PackagesMonitor extends BroadcastReceiver {
-    public static final String KEY_PACKAGES_VERSION  = "packages-version";
+    public static final String KEY_PACKAGES_VERSION = "packages-version";
 
     public synchronized static int getPackagesVersion(Context context) {
         SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(context);
         return prefs.getInt(KEY_PACKAGES_VERSION, 1);
-    }
-
-    @Override
-    public void onReceive(final Context context, final Intent intent) {
-        intent.setClass(context, AsyncService.class);
-        if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-            context.startForegroundService(intent);
-        } else {
-            context.startService(intent);
-        }
-    }
-
-    public static class AsyncService extends IntentService {
-        public AsyncService() {
-            super("GalleryPackagesMonitorAsync");
-        }
-
-        @Override
-        public void onCreate() {
-            super.onCreate();
-            if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-                String channelId = "GalleryPackagesMonitorAsync";
-                NotificationChannel channel = new NotificationChannel(channelId, channelId,
-                        NotificationManager.IMPORTANCE_LOW);
-                NotificationManager manager =
-                        (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
-                manager.createNotificationChannel(channel);
-                startForeground(KEY_PACKAGES_VERSION.hashCode(),
-                        new Notification.Builder(getApplicationContext(), channelId).build());
-            }
-        }
-
-        @Override
-        protected void onHandleIntent(Intent intent) {
-            onReceiveAsync(this, intent);
-        }
     }
 
     // Runs in a background thread.
@@ -89,6 +52,42 @@ public class PackagesMonitor extends BroadcastReceiver {
             PicasaSource.onPackageRemoved(context, packageName);
         } else if (Intent.ACTION_PACKAGE_CHANGED.equals(action)) {
             PicasaSource.onPackageChanged(context, packageName);
+        }
+    }
+
+    @Override
+    public void onReceive(final Context context, final Intent intent) {
+        intent.setClass(context, AsyncService.class);
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            context.startForegroundService(intent);
+        } else {
+            context.startService(intent);
+        }
+    }
+
+    public static class AsyncService extends IntentService {
+        public AsyncService() {
+            super("GalleryPackagesMonitorAsync");
+        }
+
+        @Override
+        public void onCreate() {
+            super.onCreate();
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+                String channelId = "GalleryPackagesMonitorAsync";
+                NotificationChannel channel = new NotificationChannel(channelId, channelId,
+                        NotificationManager.IMPORTANCE_LOW);
+                NotificationManager manager =
+                        (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
+                manager.createNotificationChannel(channel);
+                startForeground(KEY_PACKAGES_VERSION.hashCode(),
+                        new Notification.Builder(getApplicationContext(), channelId).build());
+            }
+        }
+
+        @Override
+        protected void onHandleIntent(Intent intent) {
+            onReceiveAsync(this, intent);
         }
     }
 }

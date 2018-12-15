@@ -49,28 +49,6 @@ public class ActionImage extends MediaItem {
         return null;
     }
 
-    private class BitmapJob implements Job<Bitmap> {
-        private int mType;
-
-        protected BitmapJob(int type) {
-            mType = type;
-        }
-
-        @Override
-        public Bitmap run(JobContext jc) {
-            int targetSize = MediaItem.getTargetSize(mType);
-            Bitmap bitmap = BitmapFactory.decodeResource(mApplication.getResources(),
-                    mResourceId);
-
-            if (mType == MediaItem.TYPE_MICROTHUMBNAIL) {
-                bitmap = BitmapUtils.resizeAndCropCenter(bitmap, targetSize, true);
-            } else {
-                bitmap = BitmapUtils.resizeDownBySideLength(bitmap, targetSize, true);
-            }
-            return bitmap;
-        }
-    }
-
     @Override
     public int getSupportedOperations() {
         return SUPPORT_ACTION;
@@ -99,5 +77,27 @@ public class ActionImage extends MediaItem {
     @Override
     public int getHeight() {
         return 0;
+    }
+
+    private class BitmapJob implements Job<Bitmap> {
+        private int mType;
+
+        protected BitmapJob(int type) {
+            mType = type;
+        }
+
+        @Override
+        public Bitmap run(JobContext jc) {
+            int targetSize = MediaItem.getTargetSize(mType);
+            Bitmap bitmap = BitmapFactory.decodeResource(mApplication.getResources(),
+                    mResourceId);
+
+            if (mType == MediaItem.TYPE_MICROTHUMBNAIL) {
+                bitmap = BitmapUtils.resizeAndCropCenter(bitmap, targetSize, true);
+            } else {
+                bitmap = BitmapUtils.resizeDownBySideLength(bitmap, targetSize, true);
+            }
+            return bitmap;
+        }
     }
 }

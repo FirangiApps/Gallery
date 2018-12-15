@@ -19,96 +19,55 @@ package com.android.gallery3d.app;
 import android.annotation.TargetApi;
 import android.app.ActionBar;
 import android.app.ActionBar.OnMenuVisibilityListener;
-import android.app.ActionBar.OnNavigationListener;
 import android.app.Activity;
-import android.app.AlertDialog;
 import android.content.Context;
-import android.content.DialogInterface;
 import android.content.Intent;
-import android.content.res.Resources;
 import android.graphics.Color;
 import android.graphics.drawable.ColorDrawable;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuItem;
-import android.view.View;
-import android.view.ViewGroup;
-import android.widget.BaseAdapter;
 import android.widget.ShareActionProvider;
-import android.widget.TextView;
-import android.widget.Toolbar;
-import android.widget.TwoLineListItem;
+
+import com.android.gallery3d.common.ApiHelper;
 
 import org.codeaurora.gallery.R;
-import com.android.gallery3d.common.ApiHelper;
 
 import java.util.ArrayList;
 
 public class GalleryActionBar {
+    public static final int ALBUM_FILMSTRIP_MODE_SELECTED = 0;
+    public static final int ALBUM_GRID_MODE_SELECTED = 1;
     @SuppressWarnings("unused")
     private static final String TAG = "GalleryActionBar";
-
+    private static final ActionItem[] sClusterItems = new ActionItem[]{
+            new ActionItem(FilterUtils.CLUSTER_BY_ALBUM, true, false, R.string.albums,
+                    R.string.group_by_album),
+            new ActionItem(FilterUtils.CLUSTER_BY_LOCATION, true, false,
+                    R.string.locations, R.string.location, R.string.group_by_location),
+            new ActionItem(FilterUtils.CLUSTER_BY_TIME, true, false, R.string.times,
+                    R.string.time, R.string.group_by_time),
+            new ActionItem(FilterUtils.CLUSTER_BY_FACE, true, false, R.string.people,
+                    R.string.group_by_faces),
+            new ActionItem(FilterUtils.CLUSTER_BY_TAG, true, false, R.string.tags,
+                    R.string.group_by_tags)
+    };
     private ClusterRunner mClusterRunner;
     private CharSequence[] mTitles;
     private ArrayList<Integer> mActions;
     private Context mContext;
     private LayoutInflater mInflater;
+//    private ClusterAdapter mAdapter = new ClusterAdapter();
     private AbstractGalleryActivity mActivity;
     private ActionBar mActionBar;
     private int mCurrentIndex;
-//    private ClusterAdapter mAdapter = new ClusterAdapter();
-
-//    private AlbumModeAdapter mAlbumModeAdapter;
+    //    private AlbumModeAdapter mAlbumModeAdapter;
     private OnAlbumModeSelectedListener mAlbumModeListener;
     private int mLastAlbumModeSelected;
-    private CharSequence [] mAlbumModes;
-    public static final int ALBUM_FILMSTRIP_MODE_SELECTED = 0;
-    public static final int ALBUM_GRID_MODE_SELECTED = 1;
-
-    public interface ClusterRunner {
-        public void doCluster(int id);
-    }
-
-    public interface OnAlbumModeSelectedListener {
-        public void onAlbumModeSelected(int mode);
-    }
-
-    private static class ActionItem {
-        public int action;
-        public boolean enabled;
-        public boolean visible;
-        public int spinnerTitle;
-        public int dialogTitle;
-        public int clusterBy;
-
-        public ActionItem(int action, boolean applied, boolean enabled, int title,
-                int clusterBy) {
-            this(action, applied, enabled, title, title, clusterBy);
-        }
-
-        public ActionItem(int action, boolean applied, boolean enabled, int spinnerTitle,
-                int dialogTitle, int clusterBy) {
-            this.action = action;
-            this.enabled = enabled;
-            this.spinnerTitle = spinnerTitle;
-            this.dialogTitle = dialogTitle;
-            this.clusterBy = clusterBy;
-            this.visible = true;
-        }
-    }
-
-    private static final ActionItem[] sClusterItems = new ActionItem[] {
-        new ActionItem(FilterUtils.CLUSTER_BY_ALBUM, true, false, R.string.albums,
-                R.string.group_by_album),
-        new ActionItem(FilterUtils.CLUSTER_BY_LOCATION, true, false,
-                R.string.locations, R.string.location, R.string.group_by_location),
-        new ActionItem(FilterUtils.CLUSTER_BY_TIME, true, false, R.string.times,
-                R.string.time, R.string.group_by_time),
-        new ActionItem(FilterUtils.CLUSTER_BY_FACE, true, false, R.string.people,
-                R.string.group_by_faces),
-        new ActionItem(FilterUtils.CLUSTER_BY_TAG, true, false, R.string.tags,
-                R.string.group_by_tags)
-    };
+    private CharSequence[] mAlbumModes;
+    private Menu mActionBarMenu;
+    private ShareActionProvider mSharePanoramaActionProvider;
+    private ShareActionProvider mShareActionProvider;
 
     /*private class ClusterAdapter extends BaseAdapter {
 
@@ -178,6 +137,16 @@ public class GalleryActionBar {
             return convertView;
         }
     }*/
+    private Intent mSharePanoramaIntent;
+    private Intent mShareIntent;
+
+    public GalleryActionBar(AbstractGalleryActivity activity) {
+        mActionBar = activity.getActionBar();
+        mContext = activity.getAndroidContext();
+        mActivity = activity;
+        mInflater = mActivity.getLayoutInflater();
+        mCurrentIndex = 0;
+    }
 
     public static String getClusterByTypeString(Context context, int type) {
         for (ActionItem item : sClusterItems) {
@@ -186,31 +155,6 @@ public class GalleryActionBar {
             }
         }
         return null;
-    }
-
-    public GalleryActionBar(AbstractGalleryActivity activity) {
-        mActionBar = activity.getActionBar();
-        mContext = activity.getAndroidContext();
-        mActivity = activity;
-        mInflater = ((Activity) mActivity).getLayoutInflater();
-        mCurrentIndex = 0;
-    }
-
-    private void createDialogData() {
-        ArrayList<CharSequence> titles = new ArrayList<CharSequence>();
-        mActions = new ArrayList<Integer>();
-        for (ActionItem item : sClusterItems) {
-            if (item.enabled && item.visible) {
-                titles.add(mContext.getString(item.dialogTitle));
-                mActions.add(item.action);
-            }
-        }
-        mTitles = new CharSequence[titles.size()];
-        titles.toArray(mTitles);
-    }
-
-    public int getHeight() {
-        return mActionBar != null ? mActionBar.getHeight() : 0;
     }
 
 //    public void setClusterItemEnabled(int id, boolean enabled) {
@@ -258,12 +202,17 @@ public class GalleryActionBar {
 //        }
 //    }
 
-    public void onConfigurationChanged() {
-        if (mActionBar != null && mAlbumModeListener != null) {
-//            OnAlbumModeSelectedListener listener = mAlbumModeListener;
-//            enableAlbumModeMenu(mLastAlbumModeSelected, listener);
-
+    private void createDialogData() {
+        ArrayList<CharSequence> titles = new ArrayList<CharSequence>();
+        mActions = new ArrayList<Integer>();
+        for (ActionItem item : sClusterItems) {
+            if (item.enabled && item.visible) {
+                titles.add(mContext.getString(item.dialogTitle));
+                mActions.add(item.action);
+            }
         }
+        mTitles = new CharSequence[titles.size()];
+        titles.toArray(mTitles);
     }
 
 //    public void enableAlbumModeMenu(int selected, OnAlbumModeSelectedListener listener) {
@@ -312,6 +261,18 @@ public class GalleryActionBar {
 //            }
 //        }).create().show();
 //    }
+
+    public int getHeight() {
+        return mActionBar != null ? mActionBar.getHeight() : 0;
+    }
+
+    public void onConfigurationChanged() {
+        if (mActionBar != null && mAlbumModeListener != null) {
+//            OnAlbumModeSelectedListener listener = mAlbumModeListener;
+//            enableAlbumModeMenu(mLastAlbumModeSelected, listener);
+
+        }
+    }
 
     @TargetApi(ApiHelper.VERSION_CODES.ICE_CREAM_SANDWICH)
     private void setHomeButtonEnabled(boolean enabled) {
@@ -362,14 +323,6 @@ public class GalleryActionBar {
         if (mActionBar != null) mActionBar.hide();
     }
 
-    public void addOnMenuVisibilityListener(OnMenuVisibilityListener listener) {
-        if (mActionBar != null) mActionBar.addOnMenuVisibilityListener(listener);
-    }
-
-    public void removeOnMenuVisibilityListener(OnMenuVisibilityListener listener) {
-        if (mActionBar != null) mActionBar.removeOnMenuVisibilityListener(listener);
-    }
-
 //    public boolean setSelectedAction(int type) {
 //        if (mActionBar == null) return false;
 //
@@ -404,11 +357,13 @@ public class GalleryActionBar {
 //        return false;
 //    }
 
-    private Menu mActionBarMenu;
-    private ShareActionProvider mSharePanoramaActionProvider;
-    private ShareActionProvider mShareActionProvider;
-    private Intent mSharePanoramaIntent;
-    private Intent mShareIntent;
+    public void addOnMenuVisibilityListener(OnMenuVisibilityListener listener) {
+        if (mActionBar != null) mActionBar.addOnMenuVisibilityListener(listener);
+    }
+
+    public void removeOnMenuVisibilityListener(OnMenuVisibilityListener listener) {
+        if (mActionBar != null) mActionBar.removeOnMenuVisibilityListener(listener);
+    }
 
     public void createActionBarMenu(int menuRes, Menu menu) {
         mActivity.getMenuInflater().inflate(menuRes, menu);
@@ -417,18 +372,18 @@ public class GalleryActionBar {
         MenuItem item = menu.findItem(R.id.action_share_panorama);
         if (item != null) {
             mSharePanoramaActionProvider = (ShareActionProvider)
-                item.getActionProvider();
+                    item.getActionProvider();
             mSharePanoramaActionProvider
-                .setShareHistoryFileName("panorama_share_history.xml");
+                    .setShareHistoryFileName("panorama_share_history.xml");
             mSharePanoramaActionProvider.setShareIntent(mSharePanoramaIntent);
         }
 
         item = menu.findItem(R.id.action_share);
         if (item != null) {
             mShareActionProvider = (ShareActionProvider)
-                item.getActionProvider();
+                    item.getActionProvider();
             mShareActionProvider
-                .setShareHistoryFileName("share_history.xml");
+                    .setShareHistoryFileName("share_history.xml");
             mShareActionProvider.setShareIntent(mShareIntent);
         }
     }
@@ -438,7 +393,7 @@ public class GalleryActionBar {
     }
 
     public void setShareIntents(Intent sharePanoramaIntent, Intent shareIntent,
-        ShareActionProvider.OnShareTargetSelectedListener onShareListener) {
+                                ShareActionProvider.OnShareTargetSelectedListener onShareListener) {
         mSharePanoramaIntent = sharePanoramaIntent;
         if (mSharePanoramaActionProvider != null) {
             mSharePanoramaActionProvider.setShareIntent(sharePanoramaIntent);
@@ -447,7 +402,7 @@ public class GalleryActionBar {
         if (mShareActionProvider != null) {
             mShareActionProvider.setShareIntent(shareIntent);
             mShareActionProvider.setOnShareTargetSelectedListener(
-                onShareListener);
+                    onShareListener);
         }
     }
 
@@ -456,9 +411,40 @@ public class GalleryActionBar {
                 new ColorDrawable(mContext.getResources().getColor(R.color.photo_page_action_bar)));
     }
 
-    public void setBackGroundDefault()
-    {
+    public void setBackGroundDefault() {
         mActionBar.setBackgroundDrawable(new ColorDrawable(Color.parseColor("#e53935")));
+    }
+
+    public interface ClusterRunner {
+        void doCluster(int id);
+    }
+
+    public interface OnAlbumModeSelectedListener {
+        void onAlbumModeSelected(int mode);
+    }
+
+    private static class ActionItem {
+        public int action;
+        public boolean enabled;
+        public boolean visible;
+        public int spinnerTitle;
+        public int dialogTitle;
+        public int clusterBy;
+
+        public ActionItem(int action, boolean applied, boolean enabled, int title,
+                          int clusterBy) {
+            this(action, applied, enabled, title, title, clusterBy);
+        }
+
+        public ActionItem(int action, boolean applied, boolean enabled, int spinnerTitle,
+                          int dialogTitle, int clusterBy) {
+            this.action = action;
+            this.enabled = enabled;
+            this.spinnerTitle = spinnerTitle;
+            this.dialogTitle = dialogTitle;
+            this.clusterBy = clusterBy;
+            this.visible = true;
+        }
     }
 
 

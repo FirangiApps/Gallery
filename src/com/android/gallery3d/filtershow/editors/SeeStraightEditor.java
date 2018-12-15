@@ -32,9 +32,9 @@ package com.android.gallery3d.filtershow.editors;
 import android.content.Context;
 import android.widget.FrameLayout;
 
-import org.codeaurora.gallery.R;
-import com.android.gallery3d.filtershow.filters.SeeStraightActs;
 import com.android.gallery3d.filtershow.imageshow.ImageShow;
+
+import org.codeaurora.gallery.R;
 
 public class SeeStraightEditor extends Editor {
     public final static int ID = R.id.seeStraightEditor;

@@ -17,34 +17,22 @@
 package com.android.gallery3d.filtershow.filters;
 
 import android.graphics.Bitmap;
-import android.graphics.Color;
-import android.graphics.Matrix;
-
-import org.codeaurora.gallery.R;
-import com.android.gallery3d.filtershow.pipeline.FilterEnvironment;
-
-import android.graphics.Bitmap;
-import android.graphics.Color;
 import android.graphics.Matrix;
 import android.renderscript.Allocation;
 import android.renderscript.Element;
 import android.renderscript.RenderScript;
 import android.renderscript.Script.LaunchOptions;
 import android.renderscript.Type;
-import android.util.Log;
 
-import org.codeaurora.gallery.R;
 import com.android.gallery3d.filtershow.pipeline.FilterEnvironment;
 
 public class ImageFilterGrad extends ImageFilterRS {
     private static final String LOGTAG = "ImageFilterGrad";
+    private static final int RADIUS_SCALE_FACTOR = 160;
+    private static final int STRIP_SIZE = 64;
+    FilterGradRepresentation mParameters = new FilterGradRepresentation();
     private ScriptC_grad mScript;
     private Bitmap mSourceBitmap;
-    private static final int RADIUS_SCALE_FACTOR = 160;
-
-    private static final int STRIP_SIZE = 64;
-
-    FilterGradRepresentation mParameters = new FilterGradRepresentation();
     private Bitmap mOverlayBitmap;
 
     public ImageFilterGrad() {
@@ -73,6 +61,7 @@ public class ImageFilterGrad extends ImageFilterRS {
             mScript = null;
         }
     }
+
     @Override
     protected void createFilter(android.content.res.Resources res, float scaleFactor,
                                 int quality) {
@@ -181,10 +170,7 @@ public class ImageFilterGrad extends ImageFilterRS {
     private boolean checkStop() {
         RenderScript rsCtx = getRenderScriptContext();
         rsCtx.finish();
-        if (getEnvironment().needsStop()) {
-            return true;
-        }
-        return false;
+        return getEnvironment().needsStop();
     }
 }
 

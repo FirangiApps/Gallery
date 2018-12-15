@@ -16,28 +16,19 @@
 
 package com.android.gallery3d.data;
 
-import org.codeaurora.gallery.R;
-import com.android.gallery3d.common.Utils;
 import com.android.gallery3d.exif.ExifInterface;
 import com.android.gallery3d.exif.ExifTag;
-import com.android.gallery3d.exif.Rational;
 
-import java.io.FileInputStream;
+import org.codeaurora.gallery.R;
+
 import java.io.FileNotFoundException;
 import java.io.IOException;
-import java.io.InputStream;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map.Entry;
 import java.util.TreeMap;
 
 public class MediaDetails implements Iterable<Entry<Integer, Object>> {
-    @SuppressWarnings("unused")
-    private static final String TAG = "MediaDetails";
-
-    private TreeMap<Integer, Object> mDetails = new TreeMap<Integer, Object>();
-    private HashMap<Integer, Integer> mUnits = new HashMap<Integer, Integer>();
-
     public static final int INDEX_TITLE = 1;
     public static final int INDEX_DESCRIPTION = 2;
     public static final int INDEX_DATETIME = 3;
@@ -48,7 +39,6 @@ public class MediaDetails implements Iterable<Entry<Integer, Object>> {
     public static final int INDEX_DURATION = 8;
     public static final int INDEX_MIMETYPE = 9;
     public static final int INDEX_SIZE = 10;
-
     // for EXIF
     public static final int INDEX_MAKE = 100;
     public static final int INDEX_MODEL = 101;
@@ -59,58 +49,15 @@ public class MediaDetails implements Iterable<Entry<Integer, Object>> {
     public static final int INDEX_SHUTTER_SPEED = 106;
     public static final int INDEX_EXPOSURE_TIME = 107;
     public static final int INDEX_ISO = 108;
-
     // Put this last because it may be long.
     public static final int INDEX_PATH = 200;
-
-    public static class FlashState {
-        private static int FLASH_FIRED_MASK = 1;
-        private static int FLASH_RETURN_MASK = 2 | 4;
-        private static int FLASH_MODE_MASK = 8 | 16;
-        private static int FLASH_FUNCTION_MASK = 32;
-        private static int FLASH_RED_EYE_MASK = 64;
-        private int mState;
-
-        public FlashState(int state) {
-            mState = state;
-        }
-
-        public boolean isFlashFired() {
-            return (mState & FLASH_FIRED_MASK) != 0;
-        }
-    }
-
-    public void addDetail(int index, Object value) {
-        mDetails.put(index, value);
-    }
-
-    public Object getDetail(int index) {
-        return mDetails.get(index);
-    }
-
-    public int size() {
-        return mDetails.size();
-    }
-
-    @Override
-    public Iterator<Entry<Integer, Object>> iterator() {
-        return mDetails.entrySet().iterator();
-    }
-
-    public void setUnit(int index, int unit) {
-        mUnits.put(index, unit);
-    }
-
-    public boolean hasUnit(int index) {
-        return mUnits.containsKey(index);
-    }
-
-    public int getUnit(int index) {
-        return mUnits.get(index);
-    }
+    @SuppressWarnings("unused")
+    private static final String TAG = "MediaDetails";
+    private TreeMap<Integer, Object> mDetails = new TreeMap<Integer, Object>();
+    private HashMap<Integer, Integer> mUnits = new HashMap<Integer, Integer>();
 
     private static void setExifData(MediaDetails details, ExifTag tag,
-            int key) {
+                                    int key) {
         if (tag != null) {
             String value = null;
             int type = tag.getDataType();
@@ -123,7 +70,7 @@ public class MediaDetails implements Iterable<Entry<Integer, Object>> {
             }
             if (key == MediaDetails.INDEX_FLASH) {
                 MediaDetails.FlashState state = new MediaDetails.FlashState(
-                        Integer.valueOf(value.toString()));
+                        Integer.valueOf(value));
                 details.addDetail(key, state);
             } else {
                 details.addDetail(key, value);
@@ -165,6 +112,52 @@ public class MediaDetails implements Iterable<Entry<Integer, Object>> {
             details.addDetail(MediaDetails.INDEX_FOCAL_LENGTH,
                     focalTag.getValueAsRational(0).toDouble());
             details.setUnit(MediaDetails.INDEX_FOCAL_LENGTH, R.string.unit_mm);
+        }
+    }
+
+    public void addDetail(int index, Object value) {
+        mDetails.put(index, value);
+    }
+
+    public Object getDetail(int index) {
+        return mDetails.get(index);
+    }
+
+    public int size() {
+        return mDetails.size();
+    }
+
+    @Override
+    public Iterator<Entry<Integer, Object>> iterator() {
+        return mDetails.entrySet().iterator();
+    }
+
+    public void setUnit(int index, int unit) {
+        mUnits.put(index, unit);
+    }
+
+    public boolean hasUnit(int index) {
+        return mUnits.containsKey(index);
+    }
+
+    public int getUnit(int index) {
+        return mUnits.get(index);
+    }
+
+    public static class FlashState {
+        private static int FLASH_FIRED_MASK = 1;
+        private static int FLASH_RETURN_MASK = 2 | 4;
+        private static int FLASH_MODE_MASK = 8 | 16;
+        private static int FLASH_FUNCTION_MASK = 32;
+        private static int FLASH_RED_EYE_MASK = 64;
+        private int mState;
+
+        public FlashState(int state) {
+            mState = state;
+        }
+
+        public boolean isFlashFired() {
+            return (mState & FLASH_FIRED_MASK) != 0;
         }
     }
 }

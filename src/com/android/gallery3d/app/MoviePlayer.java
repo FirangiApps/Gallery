@@ -43,12 +43,12 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Toast;
 
-import org.codeaurora.gallery.R;
 import com.android.gallery3d.common.ApiHelper;
 import com.android.gallery3d.common.BlobCache;
 import com.android.gallery3d.util.CacheManager;
 import com.android.gallery3d.util.GalleryUtils;
 
+import org.codeaurora.gallery.R;
 import org.codeaurora.gallery3d.ext.IContrllerOverlayExt;
 import org.codeaurora.gallery3d.ext.IMovieItem;
 import org.codeaurora.gallery3d.ext.IMoviePlayer;
@@ -67,7 +67,6 @@ import java.io.DataInputStream;
 import java.io.DataOutputStream;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.Timer;
 
 public class MoviePlayer implements
         MediaPlayer.OnErrorListener, MediaPlayer.OnCompletionListener,
@@ -77,43 +76,33 @@ public class MoviePlayer implements
         MediaPlayer.OnSeekCompleteListener,
         MediaPlayer.OnVideoSizeChangedListener,
         MediaPlayer.OnBufferingUpdateListener {
+    public static final int SERVER_TIMEOUT = 8801;
+    public static final int STREAMING_LOCAL = 0;
+    public static final int STREAMING_HTTP = 1;
+    public static final int STREAMING_RTSP = 2;
+    public static final int STREAMING_SDP = 3;
     @SuppressWarnings("unused")
     private static final String TAG = "MoviePlayer";
     private static final boolean LOG = true;
-
     private static final String KEY_VIDEO_POSITION = "video-position";
     private static final String KEY_RESUMEABLE_TIME = "resumeable-timeout";
-
     // These are constants in KeyEvent, appearing on API level 11.
     private static final int KEYCODE_MEDIA_PLAY = 126;
     private static final int KEYCODE_MEDIA_PAUSE = 127;
-
     // Copied from MediaPlaybackService in the Music Player app.
     private static final String SERVICECMD = "com.android.music.musicservicecommand";
     private static final String CMDNAME = "command";
     private static final String CMDPAUSE = "pause";
-
     private static final String KEY_VIDEO_CAN_SEEK = "video_can_seek";
     private static final String KEY_VIDEO_CAN_PAUSE = "video_can_pause";
     private static final String KEY_VIDEO_LAST_DURATION = "video_last_duration";
     private static final String KEY_VIDEO_LAST_DISCONNECT_TIME = "last_disconnect_time";
     private static final String KEY_VIDEO_STREAMING_TYPE = "video_streaming_type";
     private static final String KEY_VIDEO_STATE = "video_state";
-
     private static final String VIRTUALIZE_EXTRA = "virtualize";
-    public static final int SERVER_TIMEOUT = 8801;
-
     // If we resume the acitivty with in RESUMEABLE_TIMEOUT, we will keep playing.
     // Otherwise, we pause the player.
     private static final long RESUMEABLE_TIMEOUT = 3 * 60 * 1000; // 3 mins
-
-    public static final int STREAMING_LOCAL = 0;
-    public static final int STREAMING_HTTP = 1;
-    public static final int STREAMING_RTSP = 2;
-    public static final int STREAMING_SDP = 3;
-    private int mStreamingType = STREAMING_LOCAL;
-
-    private Context mContext;
     private final CodeauroraVideoView mVideoView;
     private final View mCoverView;
     private final View mRootView;
@@ -122,60 +111,6 @@ public class MoviePlayer implements
     private final AudioBecomingNoisyReceiver mAudioBecomingNoisyReceiver;
     private final MovieControllerOverlayNew mController;
     private final GestureControllerOverlay mGestureController;
-
-    private long mResumeableTime = Long.MAX_VALUE;
-    private int mVideoPosition = 0;
-    private boolean mHasPaused = false;
-    private boolean mVideoHasPaused = false;
-    private boolean mCanResumed = false;
-    private boolean mFirstBePlayed = false;
-    private boolean mKeyguardLocked = false;
-    private boolean mIsOnlyAudio = false;
-    private int mLastSystemUiVis = 0;
-
-    // If the time bar is being dragged.
-    private boolean mDragging;
-
-    // If the time bar is visible.
-    private boolean mShowing;
-
-    // used to track what type of audio focus loss caused the video to pause
-    private boolean mPausedByTransientLossOfFocus = false;
-
-    private Virtualizer mVirtualizer;
-
-    private MovieActivity mActivityContext;//for dialog and toast context
-    private MoviePlayerExtension mPlayerExt = new MoviePlayerExtension();
-    private RetryExtension mRetryExt = new RetryExtension();
-    private ServerTimeoutExtension mServerTimeoutExt = new ServerTimeoutExtension();
-    private ScreenModeExt mScreenModeExt = new ScreenModeExt();
-    private IContrllerOverlayExt mOverlayExt;
-    private IControllerRewindAndForward mControllerRewindAndForwardExt;
-    private IRewindAndForwardListener mRewindAndForwardListener = new ControllerRewindAndForwardExt();
-    private boolean mCanReplay;
-    private boolean mVideoCanSeek = false;
-    private boolean mVideoCanPause = false;
-    private boolean mWaitMetaData;
-    private boolean mIsShowResumingDialog;
-    private TState mTState = TState.PLAYING;
-    private IMovieItem mMovieItem;
-    private int mVideoLastDuration;//for duration displayed in init state
-
-    private VideoSnapshotExt mVideoSnapshotExt = new VideoSnapshotExt();
-
-    private enum TState {
-        PLAYING,
-        PAUSED,
-        STOPED,
-        COMPELTED,
-        RETRY_ERROR
-    }
-
-    interface Restorable {
-        void onRestoreInstanceState(Bundle icicle);
-        void onSaveInstanceState(Bundle outState);
-    }
-
     private final Runnable mPlayingChecker = new Runnable() {
         @Override
         public void run() {
@@ -186,7 +121,31 @@ public class MoviePlayer implements
             }
         }
     };
-
+    private int mStreamingType = STREAMING_LOCAL;
+    private Context mContext;
+    private long mResumeableTime = Long.MAX_VALUE;
+    private int mVideoPosition = 0;
+    private boolean mHasPaused = false;
+    private boolean mVideoHasPaused = false;
+    private boolean mCanResumed = false;
+    private boolean mFirstBePlayed = false;
+    private boolean mKeyguardLocked = false;
+    private boolean mIsOnlyAudio = false;
+    private int mLastSystemUiVis = 0;
+    // If the time bar is being dragged.
+    private boolean mDragging;
+    // If the time bar is visible.
+    private boolean mShowing;
+    // used to track what type of audio focus loss caused the video to pause
+    private boolean mPausedByTransientLossOfFocus = false;
+    private Virtualizer mVirtualizer;
+    private MovieActivity mActivityContext;//for dialog and toast context
+    private MoviePlayerExtension mPlayerExt = new MoviePlayerExtension();
+    private RetryExtension mRetryExt = new RetryExtension();
+    private ServerTimeoutExtension mServerTimeoutExt = new ServerTimeoutExtension();
+    private ScreenModeExt mScreenModeExt = new ScreenModeExt();
+    private IContrllerOverlayExt mOverlayExt;
+    private IControllerRewindAndForward mControllerRewindAndForwardExt;
     private final Runnable mProgressChecker = new Runnable() {
         @Override
         public void run() {
@@ -194,11 +153,16 @@ public class MoviePlayer implements
             mHandler.postDelayed(mProgressChecker, 1000 - (pos % 1000));
         }
     };
-
-    public interface TimerProgress {
-        void startTimer();
-    }
-
+    private IRewindAndForwardListener mRewindAndForwardListener = new ControllerRewindAndForwardExt();
+    private boolean mCanReplay;
+    private boolean mVideoCanSeek = false;
+    private boolean mVideoCanPause = false;
+    private boolean mWaitMetaData;
+    private boolean mIsShowResumingDialog;
+    private TState mTState = TState.PLAYING;
+    private IMovieItem mMovieItem;
+    private int mVideoLastDuration;//for duration displayed in init state
+    private VideoSnapshotExt mVideoSnapshotExt = new VideoSnapshotExt();
     private TimerProgress mTimerController = new TimerProgress() {
         @Override
         public void startTimer() {
@@ -206,7 +170,33 @@ public class MoviePlayer implements
             mHandler.post(mProgressChecker);
         }
     };
-
+    private AudioManager.OnAudioFocusChangeListener mAudioFocusChangeListener =
+            new AudioManager.OnAudioFocusChangeListener() {
+                @Override
+                public void onAudioFocusChange(int focusChange) {
+                    switch (focusChange) {
+                        case AudioManager.AUDIOFOCUS_GAIN:
+                            boolean isTargetPlaying = (mVideoView != null &&
+                                    mVideoView.isTargetPlaying());
+                            Log.d(TAG, "AUDIOFOCUS_GAIN isTargetPlaying : " + isTargetPlaying);
+                            if (mPausedByTransientLossOfFocus || isTargetPlaying) {
+                                onPlayVideo();
+                                mPausedByTransientLossOfFocus = false;
+                            }
+                            break;
+                        case AudioManager.AUDIOFOCUS_LOSS:
+                        case AudioManager.AUDIOFOCUS_LOSS_TRANSIENT:
+                            boolean isPlaying = (mVideoView != null && mVideoView.isPlaying());
+                            Log.d(TAG, "AUDIOFOCUS_LOSS isPlaying : " + isPlaying);
+                            if (isPlaying) {
+                                onPauseVideo();
+                                mPausedByTransientLossOfFocus = true;
+                            }
+                            break;
+                        default:
+                    }
+                }
+            };
     private final BroadcastReceiver mReceiver = new BroadcastReceiver() {
         @Override
         public void onReceive(Context context, Intent intent) {
@@ -226,10 +216,10 @@ public class MoviePlayer implements
     };
 
     public MoviePlayer(View rootView, final MovieActivity movieActivity,
-            IMovieItem info, Bundle savedInstance, boolean canReplay) {
+                       IMovieItem info, Bundle savedInstance, boolean canReplay) {
         mContext = movieActivity.getApplicationContext();
         mRootView = rootView;
-        mVideoView = (CodeauroraVideoView) rootView.findViewById(R.id.surface_view);
+        mVideoView = rootView.findViewById(R.id.surface_view);
         mCoverView = rootView.findViewById(R.id.surface_view_cover);
         mBookmarker = new Bookmarker(movieActivity);
 
@@ -307,7 +297,7 @@ public class MoviePlayer implements
             mResumeableTime = savedInstance.getLong(KEY_RESUMEABLE_TIME, Long.MAX_VALUE);
             onRestoreInstanceState(savedInstance);
             mHasPaused = true;
-            doStartVideo(true, mVideoPosition, mVideoLastDuration,false);
+            doStartVideo(true, mVideoPosition, mVideoLastDuration, false);
             mVideoView.start();
             mActivityContext.initEffects(mVideoView.getAudioSessionId());
         } else {
@@ -331,6 +321,15 @@ public class MoviePlayer implements
         mVideoSnapshotExt.init(mController, mVideoView, isLocalFile());
     }
 
+    private static boolean isMediaKey(int keyCode) {
+        return keyCode == KeyEvent.KEYCODE_HEADSETHOOK
+                || keyCode == KeyEvent.KEYCODE_MEDIA_PREVIOUS
+                || keyCode == KeyEvent.KEYCODE_MEDIA_NEXT
+                || keyCode == KeyEvent.KEYCODE_MEDIA_PLAY_PAUSE
+                || keyCode == KeyEvent.KEYCODE_MEDIA_PLAY
+                || keyCode == KeyEvent.KEYCODE_MEDIA_PAUSE;
+    }
+
     @TargetApi(Build.VERSION_CODES.JELLY_BEAN)
     private void setOnSystemUiVisibilityChangeListener() {
         if (!ApiHelper.HAS_VIEW_SYSTEM_UI_FLAG_HIDE_NAVIGATION) return;
@@ -340,22 +339,22 @@ public class MoviePlayer implements
         // the media control and enable system UI (e.g. ActionBar) to be visible at this point
         mVideoView.setOnSystemUiVisibilityChangeListener(
                 new View.OnSystemUiVisibilityChangeListener() {
-            @Override
-            public void onSystemUiVisibilityChange(int visibility) {
-                boolean finish = (mActivityContext == null ? true : mActivityContext.isFinishing());
-                int diff = mLastSystemUiVis ^ visibility;
-                mLastSystemUiVis = visibility;
-                if ((diff & View.SYSTEM_UI_FLAG_HIDE_NAVIGATION) != 0
-                        && (visibility & View.SYSTEM_UI_FLAG_HIDE_NAVIGATION) == 0) {
-                    mController.show();
-                    mRootView.setBackgroundColor(Color.BLACK);
-                }
+                    @Override
+                    public void onSystemUiVisibilityChange(int visibility) {
+                        boolean finish = (mActivityContext == null || mActivityContext.isFinishing());
+                        int diff = mLastSystemUiVis ^ visibility;
+                        mLastSystemUiVis = visibility;
+                        if ((diff & View.SYSTEM_UI_FLAG_HIDE_NAVIGATION) != 0
+                                && (visibility & View.SYSTEM_UI_FLAG_HIDE_NAVIGATION) == 0) {
+                            mController.show();
+                            mRootView.setBackgroundColor(Color.BLACK);
+                        }
 
-                if (LOG) {
-                    Log.v(TAG, "onSystemUiVisibilityChange(" + visibility + ") finishing()=" + finish);
-                }
-            }
-        });
+                        if (LOG) {
+                            Log.v(TAG, "onSystemUiVisibilityChange(" + visibility + ") finishing()=" + finish);
+                        }
+                    }
+                });
     }
 
     @SuppressWarnings("deprecation")
@@ -395,20 +394,20 @@ public class MoviePlayer implements
         });
         builder.setPositiveButton(
                 R.string.resume_playing_resume, new OnClickListener() {
-            @Override
-            public void onClick(DialogInterface dialog, int which) {
-                // here try to seek for bookmark
-                mVideoCanSeek = true;
-                doStartVideo(true, bookmark.mBookmark, bookmark.mDuration);
-            }
-        });
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                        // here try to seek for bookmark
+                        mVideoCanSeek = true;
+                        doStartVideo(true, bookmark.mBookmark, bookmark.mDuration);
+                    }
+                });
         builder.setNegativeButton(
                 R.string.resume_playing_restart, new OnClickListener() {
-            @Override
-            public void onClick(DialogInterface dialog, int which) {
-                doStartVideo(true, 0, bookmark.mDuration);
-            }
-        });
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                        doStartVideo(true, 0, bookmark.mDuration);
+                    }
+                });
         AlertDialog dialog = builder.create();
         dialog.setOnShowListener(new OnShowListener() {
             @Override
@@ -576,7 +575,7 @@ public class MoviePlayer implements
     }
 
     private void doStartVideo(final boolean enableFasten, final int position, final int duration,
-            boolean start) {
+                              boolean start) {
         // For streams that we expect to be slow to start up, show a
         // progress spinner until playback starts.
         requestAudioFocus();
@@ -783,10 +782,7 @@ public class MoviePlayer implements
                 || what == MediaPlayer.MEDIA_INFO_BUFFERING_END) && mOverlayExt != null) {
             mOverlayExt.showBuffering(what);
         }
-        if (mRetryExt.onInfo(mp, what, extra)) {
-            return true;
-        }
-        return false;
+        return mRetryExt.onInfo(mp, what, extra);
     }
 
     @Override
@@ -883,8 +879,8 @@ public class MoviePlayer implements
 
     public void updateRewindAndForwardUI() {
         Log.v(TAG, "updateRewindAndForwardUI");
-        Log.v(TAG, "updateRewindAndForwardUI== getCurrentPosition = " +  mVideoView.getCurrentPosition());
-        Log.v(TAG, "updateRewindAndForwardUI==getDuration =" +  mVideoView.getDuration());
+        Log.v(TAG, "updateRewindAndForwardUI== getCurrentPosition = " + mVideoView.getCurrentPosition());
+        Log.v(TAG, "updateRewindAndForwardUI==getDuration =" + mVideoView.getDuration());
         if (mControllerRewindAndForwardExt != null) {
             mControllerRewindAndForwardExt.showControllerButtonsView(mPlayerExt
                     .canStop(), mVideoView.canSeekBackward()
@@ -892,15 +888,6 @@ public class MoviePlayer implements
                     .canSeekForward()
                     && mControllerRewindAndForwardExt.getTimeBarEanbled());
         }
-    }
-
-    private static boolean isMediaKey(int keyCode) {
-        return keyCode == KeyEvent.KEYCODE_HEADSETHOOK
-                || keyCode == KeyEvent.KEYCODE_MEDIA_PREVIOUS
-                || keyCode == KeyEvent.KEYCODE_MEDIA_NEXT
-                || keyCode == KeyEvent.KEYCODE_MEDIA_PLAY_PAUSE
-                || keyCode == KeyEvent.KEYCODE_MEDIA_PLAY
-                || keyCode == KeyEvent.KEYCODE_MEDIA_PAUSE;
     }
 
     private void init(MovieActivity movieActivity, IMovieItem info, boolean canReplay) {
@@ -927,24 +914,6 @@ public class MoviePlayer implements
         }
     }
 
-    // We want to pause when the headset is unplugged.
-    private class AudioBecomingNoisyReceiver extends BroadcastReceiver {
-
-        public void register() {
-            mContext.registerReceiver(this,
-                    new IntentFilter(AudioManager.ACTION_AUDIO_BECOMING_NOISY));
-        }
-
-        public void unregister() {
-            mContext.unregisterReceiver(this);
-        }
-
-        @Override
-        public void onReceive(Context context, Intent intent) {
-            if (mVideoView.isPlaying() && mVideoView.canPause()) pauseVideo();
-        }
-    }
-
     public int getAudioSessionId() {
         return mVideoView.getAudioSessionId();
     }
@@ -954,18 +923,12 @@ public class MoviePlayer implements
     }
 
     public boolean isFullBuffer() {
-        if (mStreamingType == STREAMING_RTSP || mStreamingType == STREAMING_SDP
-                || mStreamingType == STREAMING_HTTP) {
-            return false;
-        }
-        return true;
+        return mStreamingType != STREAMING_RTSP && mStreamingType != STREAMING_SDP
+                && mStreamingType != STREAMING_HTTP;
     }
 
     public boolean isLocalFile() {
-        if (mStreamingType == STREAMING_LOCAL) {
-            return true;
-        }
-        return false;
+        return mStreamingType == STREAMING_LOCAL;
     }
 
     private void getVideoInfo(MediaPlayer mp) {
@@ -1022,11 +985,7 @@ public class MoviePlayer implements
 
     public void onVideoSizeChanged(MediaPlayer mp, int width, int height) {
         // reget the audio type
-        if (width != 0 && height != 0) {
-            mIsOnlyAudio = false;
-        } else {
-            mIsOnlyAudio = true;
-        }
+        mIsOnlyAudio = width == 0 || height == 0;
         mOverlayExt.setBottomPanel(mIsOnlyAudio, true);
         if (LOG) {
             Log.v(TAG, "onVideoSizeChanged(" + width + ", " + height + ") mIsOnlyAudio="
@@ -1082,6 +1041,75 @@ public class MoviePlayer implements
         mScreenModeExt.onRestoreInstanceState(icicle);
         mRetryExt.onRestoreInstanceState(icicle);
         mPlayerExt.onRestoreInstanceState(icicle);
+    }
+
+    public int getStepOptionValue() {
+        final String slectedStepOption = "selected_step_option";
+        final String videoPlayerData = "video_player_data";
+        final int stepBase = 3000;
+        final int stepOptionThreeSeconds = 0;
+        SharedPreferences mPrefs = mContext.getSharedPreferences(
+                videoPlayerData, 0);
+        return (mPrefs.getInt(slectedStepOption, stepOptionThreeSeconds) + 1) * stepBase;
+    }
+
+    public void restartHidingController() {
+        if (mController != null) {
+            mController.maybeStartHiding();
+        }
+    }
+
+    public void cancelHidingController() {
+        if (mController != null) {
+            mController.cancelHiding();
+        }
+    }
+
+    public int requestAudioFocus() {
+        AudioManager am = (AudioManager) mContext.getSystemService(Context.AUDIO_SERVICE);
+        return am.requestAudioFocus(mAudioFocusChangeListener, AudioManager.STREAM_MUSIC,
+                AudioManager.AUDIOFOCUS_GAIN_TRANSIENT);
+    }
+
+    public int abandonAudioFocus() {
+        AudioManager am = (AudioManager) mContext.getSystemService(Context.AUDIO_SERVICE);
+        return am.abandonAudioFocus(mAudioFocusChangeListener);
+    }
+
+    private enum TState {
+        PLAYING,
+        PAUSED,
+        STOPED,
+        COMPELTED,
+        RETRY_ERROR
+    }
+
+    interface Restorable {
+        void onRestoreInstanceState(Bundle icicle);
+
+        void onSaveInstanceState(Bundle outState);
+    }
+
+    public interface TimerProgress {
+        void startTimer();
+    }
+
+    // We want to pause when the headset is unplugged.
+    private class AudioBecomingNoisyReceiver extends BroadcastReceiver {
+
+        public void register() {
+            mContext.registerReceiver(this,
+                    new IntentFilter(AudioManager.ACTION_AUDIO_BECOMING_NOISY));
+        }
+
+        public void unregister() {
+            mContext.unregisterReceiver(this);
+        }
+
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            if (mVideoView.isPlaying() && mVideoView.canPause()) pauseVideo();
+        }
     }
 
     private class MoviePlayerExtension implements IMoviePlayer, Restorable {
@@ -1188,7 +1216,7 @@ public class MoviePlayer implements
                         .show();
             }
         }
-    };
+    }
 
     private class RetryExtension implements Restorable, MediaPlayer.OnErrorListener,
             MediaPlayer.OnInfoListener {
@@ -1216,10 +1244,7 @@ public class MoviePlayer implements
             if (LOG) {
                 Log.v(TAG, "reachRetryCount() mRetryCount=" + mRetryCount);
             }
-            if (mRetryCount > 3) {
-                return true;
-            }
-            return false;
+            return mRetryCount > 3;
         }
 
         public int getRetryCount() {
@@ -1284,6 +1309,7 @@ public class MoviePlayer implements
             mRetryDuration = mVideoLastDuration;
         }
     }
+
     private class ServerTimeoutExtension implements Restorable, MediaPlayer.OnErrorListener {
         // for cmcc server timeout case
         // please remember to clear this value when changed video.
@@ -1416,10 +1442,7 @@ public class MoviePlayer implements
                 // wait for user's operation
                 return true;
             }
-            if (!passDisconnectCheck()) {
-                return true;
-            }
-            return false;
+            return !passDisconnectCheck();
         }
 
         public void setVideoInfo(ApiHelper.Metadata data) {
@@ -1439,10 +1462,7 @@ public class MoviePlayer implements
         @Override
         public boolean onError(MediaPlayer mp, int what, int extra) {
             // if we are showing a dialog, cancel the error dialog
-            if (mIsShowDialog) {
-                return true;
-            }
-            return false;
+            return mIsShowDialog;
         }
 
         public void setTimeout(int timeout) {
@@ -1542,7 +1562,7 @@ public class MoviePlayer implements
             Log.v(TAG, "ControllerRewindAndForwardExt onRewind()");
             if (mVideoView != null && mVideoView.canSeekBackward()) {
                 mControllerRewindAndForwardExt.showControllerButtonsView(mPlayerExt
-                        .canStop(),
+                                .canStop(),
                         false, false);
                 int stepValue = getStepOptionValue();
                 int targetDuration = mVideoView.getCurrentPosition()
@@ -1552,7 +1572,7 @@ public class MoviePlayer implements
                 mVideoView.seekTo(targetDuration);
             } else {
                 mControllerRewindAndForwardExt.showControllerButtonsView(mPlayerExt
-                        .canStop(),
+                                .canStop(),
                         false, false);
             }
         }
@@ -1562,7 +1582,7 @@ public class MoviePlayer implements
             Log.v(TAG, "ControllerRewindAndForwardExt onForward()");
             if (mVideoView != null && mVideoView.canSeekForward()) {
                 mControllerRewindAndForwardExt.showControllerButtonsView(mPlayerExt
-                        .canStop(),
+                                .canStop(),
                         false, false);
                 int stepValue = getStepOptionValue();
                 int targetDuration = mVideoView.getCurrentPosition()
@@ -1573,71 +1593,10 @@ public class MoviePlayer implements
                 mVideoView.seekTo(targetDuration);
             } else {
                 mControllerRewindAndForwardExt.showControllerButtonsView(mPlayerExt
-                        .canStop(),
+                                .canStop(),
                         false, false);
             }
         }
-    }
-
-    public int getStepOptionValue() {
-        final String slectedStepOption = "selected_step_option";
-        final String videoPlayerData = "video_player_data";
-        final int stepBase = 3000;
-        final int stepOptionThreeSeconds = 0;
-        SharedPreferences mPrefs = mContext.getSharedPreferences(
-                videoPlayerData, 0);
-        return (mPrefs.getInt(slectedStepOption, stepOptionThreeSeconds) + 1) * stepBase;
-    }
-
-    public void restartHidingController() {
-        if (mController != null) {
-            mController.maybeStartHiding();
-        }
-    }
-
-    public void cancelHidingController() {
-        if (mController != null) {
-            mController.cancelHiding();
-        }
-    }
-
-    private AudioManager.OnAudioFocusChangeListener mAudioFocusChangeListener =
-            new AudioManager.OnAudioFocusChangeListener() {
-                @Override
-                public void onAudioFocusChange(int focusChange) {
-                    switch (focusChange) {
-                        case AudioManager.AUDIOFOCUS_GAIN:
-                            boolean isTargetPlaying = (mVideoView != null &&
-                                    mVideoView.isTargetPlaying());
-                            Log.d(TAG, "AUDIOFOCUS_GAIN isTargetPlaying : " + isTargetPlaying);
-                            if (mPausedByTransientLossOfFocus || isTargetPlaying) {
-                                onPlayVideo();
-                                mPausedByTransientLossOfFocus = false;
-                            }
-                            break;
-                        case AudioManager.AUDIOFOCUS_LOSS:
-                        case AudioManager.AUDIOFOCUS_LOSS_TRANSIENT:
-                            boolean isPlaying = (mVideoView != null && mVideoView.isPlaying());
-                            Log.d(TAG, "AUDIOFOCUS_LOSS isPlaying : " + isPlaying);
-                            if (isPlaying) {
-                                onPauseVideo();
-                                mPausedByTransientLossOfFocus = true;
-                            }
-                            break;
-                        default:
-                    }
-                }
-    };
-
-    public int requestAudioFocus() {
-        AudioManager am = (AudioManager) mContext.getSystemService(Context.AUDIO_SERVICE);
-        return am.requestAudioFocus(mAudioFocusChangeListener, AudioManager.STREAM_MUSIC,
-                AudioManager.AUDIOFOCUS_GAIN_TRANSIENT);
-    }
-
-    public int abandonAudioFocus() {
-        AudioManager am = (AudioManager) mContext.getSystemService(Context.AUDIO_SERVICE);
-        return am.abandonAudioFocus(mAudioFocusChangeListener);
     }
 }
 

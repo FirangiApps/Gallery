@@ -28,24 +28,22 @@ import android.widget.ListView;
 import android.widget.SimpleCursorAdapter;
 import android.widget.TextView;
 
-import org.codeaurora.gallery.R;
 import com.android.gallery3d.app.MovieActivity;
 
+import org.codeaurora.gallery.R;
+
 public class BookmarkActivity extends Activity implements OnItemClickListener {
+    public static final String KEY_LOGO_BITMAP = "logo-bitmap";
     private static final String TAG = "BookmarkActivity";
     private static final boolean LOG = true;
-
+    private static final int MENU_DELETE_ALL = 1;
+    private static final int MENU_DELETE_ONE = 2;
+    private static final int MENU_EDIT = 3;
     private BookmarkEnhance mBookmark;
     private BookmarkAdapter mAdapter;
     private Cursor mCursor;
     private ListView mListView;
     private TextView mEmptyView;
-
-    private static final int MENU_DELETE_ALL = 1;
-    private static final int MENU_DELETE_ONE = 2;
-    private static final int MENU_EDIT = 3;
-
-    public static final String KEY_LOGO_BITMAP = "logo-bitmap";
 
     @Override
     protected void onCreate(final Bundle savedInstanceState) {
@@ -57,13 +55,13 @@ public class BookmarkActivity extends Activity implements OnItemClickListener {
             getActionBar().setLogo(new BitmapDrawable(getResources(), logo));
         }
 
-        mListView = (ListView) findViewById(android.R.id.list);
-        mEmptyView = (TextView) findViewById(android.R.id.empty);
+        mListView = findViewById(android.R.id.list);
+        mEmptyView = findViewById(android.R.id.empty);
 
         mBookmark = new BookmarkEnhance(this);
         mCursor = mBookmark.query();
-        mAdapter = new BookmarkAdapter(this, R.layout.bookmark_item, null, new String[] {},
-                new int[] {});
+        mAdapter = new BookmarkAdapter(this, R.layout.bookmark_item, null, new String[]{},
+                new int[]{});
         mListView.setEmptyView(mEmptyView);
         mListView.setAdapter(mAdapter);
         mAdapter.changeCursor(mCursor);
@@ -115,53 +113,9 @@ public class BookmarkActivity extends Activity implements OnItemClickListener {
         return super.onOptionsItemSelected(item);
     }
 
-    private class BookmarkAdapter extends SimpleCursorAdapter {
-
-        public BookmarkAdapter(final Context context, final int layout, final Cursor c,
-                final String[] from, final int[] to) {
-            super(context, layout, c, from, to);
-        }
-
-        @Override
-        public View newView(final Context context, final Cursor cursor, final ViewGroup parent) {
-            final View view = super.newView(context, cursor, parent);
-            final ViewHolder holder = new ViewHolder();
-            holder.mTitleView = (TextView) view.findViewById(R.id.title);
-            holder.mDataView = (TextView) view.findViewById(R.id.data);
-            view.setTag(holder);
-            return view;
-        }
-
-        @Override
-        public void bindView(final View view, final Context context, final Cursor cursor) {
-            final ViewHolder holder = (ViewHolder) view.getTag();
-            holder.mId = cursor.getLong(BookmarkEnhance.INDEX_ID);
-            holder.mTitle = cursor.getString(BookmarkEnhance.INDEX_TITLE);
-            holder.mData = cursor.getString(BookmarkEnhance.INDEX_DATA);
-            holder.mMimetype = cursor.getString(BookmarkEnhance.INDEX_MIME_TYPE);
-            holder.mTitleView.setText(holder.mTitle);
-            holder.mDataView.setText(holder.mData);
-        }
-
-        @Override
-        public void changeCursor(final Cursor c) {
-            super.changeCursor(c);
-        }
-
-    }
-
-    private class ViewHolder {
-        long mId;
-        String mTitle;
-        String mData;
-        String mMimetype;
-        TextView mTitleView;
-        TextView mDataView;
-    }
-
     @Override
     public void onItemClick(final AdapterView<?> parent, final View view, final int position,
-            final long id) {
+                            final long id) {
         final Object o = view.getTag();
         if (o instanceof ViewHolder) {
             final ViewHolder holder = (ViewHolder) o;
@@ -182,7 +136,7 @@ public class BookmarkActivity extends Activity implements OnItemClickListener {
 
     @Override
     public void onCreateContextMenu(final ContextMenu menu, final View v,
-            final ContextMenuInfo menuInfo) {
+                                    final ContextMenuInfo menuInfo) {
         super.onCreateContextMenu(menu, v, menuInfo);
         menu.add(0, MENU_DELETE_ONE, 0, R.string.delete);
         menu.add(0, MENU_EDIT, 0, R.string.edit);
@@ -217,8 +171,8 @@ public class BookmarkActivity extends Activity implements OnItemClickListener {
         }
         final LayoutInflater inflater = LayoutInflater.from(this);
         final View v = inflater.inflate(R.layout.bookmark_edit_dialog, null);
-        final EditText titleView = (EditText) v.findViewById(R.id.title);
-        final EditText dataView = (EditText) v.findViewById(R.id.data);
+        final EditText titleView = v.findViewById(R.id.title);
+        final EditText dataView = v.findViewById(R.id.data);
         titleView.setText(holder.mTitle);
         dataView.setText(holder.mData);
 
@@ -240,5 +194,49 @@ public class BookmarkActivity extends Activity implements OnItemClickListener {
         dialog.getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_STATE_VISIBLE);
         dialog.setInverseBackgroundForced(true);
         dialog.show();
+    }
+
+    private class BookmarkAdapter extends SimpleCursorAdapter {
+
+        public BookmarkAdapter(final Context context, final int layout, final Cursor c,
+                               final String[] from, final int[] to) {
+            super(context, layout, c, from, to);
+        }
+
+        @Override
+        public View newView(final Context context, final Cursor cursor, final ViewGroup parent) {
+            final View view = super.newView(context, cursor, parent);
+            final ViewHolder holder = new ViewHolder();
+            holder.mTitleView = view.findViewById(R.id.title);
+            holder.mDataView = view.findViewById(R.id.data);
+            view.setTag(holder);
+            return view;
+        }
+
+        @Override
+        public void bindView(final View view, final Context context, final Cursor cursor) {
+            final ViewHolder holder = (ViewHolder) view.getTag();
+            holder.mId = cursor.getLong(BookmarkEnhance.INDEX_ID);
+            holder.mTitle = cursor.getString(BookmarkEnhance.INDEX_TITLE);
+            holder.mData = cursor.getString(BookmarkEnhance.INDEX_DATA);
+            holder.mMimetype = cursor.getString(BookmarkEnhance.INDEX_MIME_TYPE);
+            holder.mTitleView.setText(holder.mTitle);
+            holder.mDataView.setText(holder.mData);
+        }
+
+        @Override
+        public void changeCursor(final Cursor c) {
+            super.changeCursor(c);
+        }
+
+    }
+
+    private class ViewHolder {
+        long mId;
+        String mTitle;
+        String mData;
+        String mMimetype;
+        TextView mTitleView;
+        TextView mDataView;
     }
 }

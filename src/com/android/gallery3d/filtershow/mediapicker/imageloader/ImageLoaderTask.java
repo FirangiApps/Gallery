@@ -45,14 +45,13 @@ import java.util.concurrent.locks.ReentrantLock;
 
 final class ImageLoaderTask implements Runnable {
 
+    final String uri;
+    final ImageViewImpl imageView;
     private final String TAG = "ImageLoaderTask";
     private final ImageLoaderHandle handle;
     private final ImageLoaderInfo imageLoadingInfo;
     private final Handler handler;
-
-    final String uri;
     private final String memoryCacheKey;
-    final ImageViewImpl imageView;
     private int imageHeight, imageWidth;
 
     public ImageLoaderTask(ImageLoaderHandle handle, ImageLoaderInfo imageLoadingInfo, Handler handler) {
@@ -65,6 +64,48 @@ final class ImageLoaderTask implements Runnable {
         imageView = imageLoadingInfo.imageView;
         imageHeight = imageLoadingInfo.targetHeight;
         imageWidth = imageLoadingInfo.targetWidth;
+    }
+
+    public static void closeSilently(Closeable closeable) {
+        try {
+            closeable.close();
+        } catch (Exception e) {
+            // Just catched here.
+        }
+    }
+
+    public static int computeImageSampleSize(BitmapFactory.Options opt, int h, int w,
+                                             ViewScaleType viewScaleType) {
+        final int width = opt.outWidth / 2;
+        final int height = opt.outHeight / 2;
+        final int maxWidth = 2048;
+        final int maxHeight = 2048;
+
+        int scale = 1;
+        switch (viewScaleType) {
+            case FIT_INSIDE:
+                while ((width / scale) > w || (height / scale) > h) {
+                    scale *= 2;
+                }
+                break;
+            case CROP:
+                while ((width / scale) > w && (height / scale) > h) {
+                    scale *= 2;
+                }
+                break;
+        }
+        while ((opt.outWidth / scale) > maxWidth || (opt.outHeight / scale) > maxHeight) {
+            scale *= 2;
+        }
+        return scale;
+    }
+
+    static void runTask(Runnable r, Handler handler, ImageLoaderHandle handle) {
+        if (handler == null) {
+            handle.taskDistributor.execute(r);
+        } else {
+            handler.post(r);
+        }
     }
 
     @Override
@@ -109,7 +150,6 @@ final class ImageLoaderTask implements Runnable {
         runTask(displayBitmapTask, handler, handle);
     }
 
-
     private Bitmap parseImage(String imageUri) throws IOException {
         ViewScaleType viewScaleType = imageView.getScaleType();
         Bitmap parsedBitmap;
@@ -133,14 +173,6 @@ final class ImageLoaderTask implements Runnable {
             parsedBitmap = checkScale(parsedBitmap);
         }
         return parsedBitmap;
-    }
-
-    public static void closeSilently(Closeable closeable) {
-        try {
-            closeable.close();
-        } catch (Exception e) {
-            // Just catched here.
-        }
     }
 
     protected InputStream getImageStream(String imageUri) throws FileNotFoundException {
@@ -168,32 +200,6 @@ final class ImageLoaderTask implements Runnable {
         return imageStream;
     }
 
-    public static int computeImageSampleSize(BitmapFactory.Options opt, int h, int w,
-                                             ViewScaleType viewScaleType) {
-        final int width = opt.outWidth/2;
-        final int height = opt.outHeight/2;
-        final int maxWidth = 2048;
-        final int maxHeight = 2048;
-
-        int scale = 1;
-        switch (viewScaleType) {
-            case FIT_INSIDE:
-                while ((width / scale) > w || (height / scale) > h) {
-                    scale *= 2;
-                }
-                break;
-            case CROP:
-                while ((width / scale) > w && (height / scale) > h) {
-                        scale *= 2;
-                }
-                break;
-        }
-        while ((opt.outWidth / scale) > maxWidth || (opt.outHeight / scale) > maxHeight) {
-            scale *= 2;
-        }
-        return scale;
-    }
-
     protected Bitmap checkScale(Bitmap subsampledBitmap) {
         Matrix m = new Matrix();
 
@@ -206,9 +212,7 @@ final class ImageLoaderTask implements Runnable {
     }
 
     private boolean isTaskAvailable() {
-        if (isRecyled() || isCached())
-            return true;
-        return false;
+        return isRecyled() || isCached();
     }
 
     private void checkTaskNotActual() throws TaskInvalidException {
@@ -222,7 +226,7 @@ final class ImageLoaderTask implements Runnable {
 
     private boolean isRecyled() {
         if (imageView.isRecyled()) {
-            Log.d(TAG,"ImageAware was collected by GC. Task is cancelled: " + memoryCacheKey);
+            Log.d(TAG, "ImageAware was collected by GC. Task is cancelled: " + memoryCacheKey);
             return true;
         }
         return false;
@@ -240,14 +244,6 @@ final class ImageLoaderTask implements Runnable {
     private void checkTaskInterrupted() throws TaskInvalidException {
         if (Thread.interrupted()) {
             throw new TaskInvalidException();
-        }
-    }
-
-    static void runTask(Runnable r, Handler handler, ImageLoaderHandle handle) {
-        if (handler == null) {
-            handle.taskDistributor.execute(r);
-        } else {
-            handler.post(r);
         }
     }
 

@@ -42,17 +42,6 @@ public abstract class SurfaceTextureScreenNail implements ScreenNail,
     public SurfaceTextureScreenNail() {
     }
 
-    public void acquireSurfaceTexture(GLCanvas canvas) {
-        mExtTexture = new ExtTexture(canvas, GL_TEXTURE_EXTERNAL_OES);
-        mExtTexture.setSize(mWidth, mHeight);
-        mSurfaceTexture = new SurfaceTexture(mExtTexture.getId());
-        setDefaultBufferSize(mSurfaceTexture, mWidth, mHeight);
-        mSurfaceTexture.setOnFrameAvailableListener(this);
-        synchronized (this) {
-            mHasTexture = true;
-        }
-    }
-
     @TargetApi(ApiHelper.VERSION_CODES.ICE_CREAM_SANDWICH_MR1)
     private static void setDefaultBufferSize(SurfaceTexture st, int width, int height) {
         if (ApiHelper.HAS_SET_DEFALT_BUFFER_SIZE) {
@@ -65,6 +54,17 @@ public abstract class SurfaceTextureScreenNail implements ScreenNail,
         st.setOnFrameAvailableListener(null);
         if (ApiHelper.HAS_RELEASE_SURFACE_TEXTURE) {
             st.release();
+        }
+    }
+
+    public void acquireSurfaceTexture(GLCanvas canvas) {
+        mExtTexture = new ExtTexture(canvas, GL_TEXTURE_EXTERNAL_OES);
+        mExtTexture.setSize(mWidth, mHeight);
+        mSurfaceTexture = new SurfaceTexture(mExtTexture.getId());
+        setDefaultBufferSize(mSurfaceTexture, mWidth, mHeight);
+        mSurfaceTexture.setOnFrameAvailableListener(this);
+        synchronized (this) {
+            mHasTexture = true;
         }
     }
 
@@ -129,7 +129,8 @@ public abstract class SurfaceTextureScreenNail implements ScreenNail,
         throw new UnsupportedOperationException();
     }
 
-    protected void updateTransformMatrix(float[] matrix) {}
+    protected void updateTransformMatrix(float[] matrix) {
+    }
 
     @Override
     abstract public void noDraw();

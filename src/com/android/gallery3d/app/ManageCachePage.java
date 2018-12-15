@@ -30,7 +30,6 @@ import android.widget.ProgressBar;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import org.codeaurora.gallery.R;
 import com.android.gallery3d.common.Utils;
 import com.android.gallery3d.data.MediaObject;
 import com.android.gallery3d.data.MediaSet;
@@ -49,6 +48,8 @@ import com.android.gallery3d.util.GalleryUtils;
 import com.android.gallery3d.util.ThreadPool.Job;
 import com.android.gallery3d.util.ThreadPool.JobContext;
 
+import org.codeaurora.gallery.R;
+
 import java.util.ArrayList;
 
 public class ManageCachePage extends ActivityState implements
@@ -63,12 +64,10 @@ public class ManageCachePage extends ActivityState implements
     private static final int MSG_REFRESH_STORAGE_INFO = 1;
     private static final int MSG_REQUEST_LAYOUT = 2;
     private static final int PROGRESS_BAR_MAX = 10000;
-
-    private SlotView mSlotView;
-    private MediaSet mMediaSet;
-
     protected SelectionManager mSelectionManager;
     protected ManageCacheDrawer mSelectionDrawer;
+    private SlotView mSlotView;
+    private MediaSet mMediaSet;
     private AlbumSetDataLoader mAlbumSetDataAdapter;
 
     private EyePosition mEyePosition;
@@ -85,14 +84,8 @@ public class ManageCachePage extends ActivityState implements
     private Future<Void> mUpdateStorageInfo;
     private Handler mHandler;
     private boolean mLayoutReady = false;
-
-    @Override
-    protected int getBackgroundColorId() {
-        return R.color.cache_background;
-    }
-
     private GLView mRootPane = new GLView() {
-        private float mMatrix[] = new float[16];
+        private float[] mMatrix = new float[16];
 
         @Override
         protected void renderBackground(GLCanvas view) {
@@ -117,7 +110,7 @@ public class ManageCachePage extends ActivityState implements
 
             View footer = mActivity.findViewById(R.id.footer);
             if (footer != null) {
-                int location[] = {0, 0};
+                int[] location = {0, 0};
                 footer.getLocationOnScreen(location);
                 slotViewBottom = location[1];
             }
@@ -129,12 +122,27 @@ public class ManageCachePage extends ActivityState implements
         protected void render(GLCanvas canvas) {
             canvas.save(GLCanvas.SAVE_FLAG_MATRIX);
             GalleryUtils.setViewPointMatrix(mMatrix,
-                        getWidth() / 2 + mX, getHeight() / 2 + mY, mZ);
+                    getWidth() / 2 + mX, getHeight() / 2 + mY, mZ);
             canvas.multiplyMatrix(mMatrix, 0);
             super.render(canvas);
             canvas.restore();
         }
     };
+    private Job<Void> mUpdateStorageInfoJob = new Job<Void>() {
+        @Override
+        public Void run(JobContext jc) {
+            mCacheStorageInfo.loadStorageInfo(jc);
+            if (!jc.isCancelled()) {
+                mHandler.sendEmptyMessage(MSG_REFRESH_STORAGE_INFO);
+            }
+            return null;
+        }
+    };
+
+    @Override
+    protected int getBackgroundColorId() {
+        return R.color.cache_background;
+    }
 
     @Override
     public void onEyePositionChanged(float x, float y, float z) {
@@ -219,7 +227,7 @@ public class ManageCachePage extends ActivityState implements
     public void onConfigurationChanged(Configuration config) {
         // We use different layout resources for different configs
         initializeFooterViews();
-        FrameLayout layout = (FrameLayout) ((Activity) mActivity).findViewById(R.id.footer);
+        FrameLayout layout = mActivity.findViewById(R.id.footer);
         if (layout.getVisibility() == View.VISIBLE) {
             layout.removeAllViews();
             layout.addView(mFooterContent);
@@ -239,21 +247,10 @@ public class ManageCachePage extends ActivityState implements
         }
         mHandler.removeMessages(MSG_REFRESH_STORAGE_INFO);
 
-        FrameLayout layout = (FrameLayout) ((Activity) mActivity).findViewById(R.id.footer);
+        FrameLayout layout = mActivity.findViewById(R.id.footer);
         layout.removeAllViews();
         layout.setVisibility(View.INVISIBLE);
     }
-
-    private Job<Void> mUpdateStorageInfoJob = new Job<Void>() {
-        @Override
-        public Void run(JobContext jc) {
-            mCacheStorageInfo.loadStorageInfo(jc);
-            if (!jc.isCancelled()) {
-                mHandler.sendEmptyMessage(MSG_REFRESH_STORAGE_INFO);
-            }
-            return null;
-        }
-    };
 
     @Override
     public void onResume() {
@@ -263,7 +260,7 @@ public class ManageCachePage extends ActivityState implements
         mSelectionDrawer.resume();
         mEyePosition.resume();
         mUpdateStorageInfo = mActivity.getThreadPool().submit(mUpdateStorageInfoJob);
-        FrameLayout layout = (FrameLayout) ((Activity) mActivity).findViewById(R.id.footer);
+        FrameLayout layout = mActivity.findViewById(R.id.footer);
         layout.addView(mFooterContent);
         layout.setVisibility(View.VISIBLE);
     }
@@ -357,13 +354,13 @@ public class ManageCachePage extends ActivityState implements
     private void showToastForLocalAlbum() {
         Activity activity = mActivity;
         Toast.makeText(activity, activity.getResources().getString(
-            R.string.try_to_set_local_album_available_offline),
-            Toast.LENGTH_SHORT).show();
+                R.string.try_to_set_local_album_available_offline),
+                Toast.LENGTH_SHORT).show();
     }
 
     private void refreshCacheStorageInfo() {
-        ProgressBar progressBar = (ProgressBar) mFooterContent.findViewById(R.id.progress);
-        TextView status = (TextView) mFooterContent.findViewById(R.id.status);
+        ProgressBar progressBar = mFooterContent.findViewById(R.id.progress);
+        TextView status = mFooterContent.findViewById(R.id.status);
         progressBar.setMax(PROGRESS_BAR_MAX);
         long totalBytes = mCacheStorageInfo.getTotalBytes();
         long usedBytes = mCacheStorageInfo.getUsedBytes();

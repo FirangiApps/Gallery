@@ -33,24 +33,11 @@ import java.util.Map.Entry;
 public class ProfileData {
     @SuppressWarnings("unused")
     private static final String TAG = "ProfileData";
-
-    private static class Node {
-        public int id;  // this is the name of this node, mapped from mNameToId
-        public Node parent;
-        public int sampleCount;
-        public ArrayList<Node> children;
-        public Node(Node parent, int id) {
-            this.parent = parent;
-            this.id = id;
-        }
-    }
-
     private Node mRoot;
     private int mNextId;
     private HashMap<String, Integer> mNameToId;
     private DataOutputStream mOut;
-    private byte mScratch[] = new byte[4];  // scratch space for writeInt()
-
+    private byte[] mScratch = new byte[4];  // scratch space for writeInt()
     public ProfileData() {
         mRoot = new Node(null, -1);  // The id of the root node is unused.
         mNameToId = new HashMap<String, Integer>();
@@ -164,5 +151,17 @@ public class ProfileData {
         mScratch[2] = (byte) (v >> 16);
         mScratch[3] = (byte) (v >> 24);
         mOut.write(mScratch);
+    }
+
+    private static class Node {
+        public int id;  // this is the name of this node, mapped from mNameToId
+        public Node parent;
+        public int sampleCount;
+        public ArrayList<Node> children;
+
+        public Node(Node parent, int id) {
+            this.parent = parent;
+            this.id = id;
+        }
     }
 }

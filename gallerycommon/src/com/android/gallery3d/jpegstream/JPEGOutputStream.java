@@ -19,9 +19,13 @@ package com.android.gallery3d.jpegstream;
 import java.io.FilterOutputStream;
 import java.io.IOException;
 import java.io.OutputStream;
-public class JPEGOutputStream extends FilterOutputStream {
-    private long JNIPointer = 0; // Used by JNI code. Don't touch.
 
+public class JPEGOutputStream extends FilterOutputStream {
+    static {
+        System.loadLibrary("jni_gallery_jpegstream");
+    }
+
+    private long JNIPointer = 0; // Used by JNI code. Don't touch.
     private byte[] mTmpBuffer = new byte[1];
     private int mWidth = 0;
     private int mHeight = 0;
@@ -35,7 +39,7 @@ public class JPEGOutputStream extends FilterOutputStream {
     }
 
     public JPEGOutputStream(OutputStream out, int width, int height, int quality,
-            int format) {
+                            int format) {
         super(out);
         setConfig(width, height, quality, format);
     }
@@ -89,7 +93,7 @@ public class JPEGOutputStream extends FilterOutputStream {
         if (mConfigChanged) {
             cleanup();
             int flag = setup(out, mWidth, mHeight, mFormat, mQuality);
-            switch(flag) {
+            switch (flag) {
                 case JpegConfig.J_SUCCESS:
                     break; // allow setup to continue
                 case JpegConfig.J_ERROR_BAD_ARGS:
@@ -137,8 +141,4 @@ public class JPEGOutputStream extends FilterOutputStream {
     native private void cleanup();
 
     native private int writeInputBytes(byte[] inBuffer, int offset, int inCount);
-
-    static {
-        System.loadLibrary("jni_gallery_jpegstream");
-    }
 }

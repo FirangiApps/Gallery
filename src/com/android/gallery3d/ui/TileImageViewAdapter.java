@@ -116,7 +116,7 @@ public class TileImageViewAdapter implements TileImageView.TileSource {
         BitmapFactory.Options options = new BitmapFactory.Options();
         options.inPreferredConfig = Config.ARGB_8888;
         options.inPreferQualityOverSpeed = true;
-        options.inSampleSize =  (1 << level);
+        options.inSampleSize = (1 << level);
         options.inBitmap = bitmap;
 
         try {
@@ -155,7 +155,7 @@ public class TileImageViewAdapter implements TileImageView.TileSource {
         BitmapFactory.Options options = new BitmapFactory.Options();
         options.inPreferredConfig = Config.ARGB_8888;
         options.inPreferQualityOverSpeed = true;
-        options.inSampleSize =  (1 << level);
+        options.inSampleSize = (1 << level);
         Bitmap bitmap = null;
 
         // In CropImage, we may call the decodeRegion() concurrently.

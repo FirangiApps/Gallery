@@ -4,7 +4,6 @@ import android.view.View;
 import android.view.ViewParent;
 import android.widget.FrameLayout;
 
-import com.android.gallery3d.filtershow.cache.ImageLoader;
 import com.android.gallery3d.filtershow.editors.Editor;
 import com.android.gallery3d.filtershow.imageshow.ImageShow;
 
@@ -32,10 +31,7 @@ public class EditorPlaceHolder {
     }
 
     public boolean contains(int type) {
-        if (mEditors.get(type) != null) {
-            return true;
-        }
-        return false;
+        return mEditors.get(type) != null;
     }
 
     public Editor showEditor(int type) {
@@ -66,7 +62,7 @@ public class EditorPlaceHolder {
     }
 
     public void hide() {
-        if(mContainer != null)
+        if (mContainer != null)
             mContainer.setVisibility(View.GONE);
     }
 

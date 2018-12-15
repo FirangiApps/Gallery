@@ -17,19 +17,23 @@
 package org.codeaurora.gallery3d.video;
 
 import com.android.gallery3d.app.ControllerOverlay;
-import com.android.gallery3d.app.ControllerOverlay.Listener;
 
 ///M: for CU rewind and forward
 public interface IControllerRewindAndForward extends ControllerOverlay {
 
-  interface IRewindAndForwardListener extends Listener {
-    void onStopVideo();
-    void onRewind();
-    void onForward();
-  }
+    boolean getPlayPauseEanbled();
 
-  boolean getPlayPauseEanbled();
-  boolean getTimeBarEanbled();
-  void setIListener(IRewindAndForwardListener listener);
-  void showControllerButtonsView(boolean canStop, boolean canRewind, boolean canForward);
+    boolean getTimeBarEanbled();
+
+    void setIListener(IRewindAndForwardListener listener);
+
+    void showControllerButtonsView(boolean canStop, boolean canRewind, boolean canForward);
+
+    interface IRewindAndForwardListener extends Listener {
+        void onStopVideo();
+
+        void onRewind();
+
+        void onForward();
+    }
 }

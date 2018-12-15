@@ -24,10 +24,12 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.view.Window;
 import android.widget.CheckBox;
-import org.codeaurora.gallery.R;
+
 import com.android.gallery3d.filtershow.FilterShowActivity;
 import com.android.gallery3d.ui.BaseDialogFragment;
 import com.android.gallery3d.util.GalleryUtils;
+
+import org.codeaurora.gallery.R;
 
 //import static com.android.gallery3d.filtershow.FilterShowActivity.SELECT_FILTER;
 
@@ -41,7 +43,7 @@ public class PresetManagementDialog extends BaseDialogFragment implements View.O
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.filtershow_presets_dialog, container);
-        mCheckBox = (CheckBox) view.findViewById(R.id.filtershow_check_box);
+        mCheckBox = view.findViewById(R.id.filtershow_check_box);
         view.findViewById(R.id.cancel).setOnClickListener(this);
         view.findViewById(R.id.ok).setOnClickListener(this);
         view.findViewById(R.id.filtershow_check_box).setOnClickListener(this);
@@ -81,8 +83,8 @@ public class PresetManagementDialog extends BaseDialogFragment implements View.O
                 break;
             case R.id.ok:
                 checked = mCheckBox.isChecked();
-                GalleryUtils.setBooleanPref(activity,activity.getString(R.string.pref_filtergenerator_intro_show_key),checked);
-                activity.onMediaPickerStarted ();
+                GalleryUtils.setBooleanPref(activity, activity.getString(R.string.pref_filtergenerator_intro_show_key), checked);
+                activity.onMediaPickerStarted();
                 dismiss();
                 break;
         }

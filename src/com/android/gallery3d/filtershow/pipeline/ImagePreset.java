@@ -16,13 +16,6 @@
 
 package com.android.gallery3d.filtershow.pipeline;
 
-import java.io.IOException;
-import java.io.StringReader;
-import java.io.StringWriter;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Vector;
-
 import android.graphics.Bitmap;
 import android.graphics.Rect;
 import android.renderscript.Allocation;
@@ -30,7 +23,6 @@ import android.util.JsonReader;
 import android.util.JsonWriter;
 import android.util.Log;
 
-import org.codeaurora.gallery.R;
 import com.android.gallery3d.filtershow.cache.ImageLoader;
 import com.android.gallery3d.filtershow.filters.BaseFiltersManager;
 import com.android.gallery3d.filtershow.filters.FilterCropRepresentation;
@@ -52,19 +44,25 @@ import com.android.gallery3d.filtershow.imageshow.MasterImage;
 import com.android.gallery3d.filtershow.state.State;
 import com.android.gallery3d.filtershow.state.StateAdapter;
 
+import org.codeaurora.gallery.R;
+
+import java.io.IOException;
+import java.io.StringReader;
+import java.io.StringWriter;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Vector;
+
 public class ImagePreset {
 
-    private static final String LOGTAG = "ImagePreset";
     public static final String JASON_SAVED = "Saved";
-
+    private static final String LOGTAG = "ImagePreset";
+    private static final boolean DEBUG = false;
     private Vector<FilterRepresentation> mFilters = new Vector<FilterRepresentation>();
-
     private boolean mDoApplyGeometry = true;
     private boolean mDoApplyFilters = true;
-
     private boolean mPartialRendering = false;
     private Rect mPartialRenderingBounds;
-    private static final boolean DEBUG = false;
 
     public ImagePreset() {
     }
@@ -76,18 +74,6 @@ public class ImagePreset {
                 mFilters.add(sourceRepresentation.copy());
             }
         }
-    }
-
-    public Vector<FilterRepresentation> getFilters() {
-        return mFilters;
-    }
-
-    public FilterRepresentation getFilterRepresentation(int position) {
-        FilterRepresentation representation = null;
-
-        representation = mFilters.elementAt(position).copy();
-
-        return representation;
     }
 
     private static boolean sameSerializationName(String a, String b) {
@@ -103,6 +89,18 @@ public class ImagePreset {
             return false;
         }
         return sameSerializationName(a.getSerializationName(), b.getSerializationName());
+    }
+
+    public Vector<FilterRepresentation> getFilters() {
+        return mFilters;
+    }
+
+    public FilterRepresentation getFilterRepresentation(int position) {
+        FilterRepresentation representation = null;
+
+        representation = mFilters.elementAt(position).copy();
+
+        return representation;
     }
 
     public int getPositionForRepresentation(FilterRepresentation representation) {
@@ -165,20 +163,20 @@ public class ImagePreset {
         }
     }
 
-    public void setDoApplyGeometry(boolean value) {
-        mDoApplyGeometry = value;
-    }
-
     public boolean getDoApplyGeometry() {
         return mDoApplyGeometry;
     }
 
-    public void setDoApplyFilters(boolean value) {
-        mDoApplyFilters = value;
+    public void setDoApplyGeometry(boolean value) {
+        mDoApplyGeometry = value;
     }
 
     public boolean getDoApplyFilters() {
         return mDoApplyFilters;
+    }
+
+    public void setDoApplyFilters(boolean value) {
+        mDoApplyFilters = value;
     }
 
     public boolean hasModifications() {
@@ -344,7 +342,7 @@ public class ImagePreset {
                     mFilters.remove(i);
 
                     // reset fusion underlay image.
-                    if(filter instanceof FilterDualCamFusionRepresentation ||
+                    if (filter instanceof FilterDualCamFusionRepresentation ||
                             filter instanceof FilterTruePortraitFusionRepresentation) {
                         MasterImage.getImage().setFusionUnderlay(null);
                         MasterImage.getImage().setScaleFactor(1);
@@ -467,7 +465,7 @@ public class ImagePreset {
         FilterRepresentation border = null;
         FilterRepresentation dualcam = null;
         FilterRepresentation trueportrait = null;
-        for (int i = 0; i < mFilters.size();) {
+        for (int i = 0; i < mFilters.size(); ) {
             FilterRepresentation rep = mFilters.elementAt(i);
             if (rep.getFilterType() == FilterRepresentation.TYPE_BORDER) {
                 border = rep;
@@ -531,7 +529,7 @@ public class ImagePreset {
 
     private boolean isNonePresetFilter(FilterRepresentation representation) {
         return representation instanceof FilterPresetRepresentation &&
-                ((FilterPresetRepresentation) representation).getTextId() == R.string.none;
+                representation.getTextId() == R.string.none;
     }
 
     public FilterRepresentation getRepresentation(FilterRepresentation filterRepresentation) {
@@ -594,7 +592,7 @@ public class ImagePreset {
     public Bitmap applyDualCamera(Bitmap bitmap, FilterEnvironment environment) {
         // Apply dual camera filters
         // Returns a new bitmap.
-        for (FilterRepresentation representation:mFilters) {
+        for (FilterRepresentation representation : mFilters) {
             if (representation.getFilterType() == FilterRepresentation.TYPE_DUALCAM) {
                 Bitmap tmp = bitmap;
                 bitmap = environment.applyRepresentation(representation, bitmap);
@@ -613,7 +611,7 @@ public class ImagePreset {
     public Bitmap applyTruePortrait(Bitmap bitmap, FilterEnvironment environment) {
         // Apply trueportrait filters
         // Returns a new bitmap.
-        for (FilterRepresentation representation:mFilters) {
+        for (FilterRepresentation representation : mFilters) {
             if (representation.getFilterType() == FilterRepresentation.TYPE_TRUEPORTRAIT) {
                 Bitmap tmp = bitmap;
                 bitmap = environment.applyRepresentation(representation, bitmap);
@@ -688,7 +686,7 @@ public class ImagePreset {
     }
 
     public void applyBorder(Allocation in, Allocation out,
-            boolean copyOut, FilterEnvironment environment) {
+                            boolean copyOut, FilterEnvironment environment) {
         FilterRepresentation border = getFilterRepresentationForType(
                 FilterRepresentation.TYPE_BORDER);
         if (border != null && mDoApplyGeometry) {
@@ -704,7 +702,7 @@ public class ImagePreset {
     }
 
     public void applyFilters(int from, int to, Allocation in, Allocation out,
-            FilterEnvironment environment) {
+                             FilterEnvironment environment) {
         if (mDoApplyFilters) {
             if (from < 0) {
                 from = 0;
@@ -816,7 +814,7 @@ public class ImagePreset {
             writer.endObject();
 
         } catch (IOException e) {
-            Log.e(LOGTAG,"Error encoding JASON",e);
+            Log.e(LOGTAG, "Error encoding JASON", e);
         }
     }
 
@@ -840,7 +838,7 @@ public class ImagePreset {
             }
             reader.close();
         } catch (Exception e) {
-            Log.e(LOGTAG, "\""+filterString+"\"");
+            Log.e(LOGTAG, "\"" + filterString + "\"");
             Log.e(LOGTAG, "parsing the filter parameters:", e);
             return false;
         }

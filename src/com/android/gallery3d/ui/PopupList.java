@@ -39,34 +39,53 @@ import java.util.ArrayList;
 
 public class PopupList {
 
-    public static interface OnPopupItemClickListener {
-        public boolean onPopupItemClick(int itemId);
-    }
-
-    public static class Item {
-        public final int id;
-        public String title;
-
-        public Item(int id, String title) {
-            this.id = id;
-            this.title = title;
-        }
-
-        public void setTitle(String title) {
-            this.title = title;
-        }
-    }
-
     private final Context mContext;
     private final View mAnchorView;
     private final ArrayList<Item> mItems = new ArrayList<Item>();
     private PopupWindow mPopupWindow;
     private ListView mContentList;
     private OnPopupItemClickListener mOnPopupItemClickListener;
+    private final OnItemClickListener mOnItemClickListener =
+            new OnItemClickListener() {
+                @Override
+                public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+                    if (mPopupWindow == null) return;
+                    mPopupWindow.dismiss();
+                    if (mOnPopupItemClickListener != null) {
+                        mOnPopupItemClickListener.onPopupItemClick((int) id);
+                    }
+                }
+            };
     private int mPopupOffsetX;
     private int mPopupOffsetY;
     private int mPopupWidth;
     private int mPopupHeight;
+    private final OnGlobalLayoutListener mOnGLobalLayoutListener =
+            new OnGlobalLayoutListener() {
+                @Override
+                public void onGlobalLayout() {
+                    if (mPopupWindow == null) return;
+                    updatePopupLayoutParams();
+                    // Need to update the position of the popup window
+                    mPopupWindow.update(mAnchorView,
+                            mPopupOffsetX, mPopupOffsetY, mPopupWidth, mPopupHeight);
+                }
+            };
+    private final PopupWindow.OnDismissListener mOnDismissListener =
+            new PopupWindow.OnDismissListener() {
+                @SuppressWarnings("deprecation")
+                @Override
+                public void onDismiss() {
+                    if (mPopupWindow == null) return;
+                    mPopupWindow = null;
+                    ViewTreeObserver observer = mAnchorView.getViewTreeObserver();
+                    if (observer.isAlive()) {
+                        // We used the deprecated function for backward compatibility
+                        // The new "removeOnGlobalLayoutListener" is introduced in API level 16
+                        observer.removeGlobalOnLayoutListener(mOnGLobalLayoutListener);
+                    }
+                }
+            };
 
     public PopupList(Context context, View anchorView) {
         mContext = context;
@@ -84,46 +103,6 @@ public class PopupList {
     public void clearItems() {
         mItems.clear();
     }
-
-    private final PopupWindow.OnDismissListener mOnDismissListener =
-            new PopupWindow.OnDismissListener() {
-        @SuppressWarnings("deprecation")
-        @Override
-        public void onDismiss() {
-            if (mPopupWindow == null) return;
-            mPopupWindow = null;
-            ViewTreeObserver observer = mAnchorView.getViewTreeObserver();
-            if (observer.isAlive()) {
-                // We used the deprecated function for backward compatibility
-                // The new "removeOnGlobalLayoutListener" is introduced in API level 16
-                observer.removeGlobalOnLayoutListener(mOnGLobalLayoutListener);
-            }
-        }
-    };
-
-    private final OnItemClickListener mOnItemClickListener =
-            new OnItemClickListener() {
-        @Override
-        public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-            if (mPopupWindow == null) return;
-            mPopupWindow.dismiss();
-            if (mOnPopupItemClickListener != null) {
-                mOnPopupItemClickListener.onPopupItemClick((int) id);
-            }
-        }
-    };
-
-    private final OnGlobalLayoutListener mOnGLobalLayoutListener =
-            new OnGlobalLayoutListener() {
-        @Override
-        public void onGlobalLayout() {
-            if (mPopupWindow == null) return;
-            updatePopupLayoutParams();
-            // Need to update the position of the popup window
-            mPopupWindow.update(mAnchorView,
-                    mPopupOffsetX, mPopupOffsetY, mPopupWidth, mPopupHeight);
-        }
-    };
 
     public void show() {
         if (mPopupWindow != null) return;
@@ -179,6 +158,24 @@ public class PopupList {
         return null;
     }
 
+    public interface OnPopupItemClickListener {
+        boolean onPopupItemClick(int itemId);
+    }
+
+    public static class Item {
+        public final int id;
+        public String title;
+
+        public Item(int id, String title) {
+            this.id = id;
+            this.title = title;
+        }
+
+        public void setTitle(String title) {
+            this.title = title;
+        }
+    }
+
     private class ItemDataAdapter extends BaseAdapter {
         @Override
         public int getCount() {
@@ -201,7 +198,7 @@ public class PopupList {
                 convertView = LayoutInflater.from(mContext)
                         .inflate(R.layout.popup_list_item, null);
             }
-            TextView text = (TextView) convertView.findViewById(android.R.id.text1);
+            TextView text = convertView.findViewById(android.R.id.text1);
             text.setText(mItems.get(position).title);
             return convertView;
         }

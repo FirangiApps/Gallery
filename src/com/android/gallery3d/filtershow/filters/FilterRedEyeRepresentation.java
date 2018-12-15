@@ -18,8 +18,9 @@ package com.android.gallery3d.filtershow.filters;
 
 import android.graphics.RectF;
 
-import org.codeaurora.gallery.R;
 import com.android.gallery3d.filtershow.editors.EditorRedEye;
+
+import org.codeaurora.gallery.R;
 
 import java.util.Vector;
 
@@ -27,7 +28,7 @@ public class FilterRedEyeRepresentation extends FilterPointRepresentation {
     private static final String LOGTAG = "FilterRedEyeRepresentation";
 
     public FilterRedEyeRepresentation() {
-        super("RedEye",R.string.redeye,EditorRedEye.ID);
+        super("RedEye", R.string.redeye, EditorRedEye.ID);
         setSerializationName("REDEYE");
         setFilterClass(ImageFilterRedEye.class);
         setOverlayId(R.drawable.photoeditor_effect_redeye);

@@ -19,25 +19,19 @@ package com.android.gallery3d.filtershow.filters;
 import android.util.JsonReader;
 import android.util.JsonWriter;
 
-import org.codeaurora.gallery.R;
 import com.android.gallery3d.filtershow.controller.BasicParameterInt;
 import com.android.gallery3d.filtershow.controller.Parameter;
 import com.android.gallery3d.filtershow.controller.ParameterSet;
 import com.android.gallery3d.filtershow.editors.EditorChanSat;
-import com.android.gallery3d.filtershow.imageshow.ControlPoint;
-import com.android.gallery3d.filtershow.imageshow.Spline;
+
+import org.codeaurora.gallery.R;
 
 import java.io.IOException;
-import java.util.Vector;
 
 /**
  * Representation for a filter that has per channel & Master saturation
  */
 public class FilterChanSatRepresentation extends FilterRepresentation implements ParameterSet {
-    private static final String LOGTAG = "FilterChanSatRepresentation";
-    private static final String ARGS = "ARGS";
-    private static final String SERIALIZATION_NAME = "channelsaturation";
-
     public static final int MODE_MASTER = 0;
     public static final int MODE_RED = 1;
     public static final int MODE_YELLOW = 2;
@@ -45,10 +39,12 @@ public class FilterChanSatRepresentation extends FilterRepresentation implements
     public static final int MODE_CYAN = 4;
     public static final int MODE_BLUE = 5;
     public static final int MODE_MAGENTA = 6;
-    private int mParameterMode = MODE_MASTER;
-
+    private static final String LOGTAG = "FilterChanSatRepresentation";
+    private static final String ARGS = "ARGS";
+    private static final String SERIALIZATION_NAME = "channelsaturation";
     private static int MINSAT = -100;
     private static int MAXSAT = 100;
+    private int mParameterMode = MODE_MASTER;
     private BasicParameterInt mParamMaster = new BasicParameterInt(MODE_MASTER, 0, MINSAT, MAXSAT);
     private BasicParameterInt mParamRed = new BasicParameterInt(MODE_RED, 0, MINSAT, MAXSAT);
     private BasicParameterInt mParamYellow = new BasicParameterInt(MODE_YELLOW, 0, MINSAT, MAXSAT);

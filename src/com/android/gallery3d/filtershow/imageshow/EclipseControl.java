@@ -25,17 +25,23 @@ import android.graphics.RadialGradient;
 import android.graphics.Rect;
 import android.graphics.RectF;
 import android.graphics.Shader;
-import android.util.Log;
-
-import org.codeaurora.gallery.R;
 
 public class EclipseControl {
+    public final static int HAN_CENTER = 0;
+    public final static int HAN_NORTH = 7;
+    public final static int HAN_NE = 8;
+    public final static int HAN_EAST = 1;
+    public final static int HAN_SE = 2;
+    public final static int HAN_SOUTH = 3;
+    public final static int HAN_SW = 4;
+    public final static int HAN_WEST = 5;
+    public final static int HAN_NW = 6;
+    private static int MIN_TOUCH_DIST = 80;// should be a resource & in dips
+    private static String LOGTAG = "EclipseControl";
     private float mCenterX = Float.NaN;
     private float mCenterY = 0;
     private float mRadiusX = 200;
     private float mRadiusY = 300;
-    private static int MIN_TOUCH_DIST = 80;// should be a resource & in dips
-    private static String LOGTAG = "EclipseControl";
     private float[] handlex = new float[9];
     private float[] handley = new float[9];
     private int mSliderColor;
@@ -47,17 +53,7 @@ public class EclipseControl {
     private float mDownRadiusX;
     private float mDownRadiusY;
     private Matrix mScrToImg;
-
     private boolean mShowReshapeHandles = true;
-    public final static int HAN_CENTER = 0;
-    public final static int HAN_NORTH = 7;
-    public final static int HAN_NE = 8;
-    public final static int HAN_EAST = 1;
-    public final static int HAN_SE = 2;
-    public final static int HAN_SOUTH = 3;
-    public final static int HAN_SW = 4;
-    public final static int HAN_WEST = 5;
-    public final static int HAN_NW = 6;
     private Rect mImageBounds;
 
     public EclipseControl(Context context) {
@@ -108,7 +104,7 @@ public class EclipseControl {
         return (!mImageBounds.contains((int) x1, (int) y1));
     }
 
-    public void actionDown(float x, float y, Oval oval)  {
+    public void actionDown(float x, float y, Oval oval) {
         float[] point = new float[]{
                 x, y};
         mScrToImg.mapPoints(point);
@@ -164,7 +160,7 @@ public class EclipseControl {
                     oval.setRadiusX(Math.abs(y - oval.getCenterX() + sign * raddy));
                 } else {
                     float raddx = mDownRadiusX - Math.abs(mDownX - mDownCenterX);
-                    oval.setRadiusX(Math.abs(x - oval.getCenterX() -  sign * raddx));
+                    oval.setRadiusX(Math.abs(x - oval.getCenterX() - sign * raddx));
                 }
                 break;
             case HAN_SE:

@@ -16,10 +16,8 @@
 
 package com.android.gallery3d.ui;
 
-import org.codeaurora.gallery.R;
 import com.android.gallery3d.app.AbstractGalleryActivity;
 import com.android.gallery3d.app.AlbumSetDataLoader;
-import com.android.gallery3d.data.MediaObject;
 import com.android.gallery3d.data.Path;
 import com.android.gallery3d.glrenderer.ColorTexture;
 import com.android.gallery3d.glrenderer.FadeInTexture;
@@ -30,18 +28,18 @@ import com.android.gallery3d.glrenderer.TiledTexture;
 import com.android.gallery3d.glrenderer.UploadedTexture;
 import com.android.gallery3d.ui.AlbumSetSlidingWindow.AlbumSetEntry;
 
+import org.codeaurora.gallery.R;
+
 public class AlbumSetSlotRenderer extends AbstractSlotRenderer {
     @SuppressWarnings("unused")
     private static final String TAG = "AlbumSetView";
     private static final int CACHE_SIZE = 96;
+    protected final LabelSpec mLabelSpec;
     private final int mPlaceholderColor;
-
     private final ColorTexture mWaitLoadingTexture;
     private final ResourceTexture mCameraOverlay;
     private final AbstractGalleryActivity mActivity;
     private final SelectionManager mSelectionManager;
-    protected final LabelSpec mLabelSpec;
-
     protected AlbumSetSlidingWindow mDataWindow;
     private SlotView mSlotView;
 
@@ -50,27 +48,10 @@ public class AlbumSetSlotRenderer extends AbstractSlotRenderer {
     private Path mHighlightItemPath = null;
     private boolean mInSelectionMode;
 
-    public static class LabelSpec {
-        public int labelBackgroundHeight;
-        public int titleOffset;
-        public int countOffset;
-        public int titleFontSize;
-        public int countFontSize;
-        public int leftMargin;
-        public int iconSize;
-        public int titleLeftMargin;
-        public int titleRightMargin;
-        public int backgroundColor;
-        public int titleColor;
-        public int countColor;
-        public int borderSize;
-        public int countRightMargin;
-    }
-
     public AlbumSetSlotRenderer(AbstractGalleryActivity activity,
-            SelectionManager selectionManager,
-            SlotView slotView, LabelSpec labelSpec, int placeholderColor) {
-        super (activity);
+                                SelectionManager selectionManager,
+                                SlotView slotView, LabelSpec labelSpec, int placeholderColor) {
+        super(activity);
         mActivity = activity;
         mSelectionManager = selectionManager;
         mSlotView = slotView;
@@ -81,6 +62,20 @@ public class AlbumSetSlotRenderer extends AbstractSlotRenderer {
         mWaitLoadingTexture.setSize(1, 1);
         mCameraOverlay = new ResourceTexture(activity,
                 R.drawable.ic_cameraalbum_overlay);
+    }
+
+    private static Texture checkLabelTexture(Texture texture) {
+        return ((texture instanceof UploadedTexture)
+                && ((UploadedTexture) texture).isUploading())
+                ? null
+                : texture;
+    }
+
+    private static Texture checkContentTexture(Texture texture) {
+        return ((texture instanceof TiledTexture)
+                && !((TiledTexture) texture).isReady())
+                ? null
+                : texture;
     }
 
     public void setPressedIndex(int index) {
@@ -113,20 +108,6 @@ public class AlbumSetSlotRenderer extends AbstractSlotRenderer {
             mDataWindow.setListener(new MyCacheListener());
             mSlotView.setSlotCount(mDataWindow.size());
         }
-    }
-
-    private static Texture checkLabelTexture(Texture texture) {
-        return ((texture instanceof UploadedTexture)
-                && ((UploadedTexture) texture).isUploading())
-                ? null
-                : texture;
-    }
-
-    private static Texture checkContentTexture(Texture texture) {
-        return ((texture instanceof TiledTexture)
-                && !((TiledTexture) texture).isReady())
-                ? null
-                : texture;
     }
 
     @Override
@@ -206,19 +187,6 @@ public class AlbumSetSlotRenderer extends AbstractSlotRenderer {
         mInSelectionMode = mSelectionManager.inSelectionMode();
     }
 
-    private class MyCacheListener implements AlbumSetSlidingWindow.Listener {
-
-        @Override
-        public void onSizeChanged(int size) {
-            mSlotView.setSlotCount(size);
-        }
-
-        @Override
-        public void onContentChanged() {
-            mSlotView.invalidate();
-        }
-    }
-
     public void pause() {
         mDataWindow.pause();
     }
@@ -238,6 +206,36 @@ public class AlbumSetSlotRenderer extends AbstractSlotRenderer {
     public void onSlotSizeChanged(int width, int height) {
         if (mDataWindow != null) {
             mDataWindow.onSlotSizeChanged(width, height);
+        }
+    }
+
+    public static class LabelSpec {
+        public int labelBackgroundHeight;
+        public int titleOffset;
+        public int countOffset;
+        public int titleFontSize;
+        public int countFontSize;
+        public int leftMargin;
+        public int iconSize;
+        public int titleLeftMargin;
+        public int titleRightMargin;
+        public int backgroundColor;
+        public int titleColor;
+        public int countColor;
+        public int borderSize;
+        public int countRightMargin;
+    }
+
+    private class MyCacheListener implements AlbumSetSlidingWindow.Listener {
+
+        @Override
+        public void onSizeChanged(int size) {
+            mSlotView.setSlotCount(size);
+        }
+
+        @Override
+        public void onContentChanged() {
+            mSlotView.invalidate();
         }
     }
 }

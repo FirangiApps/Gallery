@@ -40,33 +40,29 @@ import android.view.MotionEvent;
 import android.view.View;
 import android.view.WindowManager;
 import android.widget.FrameLayout;
-
 import android.widget.TextView;
-import org.codeaurora.gallery.R;
+
 import com.android.gallery3d.util.GalleryUtils;
+
+import org.codeaurora.gallery.R;
 
 public class GestureControllerOverlay extends FrameLayout implements
         ControllerOverlay, GestureController.GestureControlListener {
-    private GestureController mGestureController;
-
     private static final int MAX_VIDEO_STEP_TIME = 60 * 1000;
     private static final int MAX_BRIGHTNESS = 100;
-
+    private final int mIndicatorHeight;
+    private final int mIndicatorWidth;
+    private final int mIndicatorIconSize;
+    private final int mIndicatorTextSize;
+    private GestureController mGestureController;
     private float mStartBrightness = -1.0f;
     private double mStartVolumePercent = -1.0f;
     private int mStartVideoTime = -1;
-
     private TextView mCurrentIndicator;
     private Drawable mBrightnessDrawable;
     private Drawable mVolumeDrawable;
     private Drawable mRewindDrawable;
     private Drawable mForwardDrawable;
-
-    private final int mIndicatorHeight;
-    private final int mIndicatorWidth;
-    private final int mIndicatorIconSize;
-    private final int mIndicatorTextSize;
-
     private Listener mListener;
     private TimeBar mTimeBar;
 

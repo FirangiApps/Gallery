@@ -16,13 +16,9 @@
 
 package com.android.gallery3d.filtershow.editors;
 
-import android.app.ActionBar;
 import android.content.Context;
-import android.content.res.Resources;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
-import android.graphics.Color;
-import android.graphics.drawable.GradientDrawable;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -31,35 +27,29 @@ import android.view.View.OnClickListener;
 import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.FrameLayout;
-import android.widget.ImageButton;
-import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.PopupMenu;
 import android.widget.SeekBar;
 
-import org.codeaurora.gallery.R;
 import com.android.gallery3d.filtershow.FilterShowActivity;
-import com.android.gallery3d.filtershow.colorpicker.ColorHueView;
-import com.android.gallery3d.filtershow.colorpicker.ColorListener;
-import com.android.gallery3d.filtershow.colorpicker.ColorOpacityView;
-import com.android.gallery3d.filtershow.colorpicker.ColorSVRectView;
 import com.android.gallery3d.filtershow.controller.BitmapCaller;
 import com.android.gallery3d.filtershow.controller.ColorChooser;
 import com.android.gallery3d.filtershow.controller.FilterView;
-import com.android.gallery3d.filtershow.controller.ParameterColor;
 import com.android.gallery3d.filtershow.filters.FilterDrawRepresentation;
 import com.android.gallery3d.filtershow.filters.FilterRepresentation;
 import com.android.gallery3d.filtershow.filters.ImageFilterDraw;
 import com.android.gallery3d.filtershow.imageshow.ImageDraw;
 
+import org.codeaurora.gallery.R;
+
 public class EditorDraw extends ParametricEditor implements FilterView {
-    private static final String LOGTAG = "EditorDraw";
     public static final int ID = R.id.editorDraw;
-    public ImageDraw mImageDraw;
+    private static final String LOGTAG = "EditorDraw";
     private static final int MODE_SIZE = FilterDrawRepresentation.PARAM_SIZE;
     private static final int MODE_SIZEE = FilterDrawRepresentation.PARAM_SIZE;
     private static final int MODE_STYLE = FilterDrawRepresentation.PARAM_STYLE;
     private static final int MODE_COLOR = FilterDrawRepresentation.PARAM_COLOR;
+    public ImageDraw mImageDraw;
     int[] brushIcons = {
             R.drawable.square,
             R.drawable.round,
@@ -139,7 +129,7 @@ public class EditorDraw extends ParametricEditor implements FilterView {
 
     @Override
     public void openUtilityPanel(final LinearLayout accessoryViewList) {
-        Button view = (Button) accessoryViewList.findViewById(R.id.applyEffect);
+        Button view = accessoryViewList.findViewById(R.id.applyEffect);
 
         view.setText(mContext.getString(R.string.draw_color));
         view.setOnClickListener(new OnClickListener() {
@@ -158,7 +148,7 @@ public class EditorDraw extends ParametricEditor implements FilterView {
     }
 
     private void showPopupMenu(LinearLayout accessoryViewList) {
-        final Button button = (Button) accessoryViewList.findViewById(
+        final Button button = accessoryViewList.findViewById(
                 R.id.applyEffect);
         if (button == null) {
             return;
@@ -193,7 +183,7 @@ public class EditorDraw extends ParametricEditor implements FilterView {
             });
         }
         popupMenu.show();
-        ((FilterShowActivity)mContext).onShowMenu(popupMenu);
+        ((FilterShowActivity) mContext).onShowMenu(popupMenu);
     }
 
     protected void selectMenuItem(MenuItem item) {
@@ -234,7 +224,7 @@ public class EditorDraw extends ParametricEditor implements FilterView {
         mView.invalidate();
     }
 
-    public void clearDrawing(){
+    public void clearDrawing() {
         ImageDraw idraw = (ImageDraw) mImageShow;
         idraw.resetParameter();
         commitLocalRepresentation();
@@ -247,7 +237,7 @@ public class EditorDraw extends ParametricEditor implements FilterView {
             return;
         }
 
-        mSeekBar = (SeekBar) editControl.findViewById(R.id.primarySeekBar);
+        mSeekBar = editControl.findViewById(R.id.primarySeekBar);
         if (mSeekBar != null) {
             mSeekBar.setVisibility(View.GONE);
         }

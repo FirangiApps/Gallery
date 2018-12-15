@@ -26,24 +26,21 @@ import java.util.ArrayList;
 public class SizeClustering extends Clustering {
     @SuppressWarnings("unused")
     private static final String TAG = "SizeClustering";
-
+    private static final long MEGA_BYTES = 1024L * 1024;
+    private static final long GIGA_BYTES = 1024L * 1024 * 1024;
+    private static final long[] SIZE_LEVELS = {
+            0,
+            1 * MEGA_BYTES,
+            10 * MEGA_BYTES,
+            100 * MEGA_BYTES,
+            1 * GIGA_BYTES,
+            2 * GIGA_BYTES,
+            4 * GIGA_BYTES,
+    };
     private Context mContext;
     private ArrayList<Path>[] mClusters;
     private String[] mNames;
-    private long mMinSizes[];
-
-    private static final long MEGA_BYTES = 1024L*1024;
-    private static final long GIGA_BYTES = 1024L*1024*1024;
-
-    private static final long[] SIZE_LEVELS = {
-        0,
-        1 * MEGA_BYTES,
-        10 * MEGA_BYTES,
-        100 * MEGA_BYTES,
-        1 * GIGA_BYTES,
-        2 * GIGA_BYTES,
-        4 * GIGA_BYTES,
-    };
+    private long[] mMinSizes;
 
     public SizeClustering(Context context) {
         mContext = context;
@@ -52,8 +49,7 @@ public class SizeClustering extends Clustering {
     @SuppressWarnings("unchecked")
     @Override
     public void run(MediaSet baseSet) {
-        @SuppressWarnings("unchecked")
-        final ArrayList<Path>[] group = new ArrayList[SIZE_LEVELS.length];
+        @SuppressWarnings("unchecked") final ArrayList<Path>[] group = new ArrayList[SIZE_LEVELS.length];
         baseSet.enumerateTotalMediaItems(new MediaSet.ItemConsumer() {
             @Override
             public void consume(int index, MediaItem item) {

@@ -17,7 +17,6 @@
 package com.android.gallery3d.filtershow.pipeline;
 
 import android.graphics.Bitmap;
-import android.graphics.Canvas;
 import android.renderscript.Allocation;
 
 import com.android.gallery3d.app.Log;
@@ -27,10 +26,12 @@ import com.android.gallery3d.filtershow.filters.FilterUserPresetRepresentation;
 import com.android.gallery3d.filtershow.filters.FiltersManagerInterface;
 import com.android.gallery3d.filtershow.filters.ImageFilter;
 
-import java.lang.ref.WeakReference;
 import java.util.HashMap;
 
 public class FilterEnvironment {
+    public static final int QUALITY_ICON = 0;
+    public static final int QUALITY_PREVIEW = 1;
+    public static final int QUALITY_FINAL = 2;
     private static final String LOGTAG = "FilterEnvironment";
     private ImagePreset mImagePreset;
     private float mScaleFactor;
@@ -39,10 +40,8 @@ public class FilterEnvironment {
     private PipelineInterface mPipeline;
     private volatile boolean mStop = false;
     private BitmapCache mBitmapCache;
-
-    public static final int QUALITY_ICON = 0;
-    public static final int QUALITY_PREVIEW = 1;
-    public static final int QUALITY_FINAL = 2;
+    private HashMap<Integer, Integer>
+            generalParameters = new HashMap<Integer, Integer>();
 
     public synchronized boolean needsStop() {
         return mStop;
@@ -51,9 +50,6 @@ public class FilterEnvironment {
     public synchronized void setStop(boolean stop) {
         this.mStop = stop;
     }
-
-    private HashMap<Integer, Integer>
-                    generalParameters = new HashMap<Integer, Integer>();
 
     public void setBitmapCache(BitmapCache cache) {
         mBitmapCache = cache;
@@ -75,36 +71,36 @@ public class FilterEnvironment {
         return mBitmapCache.getBitmapCopy(source, type);
     }
 
-    public void setImagePreset(ImagePreset imagePreset) {
-        mImagePreset = imagePreset;
-    }
-
     public ImagePreset getImagePreset() {
         return mImagePreset;
     }
 
-    public void setScaleFactor(float scaleFactor) {
-        mScaleFactor = scaleFactor;
+    public void setImagePreset(ImagePreset imagePreset) {
+        mImagePreset = imagePreset;
     }
 
     public float getScaleFactor() {
         return mScaleFactor;
     }
 
-    public void setQuality(int quality) {
-        mQuality = quality;
+    public void setScaleFactor(float scaleFactor) {
+        mScaleFactor = scaleFactor;
     }
 
     public int getQuality() {
         return mQuality;
     }
 
-    public void setFiltersManager(FiltersManagerInterface filtersManager) {
-        mFiltersManager = filtersManager;
+    public void setQuality(int quality) {
+        mQuality = quality;
     }
 
     public FiltersManagerInterface getFiltersManager() {
         return mFiltersManager;
+    }
+
+    public void setFiltersManager(FiltersManagerInterface filtersManager) {
+        mFiltersManager = filtersManager;
     }
 
     public void applyRepresentation(FilterRepresentation representation,
@@ -127,8 +123,8 @@ public class FilterEnvironment {
             return bitmap;
         }
         ImageFilter filter = mFiltersManager.getFilterForRepresentation(representation);
-        if (filter == null){
-            Log.e(LOGTAG,"No ImageFilter for "+representation.getSerializationName());
+        if (filter == null) {
+            Log.e(LOGTAG, "No ImageFilter for " + representation.getSerializationName());
             return bitmap;
         }
         filter.useRepresentation(representation);

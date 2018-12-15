@@ -25,9 +25,7 @@ import android.database.sqlite.SQLiteException;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.BitmapRegionDecoder;
-import android.graphics.Canvas;
 import android.graphics.Matrix;
-import android.graphics.Paint;
 import android.graphics.Rect;
 import android.net.Uri;
 import android.os.Build;
@@ -43,8 +41,6 @@ import com.android.gallery3d.common.Utils;
 import com.android.gallery3d.exif.ExifInterface;
 import com.android.gallery3d.exif.ExifTag;
 import com.android.gallery3d.filtershow.imageshow.MasterImage;
-import com.android.gallery3d.filtershow.pipeline.FilterEnvironment;
-import com.android.gallery3d.filtershow.tools.XmpPresets;
 import com.android.gallery3d.util.XmpUtilHelper;
 
 import java.io.FileNotFoundException;
@@ -54,11 +50,8 @@ import java.util.List;
 
 public final class ImageLoader {
 
-    private static final String LOGTAG = "ImageLoader";
-
     public static final String JPEG_MIME_TYPE = "image/jpeg";
     public static final int DEFAULT_COMPRESS_QUALITY = 95;
-
     public static final int ORI_NORMAL = ExifInterface.Orientation.TOP_LEFT;
     public static final int ORI_ROTATE_90 = ExifInterface.Orientation.RIGHT_TOP;
     public static final int ORI_ROTATE_180 = ExifInterface.Orientation.BOTTOM_LEFT;
@@ -67,10 +60,12 @@ public final class ImageLoader {
     public static final int ORI_FLIP_VERT = ExifInterface.Orientation.BOTTOM_RIGHT;
     public static final int ORI_TRANSPOSE = ExifInterface.Orientation.LEFT_TOP;
     public static final int ORI_TRANSVERSE = ExifInterface.Orientation.LEFT_BOTTOM;
-
+    private static final String LOGTAG = "ImageLoader";
     private static final int BITMAP_LOAD_BACKOUT_ATTEMPTS = 5;
     private static final float OVERDRAW_ZOOM = 1.2f;
-    private ImageLoader() {}
+
+    private ImageLoader() {
+    }
 
     /**
      * Returns the Mime type for a Url.  Safe to use with Urls that do not
@@ -126,7 +121,7 @@ public final class ImageLoader {
                 }
 
                 final String selection = "_id=?";
-                final String[] selectionArgs = new String[] { split[1] };
+                final String[] selectionArgs = new String[]{split[1]};
 
                 return getDataColumn(context, contentUri, selection, selectionArgs);
             }
@@ -139,7 +134,7 @@ public final class ImageLoader {
 
         Cursor cursor = null;
         final String column = "_data";
-        final String[] projection = { column };
+        final String[] projection = {column};
 
         try {
             cursor = context.getContentResolver().query(uri, projection, selection, selectionArgs,
@@ -192,7 +187,7 @@ public final class ImageLoader {
         Cursor cursor = null;
         try {
             cursor = context.getContentResolver().query(uri,
-                    new String[] { MediaStore.Images.ImageColumns.ORIENTATION },
+                    new String[]{MediaStore.Images.ImageColumns.ORIENTATION},
                     null, null, null);
             if (cursor != null && cursor.moveToNext()) {
                 int ori = cursor.getInt(0);
@@ -248,11 +243,11 @@ public final class ImageLoader {
         return ORI_NORMAL;
     }
 
-    private static int parseExif(ExifInterface exif){
+    private static int parseExif(ExifInterface exif) {
         Integer tagval = exif.getTagIntValue(ExifInterface.TAG_ORIENTATION);
         if (tagval != null) {
             int orientation = tagval;
-            switch(orientation) {
+            switch (orientation) {
                 case ORI_NORMAL:
                 case ORI_ROTATE_90:
                 case ORI_ROTATE_180:
@@ -275,7 +270,7 @@ public final class ImageLoader {
      */
     public static int getMetadataRotation(Context context, Uri uri) {
         int orientation = getMetadataOrientation(context, uri);
-        switch(orientation) {
+        switch (orientation) {
             case ORI_ROTATE_90:
                 return 90;
             case ORI_ROTATE_180:
@@ -430,15 +425,15 @@ public final class ImageLoader {
      * smaller than maxSideLength. The Bitmap's original dimensions are stored
      * in the rect originalBounds.
      *
-     * @param uri URI of image to open.
-     * @param context context whose ContentResolver to use.
-     * @param maxSideLength max side length of returned bitmap.
+     * @param uri            URI of image to open.
+     * @param context        context whose ContentResolver to use.
+     * @param maxSideLength  max side length of returned bitmap.
      * @param originalBounds If not null, set to the actual bounds of the stored bitmap.
-     * @param useMin use min or max side of the original image
+     * @param useMin         use min or max side of the original image
      * @return downsampled bitmap or null if this operation failed.
      */
     public static Bitmap loadConstrainedBitmap(Uri uri, Context context, int maxSideLength,
-            Rect originalBounds, boolean useMin) {
+                                               Rect originalBounds, boolean useMin) {
         if (maxSideLength <= 0 || uri == null || context == null) {
             throw new IllegalArgumentException("bad argument to getScaledBitmap");
         }
@@ -470,7 +465,7 @@ public final class ImageLoader {
 
         // Make sure sample size is reasonable
         if (sampleSize <= 0 ||
-                0 >= (int) (Math.min(w, h) / sampleSize)) {
+                0 >= (Math.min(w, h) / sampleSize)) {
             return null;
         }
         return loadDownsampledBitmap(context, uri, sampleSize);
@@ -482,20 +477,20 @@ public final class ImageLoader {
      * in the rect originalBounds.  The output is also transformed to the given
      * orientation.
      *
-     * @param uri URI of image to open.
-     * @param context context whose ContentResolver to use.
-     * @param maxSideLength max side length of returned bitmap.
-     * @param orientation  the orientation to transform the bitmap to.
+     * @param uri            URI of image to open.
+     * @param context        context whose ContentResolver to use.
+     * @param maxSideLength  max side length of returned bitmap.
+     * @param orientation    the orientation to transform the bitmap to.
      * @param originalBounds set to the actual bounds of the stored bitmap.
      * @return downsampled bitmap or null if this operation failed.
      */
     public static Bitmap loadOrientedConstrainedBitmap(Uri uri, Context context, int maxSideLength,
-            int orientation, Rect originalBounds) {
+                                                       int orientation, Rect originalBounds) {
         Bitmap bmap = loadConstrainedBitmap(uri, context, maxSideLength, originalBounds, false);
         if (bmap != null) {
             bmap = orientBitmap(bmap, orientation);
-            if (bmap.getConfig()!= Bitmap.Config.ARGB_8888){
-                bmap = bmap.copy( Bitmap.Config.ARGB_8888,true);
+            if (bmap.getConfig() != Bitmap.Config.ARGB_8888) {
+                bmap = bmap.copy(Bitmap.Config.ARGB_8888, true);
             }
         }
         return bmap;
@@ -556,7 +551,7 @@ public final class ImageLoader {
      * size. In low-memory situations, the bitmap may be downsampled further.
      */
     public static Bitmap loadOrientedBitmapWithBackouts(Context context, Uri sourceUri,
-            int sampleSize) {
+                                                        int sampleSize) {
         Bitmap bitmap = loadBitmapWithBackouts(context, sourceUri, sampleSize);
         if (bitmap == null) {
             return null;
@@ -570,7 +565,7 @@ public final class ImageLoader {
      * Loads bitmap from a resource that may be downsampled in low-memory situations.
      */
     public static Bitmap decodeResourceWithBackouts(Resources res, BitmapFactory.Options options,
-            int id) {
+                                                    int id) {
         boolean noBitmap = true;
         int num_tries = 0;
         if (options.inSampleSize < 1) {

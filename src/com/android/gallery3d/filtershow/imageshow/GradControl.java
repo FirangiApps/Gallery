@@ -30,12 +30,18 @@ import android.graphics.Shader;
 import org.codeaurora.gallery.R;
 
 public class GradControl {
+    public final static int HAN_CENTER = 0;
+    public final static int HAN_NORTH = 2;
+    public final static int HAN_SOUTH = 1;
+    Rect mImageBounds;
+    int mImageHeight;
+    Paint mPaint = new Paint();
+    DashPathEffect mDash = new DashPathEffect(new float[]{30, 30}, 0);
     private float mPoint1X = Float.NaN; // used to flag parameters have not been set
     private float mPoint1Y = 0;
     private float mPoint2X = 200;
     private float mPoint2Y = 300;
     private int mMinTouchDist = 80;// should be a resource & in dips
-
     private float[] handlex = new float[3];
     private float[] handley = new float[3];
     private int mSliderColor;
@@ -46,15 +52,8 @@ public class GradControl {
     private float mDownPoint1Y;
     private float mDownPoint2X;
     private float mDownPoint2Y;
-    Rect mImageBounds;
-    int mImageHeight;
     private Matrix mScrToImg;
-    Paint mPaint = new Paint();
-    DashPathEffect mDash = new DashPathEffect(new float[]{30, 30}, 0);
     private boolean mShowReshapeHandles = true;
-    public final static int HAN_CENTER = 0;
-    public final static int HAN_NORTH = 2;
-    public final static int HAN_SOUTH = 1;
     private int[] mPointColorPatern;
     private int[] mGrayPointColorPatern;
     private float[] mPointRadialPos = new float[]{0, .3f, .31f, 1};
@@ -227,7 +226,6 @@ public class GradControl {
 
     public void paintOvallines(
             Canvas canvas, Paint paint, float p1x, float p1y, float p2x, float p2y) {
-
 
 
         canvas.drawLine(p1x, p1y, p2x, p2y, paint);

@@ -20,21 +20,21 @@ import android.graphics.Color;
 import android.util.JsonReader;
 import android.util.JsonWriter;
 
-import org.codeaurora.gallery.R;
 import com.android.gallery3d.filtershow.controller.BasicParameterInt;
 import com.android.gallery3d.filtershow.controller.Parameter;
 import com.android.gallery3d.filtershow.controller.ParameterColor;
 import com.android.gallery3d.filtershow.editors.EditorColorBorder;
 
+import org.codeaurora.gallery.R;
+
 import java.io.IOException;
 
 public class FilterColorBorderRepresentation extends FilterRepresentation {
-    private static final String LOGTAG = "FilterColorBorderRepresentation";
-    private static final String SERIALIZATION_NAME = "COLORBORDER";
-
     public static final int PARAM_SIZE = 0;
     public static final int PARAM_RADIUS = 1;
     public static final int PARAM_COLOR = 2;
+    private static final String LOGTAG = "FilterColorBorderRepresentation";
+    private static final String SERIALIZATION_NAME = "COLORBORDER";
     public static int DEFAULT_MENU_COLOR1 = Color.WHITE;
     public static int DEFAULT_MENU_COLOR2 = Color.BLACK;
     public static int DEFAULT_MENU_COLOR3 = Color.GRAY;
@@ -106,12 +106,9 @@ public class FilterColorBorderRepresentation extends FilterRepresentation {
         }
         if (representation instanceof FilterColorBorderRepresentation) {
             FilterColorBorderRepresentation border = (FilterColorBorderRepresentation) representation;
-            if (border.mParamColor.getValue() == mParamColor.getValue()
+            return border.mParamColor.getValue() == mParamColor.getValue()
                     && border.mParamRadius.getValue() == mParamRadius.getValue()
-                    && border.mParamSize.getValue() == mParamSize.getValue()) {
-
-                return true;
-            }
+                    && border.mParamSize.getValue() == mParamSize.getValue();
         }
         return false;
     }

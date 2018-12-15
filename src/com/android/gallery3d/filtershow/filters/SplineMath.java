@@ -4,8 +4,21 @@ package com.android.gallery3d.filtershow.filters;
 public class SplineMath {
     double[][] mPoints = new double[6][2];
     double[] mDerivatives;
+
     SplineMath(int n) {
         mPoints = new double[n][2];
+    }
+
+    public static void main(String[] args) {
+        SplineMath s = new SplineMath(10);
+        for (int i = 0; i < 10; i++) {
+            s.setPoint(i, i, i);
+        }
+        float[][] curve = s.calculatetCurve(40);
+
+        for (int j = 0; j < curve.length; j++) {
+            System.out.println(curve[j][0] + "," + curve[j][1]);
+        }
     }
 
     public void setPoint(int index, double x, double y) {
@@ -150,17 +163,5 @@ public class SplineMath {
             solution[i] = (result[i] - system[i][2] * solution[i + 1]) / system[i][1];
         }
         return solution;
-    }
-
-    public static void main(String[] args) {
-        SplineMath s = new SplineMath(10);
-        for (int i = 0; i < 10; i++) {
-            s.setPoint(i, i, i);
-        }
-        float[][] curve = s.calculatetCurve(40);
-
-        for (int j = 0; j < curve.length; j++) {
-            System.out.println(curve[j][0] + "," + curve[j][1]);
-        }
     }
 }

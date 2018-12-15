@@ -31,10 +31,9 @@ import android.view.MenuItem;
 import android.view.View;
 import android.widget.Button;
 import android.widget.ShareActionProvider;
-import android.widget.Toolbar;
 import android.widget.ShareActionProvider.OnShareTargetSelectedListener;
+import android.widget.Toolbar;
 
-import org.codeaurora.gallery.R;
 import com.android.gallery3d.app.AbstractGalleryActivity;
 import com.android.gallery3d.common.ApiHelper;
 import com.android.gallery3d.common.Utils;
@@ -49,6 +48,8 @@ import com.android.gallery3d.util.GalleryUtils;
 import com.android.gallery3d.util.ThreadPool.Job;
 import com.android.gallery3d.util.ThreadPool.JobContext;
 
+import org.codeaurora.gallery.R;
+
 import java.util.ArrayList;
 
 public class ActionModeHandler implements Callback, PopupList.OnPopupItemClickListener {
@@ -62,17 +63,20 @@ public class ActionModeHandler implements Callback, PopupList.OnPopupItemClickLi
     private static final int SUPPORT_MULTIPLE_MASK = MediaObject.SUPPORT_DELETE
             | MediaObject.SUPPORT_ROTATE | MediaObject.SUPPORT_SHARE
             | MediaObject.SUPPORT_CACHE;
-
-    public interface ActionModeListener {
-        public boolean onActionItemClicked(MenuItem item);
-    }
-
     public static boolean isThreadComplete = false;
-
     private final AbstractGalleryActivity mActivity;
     private final MenuExecutor mMenuExecutor;
     private final SelectionManager mSelectionManager;
     private final NfcAdapter mNfcAdapter;
+    private final Handler mMainHandler;
+    private final OnShareTargetSelectedListener mShareTargetSelectedListener =
+            new OnShareTargetSelectedListener() {
+                @Override
+                public boolean onShareTargetSelected(ShareActionProvider source, Intent intent) {
+                    mSelectionManager.leaveSelectionMode();
+                    return false;
+                }
+            };
     private Menu mMenu;
     private MenuItem mSharePanoramaMenuItem;
     private MenuItem mShareMenuItem;
@@ -81,53 +85,10 @@ public class ActionModeHandler implements Callback, PopupList.OnPopupItemClickLi
     private SelectionMenu mSelectionMenu;
     private ActionModeListener mListener;
     private Future<?> mMenuTask;
-    private final Handler mMainHandler;
     private ActionMode mActionMode;
     private boolean mShareMaxDialog = false;
     private Toolbar mToolbar;
-
-    private static class GetAllPanoramaSupports implements PanoramaSupportCallback {
-        private int mNumInfoRequired;
-        private JobContext mJobContext;
-        public boolean mAllPanoramas = true;
-        public boolean mAllPanorama360 = true;
-        public boolean mHasPanorama360 = false;
-        private Object mLock = new Object();
-
-        public GetAllPanoramaSupports(ArrayList<MediaObject> mediaObjects, JobContext jc) {
-            mJobContext = jc;
-            mNumInfoRequired = mediaObjects.size();
-            for (MediaObject mediaObject : mediaObjects) {
-                mediaObject.getPanoramaSupport(this);
-            }
-        }
-
-        @Override
-        public void panoramaInfoAvailable(MediaObject mediaObject, boolean isPanorama,
-                boolean isPanorama360) {
-            synchronized (mLock) {
-                mNumInfoRequired--;
-                mAllPanoramas = isPanorama && mAllPanoramas;
-                mAllPanorama360 = isPanorama360 && mAllPanorama360;
-                mHasPanorama360 = mHasPanorama360 || isPanorama360;
-                if (mNumInfoRequired == 0 || mJobContext.isCancelled()) {
-                    mLock.notifyAll();
-                }
-            }
-        }
-
-        public void waitForPanoramaSupport() {
-            synchronized (mLock) {
-                while (mNumInfoRequired != 0 && !mJobContext.isCancelled()) {
-                    try {
-                        mLock.wait();
-                    } catch (InterruptedException e) {
-                        // May be a cancelled job context
-                    }
-                }
-            }
-        }
-    }
+    private WakeLockHoldingProgressListener mDeleteProgressListener;
 
     public ActionModeHandler(
             AbstractGalleryActivity activity, SelectionManager selectionManager) {
@@ -148,7 +109,7 @@ public class ActionModeHandler implements Callback, PopupList.OnPopupItemClickLi
                 R.layout.action_mode, null);
         mActionMode.setCustomView(customView);
         mSelectionMenu = new SelectionMenu(a,
-                (Button) customView.findViewById(R.id.selection_menu), this);
+                customView.findViewById(R.id.selection_menu), this);
         updateSelectionMenu();
     }
 
@@ -163,8 +124,6 @@ public class ActionModeHandler implements Callback, PopupList.OnPopupItemClickLi
     public void setActionModeListener(ActionModeListener listener) {
         mListener = listener;
     }
-
-    private WakeLockHoldingProgressListener mDeleteProgressListener;
 
     @Override
     public boolean onActionItemClicked(ActionMode mode, MenuItem item) {
@@ -240,15 +199,6 @@ public class ActionModeHandler implements Callback, PopupList.OnPopupItemClickLi
         mSelectionMenu.updateSelectAllMode(mSelectionManager.inSelectAllMode());
     }
 
-    private final OnShareTargetSelectedListener mShareTargetSelectedListener =
-            new OnShareTargetSelectedListener() {
-        @Override
-        public boolean onShareTargetSelected(ShareActionProvider source, Intent intent) {
-            mSelectionManager.leaveSelectionMode();
-            return false;
-        }
-    };
-
     @Override
     public boolean onPrepareActionMode(ActionMode mode, Menu menu) {
         return false;
@@ -263,7 +213,7 @@ public class ActionModeHandler implements Callback, PopupList.OnPopupItemClickLi
         mSharePanoramaMenuItem = menu.findItem(R.id.action_share_panorama);
         if (mSharePanoramaMenuItem != null) {
             mSharePanoramaActionProvider = (ShareActionProvider) mSharePanoramaMenuItem
-                .getActionProvider();
+                    .getActionProvider();
             mSharePanoramaActionProvider.setOnShareTargetSelectedListener(
                     mShareTargetSelectedListener);
             mSharePanoramaActionProvider.setShareHistoryFileName("panorama_share_history.xml");
@@ -307,7 +257,7 @@ public class ActionModeHandler implements Callback, PopupList.OnPopupItemClickLi
     private int computeMenuOptions(ArrayList<MediaObject> selected) {
         int operation = MediaObject.SUPPORT_ALL;
         int type = 0;
-        for (MediaObject mediaObject: selected) {
+        for (MediaObject mediaObject : selected) {
             int support = mediaObject.getSupportedOperations();
             type |= mediaObject.getMediaType();
             operation &= support;
@@ -541,12 +491,12 @@ public class ActionModeHandler implements Callback, PopupList.OnPopupItemClickLi
                             if (canSharePanoramas && supportCallback.mAllPanorama360) {
                                 mShareMenuItem.setShowAsAction(MenuItem.SHOW_AS_ACTION_NEVER);
                                 mShareMenuItem.setTitle(
-                                    mActivity.getResources().getString(R.string.share_as_photo));
+                                        mActivity.getResources().getString(R.string.share_as_photo));
                             } else {
                                 mSharePanoramaMenuItem.setVisible(false);
                                 mShareMenuItem.setShowAsAction(MenuItem.SHOW_AS_ACTION_IF_ROOM);
                                 mShareMenuItem.setTitle(
-                                    mActivity.getResources().getString(R.string.share));
+                                        mActivity.getResources().getString(R.string.share));
                             }
                             mSharePanoramaActionProvider.setShareIntent(share_panorama_intent);
                         }
@@ -597,5 +547,52 @@ public class ActionModeHandler implements Callback, PopupList.OnPopupItemClickLi
             updateSupportedOperation();
         }
         mMenuExecutor.resume();
+    }
+
+    public interface ActionModeListener {
+        boolean onActionItemClicked(MenuItem item);
+    }
+
+    private static class GetAllPanoramaSupports implements PanoramaSupportCallback {
+        public boolean mAllPanoramas = true;
+        public boolean mAllPanorama360 = true;
+        public boolean mHasPanorama360 = false;
+        private int mNumInfoRequired;
+        private JobContext mJobContext;
+        private Object mLock = new Object();
+
+        public GetAllPanoramaSupports(ArrayList<MediaObject> mediaObjects, JobContext jc) {
+            mJobContext = jc;
+            mNumInfoRequired = mediaObjects.size();
+            for (MediaObject mediaObject : mediaObjects) {
+                mediaObject.getPanoramaSupport(this);
+            }
+        }
+
+        @Override
+        public void panoramaInfoAvailable(MediaObject mediaObject, boolean isPanorama,
+                                          boolean isPanorama360) {
+            synchronized (mLock) {
+                mNumInfoRequired--;
+                mAllPanoramas = isPanorama && mAllPanoramas;
+                mAllPanorama360 = isPanorama360 && mAllPanorama360;
+                mHasPanorama360 = mHasPanorama360 || isPanorama360;
+                if (mNumInfoRequired == 0 || mJobContext.isCancelled()) {
+                    mLock.notifyAll();
+                }
+            }
+        }
+
+        public void waitForPanoramaSupport() {
+            synchronized (mLock) {
+                while (mNumInfoRequired != 0 && !mJobContext.isCancelled()) {
+                    try {
+                        mLock.wait();
+                    } catch (InterruptedException e) {
+                        // May be a cancelled job context
+                    }
+                }
+            }
+        }
     }
 }

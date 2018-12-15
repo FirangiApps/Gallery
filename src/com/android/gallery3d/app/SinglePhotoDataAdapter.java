@@ -52,6 +52,39 @@ public class SinglePhotoDataAdapter extends TileImageViewAdapter
     private ThreadPool mThreadPool;
     private int mLoadingState = LOADING_INIT;
     private BitmapScreenNail mBitmapScreenNail;
+    private FutureListener<Bitmap> mThumbListener =
+            new FutureListener<Bitmap>() {
+                @Override
+                public void onFutureDone(Future<Bitmap> future) {
+                    mHandler.sendMessage(
+                            mHandler.obtainMessage(MSG_UPDATE_IMAGE, future));
+                }
+            };
+    private FutureListener<BitmapRegionDecoder> mLargeListener =
+            new FutureListener<BitmapRegionDecoder>() {
+                @Override
+                public void onFutureDone(Future<BitmapRegionDecoder> future) {
+                    BitmapRegionDecoder decoder = future.get();
+                    // cannot get large bitmap, then try to get thumb bitmap
+                    if (decoder == null) {
+                        if (mTask != null && !mTask.isCancelled()) {
+                            Log.w(TAG, "fail to get region decoder, try to request thumb image");
+                            mHasFullImage = false;
+                            pause();
+                            resume();
+                        }
+                        return;
+                    }
+                    int width = decoder.getWidth();
+                    int height = decoder.getHeight();
+                    BitmapFactory.Options options = new BitmapFactory.Options();
+                    options.inSampleSize = BitmapUtils.computeSampleSize(
+                            (float) SIZE_BACKUP / Math.max(width, height));
+                    Bitmap bitmap = decoder.decodeRegion(new Rect(0, 0, width, height), options);
+                    mHandler.sendMessage(mHandler.obtainMessage(
+                            MSG_UPDATE_IMAGE, new ImageBundle(decoder, bitmap)));
+                }
+            };
 
     public SinglePhotoDataAdapter(
             AbstractGalleryActivity activity, PhotoView view, MediaItem item) {
@@ -73,51 +106,6 @@ public class SinglePhotoDataAdapter extends TileImageViewAdapter
         };
         mThreadPool = activity.getThreadPool();
     }
-
-    private static class ImageBundle {
-        public final BitmapRegionDecoder decoder;
-        public final Bitmap backupImage;
-
-        public ImageBundle(BitmapRegionDecoder decoder, Bitmap backupImage) {
-            this.decoder = decoder;
-            this.backupImage = backupImage;
-        }
-    }
-
-    private FutureListener<BitmapRegionDecoder> mLargeListener =
-            new FutureListener<BitmapRegionDecoder>() {
-        @Override
-        public void onFutureDone(Future<BitmapRegionDecoder> future) {
-            BitmapRegionDecoder decoder = future.get();
-            // cannot get large bitmap, then try to get thumb bitmap
-            if (decoder == null) {
-                if (mTask != null && !mTask.isCancelled()) {
-                    Log.w(TAG, "fail to get region decoder, try to request thumb image");
-                    mHasFullImage = false;
-                    pause();
-                    resume();
-                }
-                return;
-            }
-            int width = decoder.getWidth();
-            int height = decoder.getHeight();
-            BitmapFactory.Options options = new BitmapFactory.Options();
-            options.inSampleSize = BitmapUtils.computeSampleSize(
-                    (float) SIZE_BACKUP / Math.max(width, height));
-            Bitmap bitmap = decoder.decodeRegion(new Rect(0, 0, width, height), options);
-            mHandler.sendMessage(mHandler.obtainMessage(
-                    MSG_UPDATE_IMAGE, new ImageBundle(decoder, bitmap)));
-        }
-    };
-
-    private FutureListener<Bitmap> mThumbListener =
-            new FutureListener<Bitmap>() {
-        @Override
-        public void onFutureDone(Future<Bitmap> future) {
-            mHandler.sendMessage(
-                    mHandler.obtainMessage(MSG_UPDATE_IMAGE, future));
-        }
-    };
 
     @Override
     public boolean isEmpty() {
@@ -271,5 +259,15 @@ public class SinglePhotoDataAdapter extends TileImageViewAdapter
     @Override
     public int getLoadingState(int offset) {
         return mLoadingState;
+    }
+
+    private static class ImageBundle {
+        public final BitmapRegionDecoder decoder;
+        public final Bitmap backupImage;
+
+        public ImageBundle(BitmapRegionDecoder decoder, Bitmap backupImage) {
+            this.decoder = decoder;
+            this.backupImage = backupImage;
+        }
     }
 }

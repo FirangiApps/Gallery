@@ -25,14 +25,14 @@ import com.android.gallery3d.filtershow.controller.Parameter;
 import com.android.gallery3d.filtershow.controller.ParameterInteger;
 
 public class FilterBasicRepresentation extends FilterRepresentation implements ParameterInteger {
+    public static final String SERIAL_NAME = "Name";
+    public static final String SERIAL_VALUE = "Value";
     private static final String LOGTAG = "FilterBasicRep";
     private int mMinimum;
     private int mValue;
     private int mMaximum;
     private int mDefaultValue;
     private int mPreviewValue;
-    public static final String SERIAL_NAME = "Name";
-    public static final String SERIAL_VALUE = "Value";
     private boolean mLogVerbose = Log.isLoggable(LOGTAG, Log.VERBOSE);
 
     public FilterBasicRepresentation(String name, int minimum, int value, int maximum) {
@@ -49,7 +49,7 @@ public class FilterBasicRepresentation extends FilterRepresentation implements P
 
     @Override
     public FilterRepresentation copy() {
-        FilterBasicRepresentation representation = new FilterBasicRepresentation(getName(),0,0,0);
+        FilterBasicRepresentation representation = new FilterBasicRepresentation(getName(), 0, 0, 0);
         copyAllParameters(representation);
         return representation;
     }
@@ -79,13 +79,11 @@ public class FilterBasicRepresentation extends FilterRepresentation implements P
         }
         if (representation instanceof FilterBasicRepresentation) {
             FilterBasicRepresentation basic = (FilterBasicRepresentation) representation;
-            if (basic.mMinimum == mMinimum
+            return basic.mMinimum == mMinimum
                     && basic.mMaximum == mMaximum
                     && basic.mValue == mValue
                     && basic.mDefaultValue == mDefaultValue
-                    && basic.mPreviewValue == mPreviewValue) {
-                return true;
-            }
+                    && basic.mPreviewValue == mPreviewValue;
         }
         return false;
     }
@@ -124,13 +122,13 @@ public class FilterBasicRepresentation extends FilterRepresentation implements P
         mMaximum = maximum;
     }
 
-    public void setDefaultValue(int defaultValue) {
-        mDefaultValue = defaultValue;
-    }
-
     @Override
     public int getDefaultValue() {
         return mDefaultValue;
+    }
+
+    public void setDefaultValue(int defaultValue) {
+        mDefaultValue = defaultValue;
     }
 
     public int getPreviewValue() {
@@ -148,7 +146,7 @@ public class FilterBasicRepresentation extends FilterRepresentation implements P
     }
 
     @Override
-    public String getParameterType(){
+    public String getParameterType() {
         return sParameterType;
     }
 
@@ -178,8 +176,8 @@ public class FilterBasicRepresentation extends FilterRepresentation implements P
     @Override
     public String[][] serializeRepresentation() {
         String[][] ret = {
-                {SERIAL_NAME  , getName() },
-                {SERIAL_VALUE , Integer.toString(mValue)}};
+                {SERIAL_NAME, getName()},
+                {SERIAL_VALUE, Integer.toString(mValue)}};
         return ret;
     }
 

@@ -35,12 +35,17 @@ import android.util.Log;
 
 public class ImageLoaderInstance {
 
+    private static final String TAG = "ImageLoaderInstance";
+    private volatile static ImageLoaderInstance instance;
     private ImageLoaderHandle handle;
     private ImageLoaderConfig configuration;
-    private volatile static ImageLoaderInstance instance;
-    private static final String TAG = "ImageLoaderInstance";
 
-    /** Returns singleton class instance */
+    protected ImageLoaderInstance() {
+    }
+
+    /**
+     * Returns singleton class instance
+     */
     public static ImageLoaderInstance getInstance() {
         if (instance == null) {
             synchronized (ImageLoaderInstance.class) {
@@ -52,9 +57,6 @@ public class ImageLoaderInstance {
         return instance;
     }
 
-    protected ImageLoaderInstance() {
-    }
-
     public synchronized void init(ImageLoaderConfig configuration) {
         if (this.configuration == null) {
             handle = new ImageLoaderHandle(configuration);
@@ -62,7 +64,7 @@ public class ImageLoaderInstance {
         }
     }
 
-    public void displayImage(String uri, ImageViewImpl imageView, ImageLoaderOptions options){
+    public void displayImage(String uri, ImageViewImpl imageView, ImageLoaderOptions options) {
         if (imageView == null) {
             throw new IllegalArgumentException("Null iamgeView were passed.");
         }
@@ -74,7 +76,7 @@ public class ImageLoaderInstance {
 
         int imageHeight = configuration.defineHeightForImage(imageView);
         int imageWidth = configuration.defineWidthForImage(imageView);
-        String memoryCacheKey = configuration.generateKey(uri, imageHeight, imageWidth);
+        String memoryCacheKey = ImageLoaderConfig.generateKey(uri, imageHeight, imageWidth);
         handle.prepareDisplayTaskFor(imageView, memoryCacheKey);
 
         Bitmap bmp = configuration.get(memoryCacheKey);
@@ -86,7 +88,7 @@ public class ImageLoaderInstance {
             ImageLoaderInfo imageLoadingInfo = new ImageLoaderInfo(uri, imageView, imageHeight, imageWidth,
                     memoryCacheKey, options, handle.getLockForUri(uri));
             ImageLoaderTask displayTask = new ImageLoaderTask(handle, imageLoadingInfo,
-                    configuration.defineHandler(options));
+                    ImageLoaderConfig.defineHandler(options));
             handle.submit(displayTask);
         }
     }

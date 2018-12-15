@@ -20,6 +20,7 @@ import android.renderscript.Element;
 import android.renderscript.ScriptIntrinsicConvolve3x3;
 
 import com.android.gallery3d.filtershow.editors.BasicEditor;
+
 import org.codeaurora.gallery.R;
 
 public class ImageFilterSharpen extends ImageFilterRS {
@@ -64,7 +65,7 @@ public class ImageFilterSharpen extends ImageFilterRS {
 
     @Override
     protected void createFilter(android.content.res.Resources res, float scaleFactor,
-            int quality) {
+                                int quality) {
         if (mScript == null) {
             mScript = ScriptIntrinsicConvolve3x3.create(getRenderScriptContext(),
                     Element.RGBA_8888(getRenderScriptContext()));
@@ -74,7 +75,7 @@ public class ImageFilterSharpen extends ImageFilterRS {
     private void computeKernel() {
         float p1 = mParameters.getValue();
         float value = p1 / 100.0f;
-        float f[] = new float[9];
+        float[] f = new float[9];
         float p = value;
         f[0] = -p;
         f[1] = -p;

@@ -32,10 +32,10 @@ import com.android.gallery3d.ui.SynchronizedHandler;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Locale;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.FutureTask;
-import java.util.Locale;
 
 public class AlbumDataLoader {
     @SuppressWarnings("unused")
@@ -52,32 +52,20 @@ public class AlbumDataLoader {
     private final MediaItem[] mData;
     private final long[] mItemVersion;
     private final long[] mSetVersion;
-
-    public static interface DataListener {
-        public void onContentChanged(int index);
-        public void onSizeChanged(int size);
-    }
-
+    private final MediaSet mSource;
+    private final Handler mMainHandler;
     private int mActiveStart = 0;
     private int mActiveEnd = 0;
-
     private int mContentStart = 0;
     private int mContentEnd = 0;
-
-    private final MediaSet mSource;
     private long mSourceVersion = MediaObject.INVALID_DATA_VERSION;
-
-    private final Handler mMainHandler;
     private int mSize = 0;
-
     private DataListener mDataListener;
     private MySourceListener mSourceListener = new MySourceListener();
     private LoadingListener mLoadingListener;
-
     private ReloadTask mReloadTask;
     // the data version on which last loading failed
     private long mFailedVersion = MediaObject.INVALID_DATA_VERSION;
-
     public AlbumDataLoader(AbstractGalleryActivity context, MediaSet mediaSet) {
         mSource = mediaSet;
 
@@ -124,7 +112,7 @@ public class AlbumDataLoader {
     public MediaItem get(int index) {
         if (!isActive(index)
                 && View.LAYOUT_DIRECTION_LTR == TextUtils
-                        .getLayoutDirectionFromLocale(Locale.getDefault())) {
+                .getLayoutDirectionFromLocale(Locale.getDefault())) {
             return mSource.getMediaItem(index, 1).get(0);
         }
         return mData[index % mData.length];
@@ -209,13 +197,6 @@ public class AlbumDataLoader {
         }
     }
 
-    private class MySourceListener implements ContentListener {
-        @Override
-        public void onContentDirty() {
-            if (mReloadTask != null) mReloadTask.notifyDirty();
-        }
-    }
-
     public void setDataListener(DataListener listener) {
         mDataListener = listener;
     }
@@ -237,6 +218,12 @@ public class AlbumDataLoader {
         }
     }
 
+    public interface DataListener {
+        void onContentChanged(int index);
+
+        void onSizeChanged(int size);
+    }
+
     private static class UpdateInfo {
         public long version;
         public int reloadStart;
@@ -244,6 +231,13 @@ public class AlbumDataLoader {
 
         public int size;
         public ArrayList<MediaItem> items;
+    }
+
+    private class MySourceListener implements ContentListener {
+        @Override
+        public void onContentDirty() {
+            if (mReloadTask != null) mReloadTask.notifyDirty();
+        }
     }
 
     private class GetUpdateInfo implements Callable<UpdateInfo> {
@@ -263,7 +257,7 @@ public class AlbumDataLoader {
             long version = mVersion;
             info.version = mSourceVersion;
             info.size = mSize;
-            long setVersion[] = mSetVersion;
+            long[] setVersion = mSetVersion;
             for (int i = mContentStart, n = mContentEnd; i < n; ++i) {
                 int index = i % DATA_CACHE_SIZE;
                 if (setVersion[index] != version) {

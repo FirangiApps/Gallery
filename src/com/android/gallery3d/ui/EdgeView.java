@@ -23,15 +23,13 @@ import com.android.gallery3d.glrenderer.GLCanvas;
 
 // EdgeView draws EdgeEffect (blue glow) at four sides of the view.
 public class EdgeView extends GLView {
-    @SuppressWarnings("unused")
-    private static final String TAG = "EdgeView";
-
     public static final int INVALID_DIRECTION = -1;
     public static final int TOP = 0;
     public static final int LEFT = 1;
     public static final int BOTTOM = 2;
     public static final int RIGHT = 3;
-
+    @SuppressWarnings("unused")
+    private static final String TAG = "EdgeView";
     // Each edge effect has a transform matrix, and each matrix has 16 elements.
     // We put all the elements in one array. These constants specify the
     // starting index of each matrix.
@@ -49,7 +47,7 @@ public class EdgeView extends GLView {
         }
     }
 
-    public void release () {
+    public void release() {
         mEffect = null;
     }
 
@@ -106,7 +104,7 @@ public class EdgeView extends GLView {
     // offset is in pixels. direction is one of {TOP, LEFT, BOTTOM, RIGHT}.
     public void onPull(int offset, int direction) {
         int fullLength = ((direction & 1) == 0) ? getWidth() : getHeight();
-        mEffect[direction].onPull((float)offset / fullLength);
+        mEffect[direction].onPull((float) offset / fullLength);
         if (!mEffect[direction].isFinished()) {
             invalidate();
         }

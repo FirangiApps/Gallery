@@ -44,36 +44,29 @@ public abstract class CommonControllerOverlay extends FrameLayout implements
         OnClickListener,
         TimeBar.Listener {
 
-    protected enum State {
-        PLAYING,
-        PAUSED,
-        ENDED,
-        ERROR,
-        LOADING,
-        BUFFERING,
-        RETRY_CONNECTING,
-        RETRY_CONNECTING_ERROR
-    }
-
     protected static final float ERROR_MESSAGE_RELATIVE_PADDING = 1.0f / 6;
-
-    protected Listener mListener;
-
     protected final View mBackground;
-    protected TimeBar mTimeBar;
-
-    protected View mMainView;
     protected final LinearLayout mLoadingView;
     protected final TextView mErrorView;
     protected final ImageView mPlayPauseReplayView;
-
+    // The paddings of 4 sides which covered by system components. E.g.
+    // +-----------------+\
+    // | Action Bar | insets.top
+    // +-----------------+/
+    // | |
+    // | Content Area | insets.right = insets.left = 0
+    // | |
+    // +-----------------+\
+    // | Navigation Bar | insets.bottom
+    // +-----------------+/
+    // Please see View.fitSystemWindows() for more details.
+    protected final Rect mWindowInsets = new Rect();
+    protected Listener mListener;
+    protected TimeBar mTimeBar;
+    protected View mMainView;
     protected State mState;
 
     protected boolean mCanReplay = true;
-
-    public void setSeekable(boolean canSeek) {
-        mTimeBar.setSeekable(canSeek);
-    }
 
     public CommonControllerOverlay(Context context) {
         super(context);
@@ -110,7 +103,7 @@ public abstract class CommonControllerOverlay extends FrameLayout implements
         mPlayPauseReplayView.setFocusable(true);
         mPlayPauseReplayView.setClickable(true);
         mPlayPauseReplayView.setOnClickListener(this);
-        TypedArray array = context.getTheme().obtainStyledAttributes(new int[] {
+        TypedArray array = context.getTheme().obtainStyledAttributes(new int[]{
                 android.R.attr.actionBarItemBackground
         });
         Drawable drawable = array.getDrawable(array.getIndex(0));
@@ -126,6 +119,10 @@ public abstract class CommonControllerOverlay extends FrameLayout implements
                 new RelativeLayout.LayoutParams(
                         LayoutParams.MATCH_PARENT, LayoutParams.MATCH_PARENT);
         setLayoutParams(params);
+    }
+
+    public void setSeekable(boolean canSeek) {
+        mTimeBar.setSeekable(canSeek);
     }
 
     abstract protected void createTimeBar(Context context);
@@ -189,7 +186,7 @@ public abstract class CommonControllerOverlay extends FrameLayout implements
 
     @Override
     public void setTimes(int currentTime, int totalTime,
-            int trimStartTime, int trimEndTime) {
+                         int trimStartTime, int trimEndTime) {
         mTimeBar.setTime(currentTime, totalTime, trimStartTime, trimEndTime);
     }
 
@@ -241,24 +238,8 @@ public abstract class CommonControllerOverlay extends FrameLayout implements
 
     @Override
     public boolean onTouchEvent(MotionEvent event) {
-        if (super.onTouchEvent(event)) {
-            return true;
-        }
-        return false;
+        return super.onTouchEvent(event);
     }
-
-    // The paddings of 4 sides which covered by system components. E.g.
-    // +-----------------+\
-    // | Action Bar | insets.top
-    // +-----------------+/
-    // | |
-    // | Content Area | insets.right = insets.left = 0
-    // | |
-    // +-----------------+\
-    // | Navigation Bar | insets.bottom
-    // +-----------------+/
-    // Please see View.fitSystemWindows() for more details.
-    protected final Rect mWindowInsets = new Rect();
 
     @Override
     protected boolean fitSystemWindows(Rect insets) {
@@ -328,17 +309,17 @@ public abstract class CommonControllerOverlay extends FrameLayout implements
         mPlayPauseReplayView.setContentDescription(contentDescription);
         mPlayPauseReplayView.setVisibility(
                 (mState != State.LOADING && mState != State.ERROR &&
-                !(mState == State.ENDED && !mCanReplay))
-                ? View.VISIBLE : View.GONE);
+                        !(mState == State.ENDED && !mCanReplay))
+                        ? View.VISIBLE : View.GONE);
         requestLayout();
     }
-
-    // TimeBar listener
 
     @Override
     public void onScrubbingStart() {
         mListener.onSeekStart();
     }
+
+    // TimeBar listener
 
     @Override
     public void onScrubbingMove(int time) {
@@ -348,5 +329,16 @@ public abstract class CommonControllerOverlay extends FrameLayout implements
     @Override
     public void onScrubbingEnd(int time, int trimStartTime, int trimEndTime) {
         mListener.onSeekEnd(time, trimStartTime, trimEndTime);
+    }
+
+    protected enum State {
+        PLAYING,
+        PAUSED,
+        ENDED,
+        ERROR,
+        LOADING,
+        BUFFERING,
+        RETRY_CONNECTING,
+        RETRY_CONNECTING_ERROR
     }
 }

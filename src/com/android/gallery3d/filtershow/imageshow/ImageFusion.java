@@ -68,7 +68,7 @@ public class ImageFusion extends ImageShow {
         mTmpPoint[1] = event.getY();
         mToOrig.mapPoints(mTmpPoint);
 
-        mRepresentation.setPoint((int)mTmpPoint[0], (int)mTmpPoint[1]);
+        mRepresentation.setPoint((int) mTmpPoint[0], (int) mTmpPoint[1]);
         mEditor.commitLocalRepresentation();
         return true;
     }

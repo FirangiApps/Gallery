@@ -20,9 +20,9 @@ import android.graphics.Bitmap;
 import android.graphics.RectF;
 
 import com.android.gallery3d.common.Utils;
-import com.android.photos.data.GalleryBitmapPool;
 import com.android.gallery3d.glrenderer.GLCanvas;
 import com.android.gallery3d.glrenderer.TiledTexture;
+import com.android.photos.data.GalleryBitmapPool;
 
 // This is a ScreenNail wraps a Bitmap. There are some extra functions:
 //
@@ -37,18 +37,18 @@ public class TiledScreenNail implements ScreenNail {
 
     // The duration of the fading animation in milliseconds
     private static final int DURATION = 180;
-
-    private static int sMaxSide = 640;
-
     // These are special values for mAnimationStartTime
     private static final long ANIMATION_NOT_NEEDED = -1;
     private static final long ANIMATION_NEEDED = -2;
     private static final long ANIMATION_DONE = -3;
-
+    private static int sMaxSide = 640;
+    // This gets overridden by bitmap_screennail_placeholder
+    // in GalleryUtils.initialize
+    private static int mPlaceholderColor = 0xFF222222;
+    private static boolean mDrawPlaceholder = true;
     private int mWidth;
     private int mHeight;
     private long mAnimationStartTime = ANIMATION_NOT_NEEDED;
-
     private Bitmap mBitmap;
     private TiledTexture mTexture;
 
@@ -58,18 +58,24 @@ public class TiledScreenNail implements ScreenNail {
         mBitmap = bitmap;
         mTexture = new TiledTexture(bitmap);
     }
-
     public TiledScreenNail(int width, int height) {
         setSize(width, height);
     }
 
-    // This gets overridden by bitmap_screennail_placeholder
-    // in GalleryUtils.initialize
-    private static int mPlaceholderColor = 0xFF222222;
-    private static boolean mDrawPlaceholder = true;
-
     public static void setPlaceholderColor(int color) {
         mPlaceholderColor = color;
+    }
+
+    public static void disableDrawPlaceholder() {
+        mDrawPlaceholder = false;
+    }
+
+    public static void enableDrawPlaceholder() {
+        mDrawPlaceholder = true;
+    }
+
+    public static void setMaxSide(int size) {
+        sMaxSide = Math.max(size, sMaxSide);
     }
 
     private void setSize(int width, int height) {
@@ -143,21 +149,13 @@ public class TiledScreenNail implements ScreenNail {
         }
     }
 
-    public static void disableDrawPlaceholder() {
-        mDrawPlaceholder = false;
-    }
-
-    public static void enableDrawPlaceholder() {
-        mDrawPlaceholder = true;
-    }
-
     @Override
     public void draw(GLCanvas canvas, int x, int y, int width, int height) {
         if (mTexture == null) {
             if (mAnimationStartTime == ANIMATION_NOT_NEEDED) {
                 mAnimationStartTime = ANIMATION_NEEDED;
             }
-            if(mDrawPlaceholder) {
+            if (mDrawPlaceholder) {
                 canvas.fillRect(x, y, width, height, mPlaceholderColor);
             }
             return;
@@ -210,9 +208,5 @@ public class TiledScreenNail implements ScreenNail {
 
     public TiledTexture getTexture() {
         return mTexture;
-    }
-
-    public static void setMaxSide(int size) {
-        sMaxSide = Math.max(size, sMaxSide);
     }
 }

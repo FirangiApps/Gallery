@@ -32,18 +32,14 @@ import com.android.gallery3d.data.PathMatcher;
 import java.io.FileNotFoundException;
 
 public class PicasaSource extends MediaSource {
+    public static final Path ALBUM_PATH = Path.fromString("/picasa/all");
     private static final String TAG = "PicasaSource";
-
     private static final int NO_MATCH = -1;
     private static final int IMAGE_MEDIA_ID = 1;
-
     private static final int PICASA_ALBUMSET = 0;
     private static final int MAP_BATCH_COUNT = 100;
-
     private GalleryApp mApplication;
     private PathMatcher mMatcher;
-
-    public static final Path ALBUM_PATH = Path.fromString("/picasa/all");
 
     public PicasaSource(GalleryApp application) {
         super("picasa");
@@ -52,33 +48,6 @@ public class PicasaSource extends MediaSource {
         mMatcher.add("/picasa/all", PICASA_ALBUMSET);
         mMatcher.add("/picasa/image", PICASA_ALBUMSET);
         mMatcher.add("/picasa/video", PICASA_ALBUMSET);
-    }
-
-    private static class EmptyAlbumSet extends MediaSet {
-
-        public EmptyAlbumSet(Path path, long version) {
-            super(path, version);
-        }
-
-        @Override
-        public String getName() {
-            return "picasa";
-        }
-
-        @Override
-        public long reload() {
-            return mDataVersion;
-        }
-    }
-
-    @Override
-    public MediaObject createMediaObject(Path path) {
-        switch (mMatcher.match(path)) {
-            case PICASA_ALBUMSET:
-                return new EmptyAlbumSet(path, MediaObject.nextVersionNumber());
-            default:
-                throw new RuntimeException("bad path: " + path);
-        }
     }
 
     public static MediaItem getFaceItem(Context context, MediaItem item, int faceIndex) {
@@ -142,7 +111,34 @@ public class PicasaSource extends MediaSource {
 
     public static void onPackageChanged(Context context, String packageName) {/*do nothing*/}
 
-    public static Dialog getVersionCheckDialog(Activity activity){
+    public static Dialog getVersionCheckDialog(Activity activity) {
         return null;
+    }
+
+    @Override
+    public MediaObject createMediaObject(Path path) {
+        switch (mMatcher.match(path)) {
+            case PICASA_ALBUMSET:
+                return new EmptyAlbumSet(path, MediaObject.nextVersionNumber());
+            default:
+                throw new RuntimeException("bad path: " + path);
+        }
+    }
+
+    private static class EmptyAlbumSet extends MediaSet {
+
+        public EmptyAlbumSet(Path path, long version) {
+            super(path, version);
+        }
+
+        @Override
+        public String getName() {
+            return "picasa";
+        }
+
+        @Override
+        public long reload() {
+            return mDataVersion;
+        }
     }
 }

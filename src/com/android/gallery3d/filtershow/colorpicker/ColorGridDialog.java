@@ -29,28 +29,28 @@ import org.codeaurora.gallery.R;
 import java.util.ArrayList;
 
 public class ColorGridDialog extends Dialog {
-    RGBListener mCallback;
     private static final String LOGTAG = "ColorGridDialog";
+    RGBListener mCallback;
 
     public ColorGridDialog(Context context, final RGBListener cl) {
         super(context);
         mCallback = cl;
         setTitle(R.string.color_pick_title);
         setContentView(R.layout.filtershow_color_gird);
-        Button sel = (Button) findViewById(R.id.filtershow_cp_custom);
+        Button sel = findViewById(R.id.filtershow_cp_custom);
         ArrayList<Button> b = getButtons((ViewGroup) getWindow().getDecorView());
         int k = 0;
         float[] hsv = new float[3];
 
         for (Button button : b) {
-            if (!button.equals(sel)){
+            if (!button.equals(sel)) {
                 hsv[0] = (k % 5) * 360 / 5;
                 hsv[1] = (k / 5) / 3.0f;
                 hsv[2] = (k < 5) ? (k / 4f) : 1;
                 final int c = (Color.HSVToColor(hsv) & 0x00FFFFFF) | 0xAA000000;
                 GradientDrawable sd = ((GradientDrawable) button.getBackground());
                 button.setOnClickListener(new View.OnClickListener() {
-                        @Override
+                    @Override
                     public void onClick(View v) {
                         mCallback.setColor(c);
                         dismiss();
@@ -62,7 +62,7 @@ public class ColorGridDialog extends Dialog {
 
         }
         sel.setOnClickListener(new View.OnClickListener() {
-                @Override
+            @Override
             public void onClick(View v) {
                 showColorPicker();
                 ColorGridDialog.this.dismiss();
@@ -85,13 +85,14 @@ public class ColorGridDialog extends Dialog {
 
     public void showColorPicker() {
         ColorListener cl = new ColorListener() {
-                @Override
+            @Override
             public void setColor(float[] hsvo) {
                 int c = Color.HSVToColor(hsvo) & 0xFFFFFF;
                 int alpha = (int) (hsvo[3] * 255);
                 c |= alpha << 24;
                 mCallback.setColor(c);
             }
+
             @Override
             public void addColorListener(ColorListener l) {
             }

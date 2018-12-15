@@ -32,6 +32,7 @@ package com.android.gallery3d.filtershow.mediapicker.imageloader;
 import android.content.res.Resources;
 import android.graphics.drawable.Drawable;
 import android.os.Handler;
+
 import org.codeaurora.gallery.R;
 
 public class ImageLoaderOptions {

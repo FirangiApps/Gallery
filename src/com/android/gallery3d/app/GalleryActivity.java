@@ -33,29 +33,18 @@ import android.net.Uri;
 import android.os.Bundle;
 import android.support.design.widget.BottomNavigationView;
 import android.support.v4.widget.DrawerLayout;
-import android.support.v4.widget.DrawerLayout.DrawerListener;
 import android.text.TextUtils;
 import android.util.Log;
-import android.view.Gravity;
 import android.view.InputDevice;
-import android.view.LayoutInflater;
 import android.view.MenuItem;
 import android.view.MotionEvent;
 import android.view.View;
-import android.view.View.OnClickListener;
-import android.view.ViewGroup;
 import android.view.WindowManager;
-import android.widget.AdapterView;
-import android.widget.BaseAdapter;
-import android.widget.ImageView;
 import android.widget.ListView;
 import android.widget.RelativeLayout;
-import android.widget.RelativeLayout.LayoutParams;
-import android.widget.TextView;
 import android.widget.Toast;
 import android.widget.Toolbar;
 
-import org.codeaurora.gallery.R;
 import com.android.gallery3d.common.Utils;
 import com.android.gallery3d.data.DataManager;
 import com.android.gallery3d.data.MediaItem;
@@ -63,6 +52,8 @@ import com.android.gallery3d.data.MediaSet;
 import com.android.gallery3d.data.Path;
 import com.android.gallery3d.picasasource.PicasaSource;
 import com.android.gallery3d.util.GalleryUtils;
+
+import org.codeaurora.gallery.R;
 
 import java.util.Locale;
 
@@ -80,36 +71,50 @@ public final class GalleryActivity extends AbstractGalleryActivity implements On
     public static final String KEY_FROM_SNAPCAM = "from-snapcam";
     public static final String KEY_TOTAL_NUMBER = "total-number";
     public static final String QSST = "QSST";
-
+    public static final String PERMISSION_ACCESS_ALL =
+            "android.permission.ACCESS_ALL_DOWNLOADS";
     private static final int ALL_DOWNLOADS = 1;
     private static final int ALL_DOWNLOADS_ID = 2;
     private static final UriMatcher sURIMatcher =
             new UriMatcher(UriMatcher.NO_MATCH);
-    public static final String PERMISSION_ACCESS_ALL =
-            "android.permission.ACCESS_ALL_DOWNLOADS";
+    private static final String TAG = "GalleryActivity";
+    private static final int PERMISSION_REQUEST_STORAGE = 1;
+    private static final ActionItem[] sActionItems = new ActionItem[]{
+            new ActionItem(FilterUtils.CLUSTER_BY_TIME,
+                    R.string.timeline_title, R.drawable.timeline),
+            new ActionItem(FilterUtils.CLUSTER_BY_ALBUM, R.string.albums_title,
+                    R.drawable.albums),
+            new ActionItem(FilterUtils.CLUSTER_BY_VIDEOS,
+                    R.string.videos_title, R.drawable.videos)};
+    public static boolean mIsparentActivityFInishing;
+
     static {
         sURIMatcher.addURI("downloads", "all_downloads", ALL_DOWNLOADS);
         sURIMatcher.addURI("downloads", "all_downloads/#", ALL_DOWNLOADS_ID);
     }
 
-    private static final String TAG = "GalleryActivity";
+    public Toolbar mToolbar;
     private Dialog mVersionCheckDialog;
     private ListView mDrawerListView;
     private DrawerLayout mDrawerLayout;
-    public static boolean mIsparentActivityFInishing;
-    public Toolbar mToolbar;
-
     private BottomNavigationView mBottomNavigation;
     private RelativeLayout mGLParentLayout;
     private RelativeLayout.LayoutParams params;
-
-    /** DrawerLayout is not supported in some entrances.
-     * such as Intent.ACTION_VIEW, Intent.ACTION_GET_CONTENT, Intent.PICK. */
+    /**
+     * DrawerLayout is not supported in some entrances.
+     * such as Intent.ACTION_VIEW, Intent.ACTION_GET_CONTENT, Intent.PICK.
+     */
     private boolean mDrawerLayoutSupported = true;
-
-    private static final int PERMISSION_REQUEST_STORAGE = 1;
     private Bundle mSavedInstanceState;
 
+    public static int getActionTitle(Context context, int type) {
+        for (ActionItem item : sActionItems) {
+            if (item.action == type) {
+                return item.title;
+            }
+        }
+        return -1;
+    }
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -148,55 +153,35 @@ public final class GalleryActivity extends AbstractGalleryActivity implements On
         finish();
     }
 
-    private static class ActionItem {
-        public int action;
-        public int title;
-        public int icon;
-
-        public ActionItem(int action, int title, int icon) {
-            this.action = action;
-            this.title = title;
-            this.icon = icon;
-        }
-    }
-
-    private static final ActionItem[] sActionItems = new ActionItem[] {
-            new ActionItem(FilterUtils.CLUSTER_BY_TIME,
-                    R.string.timeline_title, R.drawable.timeline),
-            new ActionItem(FilterUtils.CLUSTER_BY_ALBUM, R.string.albums_title,
-                    R.drawable.albums),
-            new ActionItem(FilterUtils.CLUSTER_BY_VIDEOS,
-                    R.string.videos_title, R.drawable.videos) };
-
     public void initView() {
-        mToolbar = (Toolbar) findViewById(R.id.toolbar);
+        mToolbar = findViewById(R.id.toolbar);
         setActionBar(mToolbar);
         setToolbar(mToolbar);
 
-        mGLParentLayout = (RelativeLayout) findViewById(R.id.gl_parent_layout);
+        mGLParentLayout = findViewById(R.id.gl_parent_layout);
         params = (RelativeLayout.LayoutParams) mGLParentLayout.getLayoutParams();
 
-        mBottomNavigation = (BottomNavigationView) findViewById(R.id.bottom_navigation);
+        mBottomNavigation = findViewById(R.id.bottom_navigation);
         mBottomNavigation.setOnNavigationItemSelectedListener(
                 new BottomNavigationView.OnNavigationItemSelectedListener() {
-            @Override
-            public boolean onNavigationItemSelected(MenuItem item) {
-                getGLRoot().lockRenderThread();
-                switch (item.getItemId()) {
-                    case R.id.action_timeline:
-                        showScreen(0);
-                        break;
-                    case R.id.action_album:
-                        showScreen(1);
-                        break;
-                    case R.id.action_videos:
-                        showScreen(2);
-                        break;
-                }
-                getGLRoot().unlockRenderThread();
-                return true;
-            }
-        });
+                    @Override
+                    public boolean onNavigationItemSelected(MenuItem item) {
+                        getGLRoot().lockRenderThread();
+                        switch (item.getItemId()) {
+                            case R.id.action_timeline:
+                                showScreen(0);
+                                break;
+                            case R.id.action_album:
+                                showScreen(1);
+                                break;
+                            case R.id.action_videos:
+                                showScreen(2);
+                                break;
+                        }
+                        getGLRoot().unlockRenderThread();
+                        return true;
+                    }
+                });
     }
 
     public void toggleNavBar(boolean show) {
@@ -223,27 +208,18 @@ public final class GalleryActivity extends AbstractGalleryActivity implements On
                 DataManager.INCLUDE_ALL);
         switch (position) {
 
-        case 0:
-            startTimelinePage(); //Timeline view
-            break;
-        case 1:
-            startAlbumPage(); // Albums View
-            break;
-        case 2:
-            startVideoPage(); // Videos view
-            break;
-        default:
-            break;
+            case 0:
+                startTimelinePage(); //Timeline view
+                break;
+            case 1:
+                startAlbumPage(); // Albums View
+                break;
+            case 2:
+                startVideoPage(); // Videos view
+                break;
+            default:
+                break;
         }
-    }
-
-    public static int getActionTitle(Context context, int type) {
-        for (ActionItem item : sActionItems) {
-            if (item.action == type) {
-                return item.title;
-            }
-        }
-        return -1;
     }
 
     private void initializeByIntent() {
@@ -268,14 +244,14 @@ public final class GalleryActivity extends AbstractGalleryActivity implements On
             startGetContent(intent);
             toggleNavBar(false);
         } else if (Intent.ACTION_VIEW.equalsIgnoreCase(action)
-                || ACTION_REVIEW.equalsIgnoreCase(action)){
+                || ACTION_REVIEW.equalsIgnoreCase(action)) {
             mDrawerLayoutSupported = false;
             Uri uri = intent.getData();
             if (uri != null) {
                 int flag = intent.getFlags();
                 int match = sURIMatcher.match(uri);
                 if ((match == ALL_DOWNLOADS || match == ALL_DOWNLOADS_ID) &&
-                       (flag & Intent.FLAG_GRANT_READ_URI_PERMISSION) == 0) {
+                        (flag & Intent.FLAG_GRANT_READ_URI_PERMISSION) == 0) {
                     if (checkCallingOrSelfPermission(
                             PERMISSION_ACCESS_ALL) != PackageManager.PERMISSION_GRANTED) {
                         Log.w(TAG, "no permission to view: " + uri);
@@ -308,8 +284,8 @@ public final class GalleryActivity extends AbstractGalleryActivity implements On
             String oldClass = state.getClass().getSimpleName();
             String newClass = AlbumSetPage.class.getSimpleName();
             if (!oldClass.equals(newClass)) {
-             getStateManager().switchState(getStateManager().getTopState(),
-                    AlbumSetPage.class, data);
+                getStateManager().switchState(getStateManager().getTopState(),
+                        AlbumSetPage.class, data);
             }
         }
         mVersionCheckDialog = PicasaSource.getVersionCheckDialog(this);
@@ -318,7 +294,7 @@ public final class GalleryActivity extends AbstractGalleryActivity implements On
         }
     }
 
-   private void startTimelinePage() {
+    private void startTimelinePage() {
         String newBPath = getDataManager().getTopSetPath(DataManager.INCLUDE_ALL);
         String newPath = FilterUtils.switchClusterPath(newBPath, FilterUtils.CLUSTER_BY_TIME);
         Bundle data = new Bundle();
@@ -330,8 +306,8 @@ public final class GalleryActivity extends AbstractGalleryActivity implements On
             String oldClass = state.getClass().getSimpleName();
             String newClass = TimeLinePage.class.getSimpleName();
             if (!oldClass.equals(newClass)) {
-            getStateManager().switchState(getStateManager().getTopState(),
-                    TimeLinePage.class, data);
+                getStateManager().switchState(getStateManager().getTopState(),
+                        TimeLinePage.class, data);
             }
         }
         mVersionCheckDialog = PicasaSource.getVersionCheckDialog(this);
@@ -340,7 +316,7 @@ public final class GalleryActivity extends AbstractGalleryActivity implements On
         }
     }
 
-   public void startVideoPage() {
+    public void startVideoPage() {
         PicasaSource.showSignInReminder(this);
         String basePath = getDataManager().getTopSetPath(
                 DataManager.INCLUDE_ALL);
@@ -353,8 +329,8 @@ public final class GalleryActivity extends AbstractGalleryActivity implements On
         String oldClass = state.getClass().getSimpleName();
         String newClass = AlbumPage.class.getSimpleName();
         if (!oldClass.equals(newClass)) {
-        getStateManager().switchState(getStateManager().getTopState(),
-                AlbumPage.class, data);
+            getStateManager().switchState(getStateManager().getTopState(),
+                    AlbumPage.class, data);
         }
         mVersionCheckDialog = PicasaSource.getVersionCheckDialog(this);
         if (mVersionCheckDialog != null) {
@@ -378,7 +354,7 @@ public final class GalleryActivity extends AbstractGalleryActivity implements On
         String type = intent.getType();
         if (type != null) {
             return GalleryUtils.MIME_TYPE_PANORAMA360.equals(type)
-                ? MediaItem.MIME_TYPE_JPEG : type;
+                    ? MediaItem.MIME_TYPE_JPEG : type;
         }
 
         Uri uri = intent.getData();
@@ -462,7 +438,7 @@ public final class GalleryActivity extends AbstractGalleryActivity implements On
                 } else {
                     int hintIndex = 0;
                     if (View.LAYOUT_DIRECTION_RTL == TextUtils
-                        .getLayoutDirectionFromLocale(Locale.getDefault())) {
+                            .getLayoutDirectionFromLocale(Locale.getDefault())) {
                         hintIndex = intent.getIntExtra(KEY_TOTAL_NUMBER, 1) - 1;
                     }
                     data.putInt(PhotoPage.KEY_INDEX_HINT, hintIndex);
@@ -546,6 +522,18 @@ public final class GalleryActivity extends AbstractGalleryActivity implements On
             unregisterReceiver(receiver);
         } catch (Exception e) {
             Log.w(TAG, "unregister HomeIconActionReceiver failed");
+        }
+    }
+
+    private static class ActionItem {
+        public int action;
+        public int title;
+        public int icon;
+
+        public ActionItem(int action, int title, int icon) {
+            this.action = action;
+            this.title = title;
+            this.icon = icon;
         }
     }
 }

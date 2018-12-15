@@ -31,10 +31,10 @@ package com.android.gallery3d.filtershow.category;
 
 
 import android.app.Activity;
-import android.graphics.Bitmap;
 import android.os.Bundle;
-import android.view.View;
 import android.support.annotation.Nullable;
+import android.view.View;
+
 import com.android.gallery3d.filtershow.FilterShowActivity;
 import com.android.gallery3d.filtershow.editors.TrueScannerEditor;
 

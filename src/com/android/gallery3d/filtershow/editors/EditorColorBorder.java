@@ -26,7 +26,6 @@ import android.widget.LinearLayout;
 import android.widget.PopupMenu;
 import android.widget.SeekBar;
 
-import org.codeaurora.gallery.R;
 import com.android.gallery3d.filtershow.FilterShowActivity;
 import com.android.gallery3d.filtershow.controller.ColorChooser;
 import com.android.gallery3d.filtershow.filters.FilterColorBorderRepresentation;
@@ -34,10 +33,11 @@ import com.android.gallery3d.filtershow.filters.FilterRepresentation;
 import com.android.gallery3d.filtershow.filters.ImageFilterColorBorder;
 import com.android.gallery3d.filtershow.imageshow.ImageShow;
 
-public class EditorColorBorder extends ParametricEditor  {
-    private static final String LOGTAG = "EditorColorBorder";
-    public static final int ID = R.id.editorColorBorder;
+import org.codeaurora.gallery.R;
 
+public class EditorColorBorder extends ParametricEditor {
+    public static final int ID = R.id.editorColorBorder;
+    private static final String LOGTAG = "EditorColorBorder";
     int[] mBasColors = {
             FilterColorBorderRepresentation.DEFAULT_MENU_COLOR1,
             FilterColorBorderRepresentation.DEFAULT_MENU_COLOR2,
@@ -96,7 +96,7 @@ public class EditorColorBorder extends ParametricEditor  {
 
     @Override
     public void openUtilityPanel(final LinearLayout accessoryViewList) {
-        Button view = (Button) accessoryViewList.findViewById(R.id.applyEffect);
+        Button view = accessoryViewList.findViewById(R.id.applyEffect);
         view.setText(mContext.getString(R.string.color_border_size));
         view.setOnClickListener(new OnClickListener() {
 
@@ -113,7 +113,7 @@ public class EditorColorBorder extends ParametricEditor  {
     }
 
     private void showPopupMenu(LinearLayout accessoryViewList) {
-        final Button button = (Button) accessoryViewList.findViewById(
+        final Button button = accessoryViewList.findViewById(
                 R.id.applyEffect);
         if (button == null) {
             return;
@@ -130,7 +130,7 @@ public class EditorColorBorder extends ParametricEditor  {
             }
         });
         popupMenu.show();
-        ((FilterShowActivity)mContext).onShowMenu(popupMenu);
+        ((FilterShowActivity) mContext).onShowMenu(popupMenu);
     }
 
     protected void selectMenuItem(MenuItem item) {
@@ -184,7 +184,7 @@ public class EditorColorBorder extends ParametricEditor  {
             super.setEditPanelUI(editControl);
             return;
         }
-        mSeekBar = (SeekBar) editControl.findViewById(R.id.primarySeekBar);
+        mSeekBar = editControl.findViewById(R.id.primarySeekBar);
         if (mSeekBar != null) {
             mSeekBar.setVisibility(View.GONE);
         }

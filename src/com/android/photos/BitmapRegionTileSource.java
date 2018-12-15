@@ -50,14 +50,12 @@ public class BitmapRegionTileSource implements TiledImageRenderer.TileSource {
     // This must be no larger than half the size of the GL_SIZE_LIMIT
     // due to decodePreview being allowed to be up to 2x the size of the target
     private static final int MAX_PREVIEW_SIZE = 1024;
-
+    private final int mRotation;
     BitmapRegionDecoder mDecoder;
     int mWidth;
     int mHeight;
     int mTileSize;
     private BasicTexture mPreview;
-    private final int mRotation;
-
     // For use only by getTile
     private Rect mWantRegion = new Rect();
     private Rect mOverlapRegion = new Rect();
@@ -89,11 +87,20 @@ public class BitmapRegionTileSource implements TiledImageRenderer.TileSource {
             } else {
                 Log.w(TAG, String.format(
                         "Failed to create preview of apropriate size! "
-                        + " in: %dx%d, out: %dx%d",
+                                + " in: %dx%d, out: %dx%d",
                         mWidth, mHeight,
                         preview.getWidth(), preview.getHeight()));
             }
         }
+    }
+
+    private static Bitmap ensureGLCompatibleBitmap(Bitmap bitmap) {
+        if (bitmap == null || bitmap.getConfig() != null) {
+            return bitmap;
+        }
+        Bitmap newBitmap = bitmap.copy(Config.ARGB_8888, false);
+        bitmap.recycle();
+        return newBitmap;
     }
 
     @Override
@@ -205,14 +212,5 @@ public class BitmapRegionTileSource implements TiledImageRenderer.TileSource {
             result = BitmapUtils.resizeBitmapByScale(result, scale, true);
         }
         return ensureGLCompatibleBitmap(result);
-    }
-
-    private static Bitmap ensureGLCompatibleBitmap(Bitmap bitmap) {
-        if (bitmap == null || bitmap.getConfig() != null) {
-            return bitmap;
-        }
-        Bitmap newBitmap = bitmap.copy(Config.ARGB_8888, false);
-        bitmap.recycle();
-        return newBitmap;
     }
 }

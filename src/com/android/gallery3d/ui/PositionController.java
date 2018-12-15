@@ -21,7 +21,6 @@ import android.graphics.Rect;
 import android.util.Log;
 import android.widget.Scroller;
 
-import com.android.gallery3d.app.PhotoPage;
 import com.android.gallery3d.common.Utils;
 import com.android.gallery3d.ui.PhotoView.Size;
 import com.android.gallery3d.util.GalleryUtils;
@@ -29,16 +28,13 @@ import com.android.gallery3d.util.RangeArray;
 import com.android.gallery3d.util.RangeIntArray;
 
 class PositionController {
-    private static final String TAG = "PositionController";
-
     public static final int IMAGE_AT_LEFT_EDGE = 1;
     public static final int IMAGE_AT_RIGHT_EDGE = 2;
     public static final int IMAGE_AT_TOP_EDGE = 4;
     public static final int IMAGE_AT_BOTTOM_EDGE = 8;
-
     public static final int CAPTURE_ANIMATION_TIME = 700;
     public static final int SNAPBACK_ANIMATION_TIME = 600;
-
+    private static final String TAG = "PositionController";
     // Special values for animation time.
     private static final long NO_ANIMATION = -1;
     private static final long LAST_ANIMATION = -2;
@@ -61,17 +57,17 @@ class PositionController {
     // mFilmScroller.isFinished() to decide when to stop. We set it to 0 so it's
     // faster for Animatable.advanceAnimation() to calculate the progress
     // (always 1).
-    private static final int ANIM_TIME[] = {
-        0,    // ANIM_KIND_SCROLL
-        0,    // ANIM_KIND_SCALE
-        SNAPBACK_ANIMATION_TIME,  // ANIM_KIND_SNAPBACK
-        400,  // ANIM_KIND_SLIDE
-        300,  // ANIM_KIND_ZOOM
-        300,  // ANIM_KIND_OPENING
-        0,    // ANIM_KIND_FLING (the duration is calculated dynamically)
-        0,    // ANIM_KIND_FLING_X (see the comment above)
-        0,    // ANIM_KIND_DELETE (the duration is calculated dynamically)
-        CAPTURE_ANIMATION_TIME,  // ANIM_KIND_CAPTURE
+    private static final int[] ANIM_TIME = {
+            0,    // ANIM_KIND_SCROLL
+            0,    // ANIM_KIND_SCALE
+            SNAPBACK_ANIMATION_TIME,  // ANIM_KIND_SNAPBACK
+            400,  // ANIM_KIND_SLIDE
+            300,  // ANIM_KIND_ZOOM
+            300,  // ANIM_KIND_OPENING
+            0,    // ANIM_KIND_FLING (the duration is calculated dynamically)
+            0,    // ANIM_KIND_FLING_X (see the comment above)
+            0,    // ANIM_KIND_DELETE (the duration is calculated dynamically)
+            CAPTURE_ANIMATION_TIME,  // ANIM_KIND_CAPTURE
     };
 
     // We try to scale up the image to fill the screen. But in order not to
@@ -82,77 +78,59 @@ class PositionController {
     // above or below the usual scaling limits.
     private static final float SCALE_MIN_EXTRA = 0.7f;
     private static final float SCALE_MAX_EXTRA = 1.4f;
-
-    // Setting this true makes the extra scaling range permanent (until this is
-    // set to false again).
-    private boolean mExtraScalingRange = false;
-
-    // Film Mode v.s. Page Mode: in film mode we show smaller pictures.
-    private boolean mFilmMode = false;
-
     // These are the limits for width / height of the picture in film mode.
     private static final float FILM_MODE_PORTRAIT_HEIGHT = 0.48f;
     private static final float FILM_MODE_PORTRAIT_WIDTH = 0.7f;
     private static final float FILM_MODE_LANDSCAPE_HEIGHT = 0.7f;
     private static final float FILM_MODE_LANDSCAPE_WIDTH = 0.7f;
-
     // In addition to the focused box (index == 0). We also keep information
     // about this many boxes on each side.
     private static final int BOX_MAX = PhotoView.SCREEN_NAIL_MAX;
     private static final int[] CENTER_OUT_INDEX = new int[2 * BOX_MAX + 1];
-
     private static final int IMAGE_GAP = GalleryUtils.dpToPixel(16);
     private static final int HORIZONTAL_SLACK = GalleryUtils.dpToPixel(12);
-
     // These are constants for the delete gesture.
     private static final int DEFAULT_DELETE_ANIMATION_DURATION = 200; // ms
     private static final int MAX_DELETE_ANIMATION_DURATION = 400; // ms
 
+    static {
+        // Initialize the CENTER_OUT_INDEX array.
+        // The array maps 0, 1, 2, 3, 4, ..., 2 * BOX_MAX
+        // to 0, 1, -1, 2, -2, ..., BOX_MAX, -BOX_MAX
+        for (int i = 0; i < CENTER_OUT_INDEX.length; i++) {
+            int j = (i + 1) / 2;
+            if ((i & 1) == 0) j = -j;
+            CENTER_OUT_INDEX[i] = j;
+        }
+    }
+
+    // The direction of a new picture should appear. New pictures pop from top
+    // if this value is true, or from bottom if this value is false.
+    boolean mPopFromTop;
+    // Setting this true makes the extra scaling range permanent (until this is
+    // set to false again).
+    private boolean mExtraScalingRange = false;
+    // Film Mode v.s. Page Mode: in film mode we show smaller pictures.
+    private boolean mFilmMode = false;
     private Listener mListener;
     private volatile Rect mOpenAnimationRect;
-
     // Use a large enough value, so we won't see the gray shadow in the beginning.
     private int mViewW = 1200;
     private int mViewH = 1200;
-
     // A scaling gesture is in progress.
     private boolean mInScale;
     // The focus point of the scaling gesture, relative to the center of the
     // picture in bitmap pixels.
     private float mFocusX, mFocusY;
-
     // whether there is a previous/next picture.
     private boolean mHasPrev, mHasNext;
-
     // This is used by the fling animation (page mode).
     private FlingScroller mPageScroller;
-
     // This is used by the fling animation (film mode).
     private Scroller mFilmScroller;
-
     // The bound of the stable region that the focused box can stay, see the
     // comments above calculateStableBound() for details.
     private int mBoundLeft, mBoundRight, mBoundTop, mBoundBottom;
-
-    // Constrained frame is a rectangle that the focused box should fit into if
-    // it is constrained. It has two effects:
-    //
-    // (1) In page mode, if the focused box is constrained, scaling for the
-    // focused box is adjusted to fit into the constrained frame, instead of the
-    // whole view.
-    //
-    // (2) In page mode, if the focused box is constrained, the mPlatform's
-    // default center (mDefaultX/Y) is moved to the center of the constrained
-    // frame, instead of the view center.
-    //
-    private Rect mConstrainedFrame = new Rect();
-
-    // Whether the focused box is constrained.
-    //
-    // Our current program's first call to moveBox() sets constrained = true, so
-    // we set the initial value of this variable to true, and we will not see
-    // see unwanted transition animation.
-    private boolean mConstrained = true;
 
     //
     //  ___________________________________________________________
@@ -166,47 +144,36 @@ class PositionController {
     //                       <--  Platform  -->
     //
     // The focused box (Box*) centers at mPlatform's (mCurrentX, mCurrentY)
-
+    // Constrained frame is a rectangle that the focused box should fit into if
+    // it is constrained. It has two effects:
+    //
+    // (1) In page mode, if the focused box is constrained, scaling for the
+    // focused box is adjusted to fit into the constrained frame, instead of the
+    // whole view.
+    //
+    // (2) In page mode, if the focused box is constrained, the mPlatform's
+    // default center (mDefaultX/Y) is moved to the center of the constrained
+    // frame, instead of the view center.
+    //
+    private Rect mConstrainedFrame = new Rect();
+    // Whether the focused box is constrained.
+    //
+    // Our current program's first call to moveBox() sets constrained = true, so
+    // we set the initial value of this variable to true, and we will not see
+    // see unwanted transition animation.
+    private boolean mConstrained = true;
     private Platform mPlatform = new Platform();
     private RangeArray<Box> mBoxes = new RangeArray<Box>(-BOX_MAX, BOX_MAX);
     // The gap at the right of a Box i is at index i. The gap at the left of a
     // Box i is at index i - 1.
     private RangeArray<Gap> mGaps = new RangeArray<Gap>(-BOX_MAX, BOX_MAX - 1);
     private FilmRatio mFilmRatio = new FilmRatio();
-
     // These are only used during moveBox().
     private RangeArray<Box> mTempBoxes = new RangeArray<Box>(-BOX_MAX, BOX_MAX);
     private RangeArray<Gap> mTempGaps =
-        new RangeArray<Gap>(-BOX_MAX, BOX_MAX - 1);
-
+            new RangeArray<Gap>(-BOX_MAX, BOX_MAX - 1);
     // The output of the PositionController. Available through getPosition().
     private RangeArray<Rect> mRects = new RangeArray<Rect>(-BOX_MAX, BOX_MAX);
-
-    // The direction of a new picture should appear. New pictures pop from top
-    // if this value is true, or from bottom if this value is false.
-    boolean mPopFromTop;
-
-    public interface Listener {
-        void invalidate();
-        boolean isHoldingDown();
-        boolean isHoldingDelete();
-
-        // EdgeView
-        void onPull(int offset, int direction);
-        void onRelease();
-        void onAbsorb(int velocity, int direction);
-    }
-
-    static {
-        // Initialize the CENTER_OUT_INDEX array.
-        // The array maps 0, 1, 2, 3, 4, ..., 2 * BOX_MAX
-        // to 0, 1, -1, 2, -2, ..., BOX_MAX, -BOX_MAX
-        for (int i = 0; i < CENTER_OUT_INDEX.length; i++) {
-            int j = (i + 1) / 2;
-            if ((i & 1) == 0) j = -j;
-            CENTER_OUT_INDEX[i] = j;
-        }
-    }
 
     public PositionController(Context context, Listener listener) {
         mListener = listener;
@@ -224,6 +191,11 @@ class PositionController {
             mGaps.put(i, new Gap());
             initGap(i);
         }
+    }
+
+    private static boolean isAlmostEqual(float a, float b) {
+        float diff = a - b;
+        return (diff < 0 ? -diff : diff) < 0.02f;
     }
 
     public void setOpenAnimationRect(Rect r) {
@@ -662,7 +634,7 @@ class PositionController {
 
         // We only want to do fling when the picture is zoomed-in.
         if (viewWiderThanScaledImage(b.mCurrentScale) &&
-            viewTallerThanScaledImage(b.mCurrentScale)) {
+                viewTallerThanScaledImage(b.mCurrentScale)) {
             return false;
         }
 
@@ -670,11 +642,11 @@ class PositionController {
         // picture.
         int edges = getImageAtEdges();
         if ((velocityX > 0 && (edges & IMAGE_AT_LEFT_EDGE) != 0) ||
-            (velocityX < 0 && (edges & IMAGE_AT_RIGHT_EDGE) != 0)) {
+                (velocityX < 0 && (edges & IMAGE_AT_RIGHT_EDGE) != 0)) {
             velocityX = 0;
         }
         if ((velocityY > 0 && (edges & IMAGE_AT_TOP_EDGE) != 0) ||
-            (velocityY < 0 && (edges & IMAGE_AT_BOTTOM_EDGE) != 0)) {
+                (velocityY < 0 && (edges & IMAGE_AT_BOTTOM_EDGE) != 0)) {
             velocityY = 0;
         }
 
@@ -792,7 +764,7 @@ class PositionController {
     }
 
     private boolean startAnimation(int targetX, int targetY, float targetScale,
-            int kind) {
+                                   int kind) {
         boolean changed = false;
         changed |= mPlatform.doAnimation(targetX, mPlatform.mDefaultY, kind);
         changed |= mBoxes.get(0).doAnimation(targetY, targetScale, kind);
@@ -816,8 +788,8 @@ class PositionController {
     public boolean inOpeningAnimation() {
         return (mPlatform.mAnimationKind == ANIM_KIND_OPENING &&
                 mPlatform.mAnimationStartTime != NO_ANIMATION) ||
-               (mBoxes.get(0).mAnimationKind == ANIM_KIND_OPENING &&
-                mBoxes.get(0).mAnimationStartTime != NO_ANIMATION);
+                (mBoxes.get(0).mAnimationKind == ANIM_KIND_OPENING &&
+                        mBoxes.get(0).mAnimationStartTime != NO_ANIMATION);
     }
 
     ////////////////////////////////////////////////////////////////////////////
@@ -982,7 +954,7 @@ class PositionController {
     }
 
     @SuppressWarnings("unused")
-    private void debugMoveBox(int fromIndex[]) {
+    private void debugMoveBox(int[] fromIndex) {
         StringBuilder s = new StringBuilder("moveBox:");
         for (int i = 0; i < fromIndex.length; i++) {
             int j = fromIndex[i];
@@ -1013,8 +985,8 @@ class PositionController {
     // hasPrev/hasNext indicates if there are previous/next boxes for the
     // focused box. constrained indicates whether the focused box should be put
     // into the constrained frame.
-    public void moveBox(int fromIndex[], boolean hasPrev, boolean hasNext,
-            boolean constrained, Size[] sizes) {
+    public void moveBox(int[] fromIndex, boolean hasPrev, boolean hasNext,
+                        boolean constrained, Size[] sizes) {
         //debugMoveBox(fromIndex);
         mHasPrev = hasPrev;
         mHasNext = hasNext;
@@ -1192,7 +1164,7 @@ class PositionController {
     public boolean isCenter() {
         Box b = mBoxes.get(0);
         return mPlatform.mCurrentX == mPlatform.mDefaultX
-            && b.mCurrentY == 0;
+                && b.mCurrentY == 0;
     }
 
     public int getImageWidth() {
@@ -1250,7 +1222,7 @@ class PositionController {
     }
 
     public boolean hasDeletingBox() {
-        for(int i = -BOX_MAX; i <= BOX_MAX; i++) {
+        for (int i = -BOX_MAX; i <= BOX_MAX; i++) {
             if (mBoxes.get(i).mAnimationKind == ANIM_KIND_DELETE) {
                 return true;
             }
@@ -1295,11 +1267,6 @@ class PositionController {
         if (mFilmMode) return getMinimalScale(b);
         if (mConstrained && !mConstrainedFrame.isEmpty()) return getMinimalScale(b);
         return SCALE_LIMIT;
-    }
-
-    private static boolean isAlmostEqual(float a, float b) {
-        float diff = a - b;
-        return (diff < 0 ? -diff : diff) < 0.02f;
     }
 
     // Calculates the stable region of mPlatform.mCurrentX and
@@ -1360,6 +1327,21 @@ class PositionController {
                 ? b.mCurrentScale : b.mToScale;
     }
 
+    public interface Listener {
+        void invalidate();
+
+        boolean isHoldingDown();
+
+        boolean isHoldingDelete();
+
+        // EdgeView
+        void onPull(int offset, int direction);
+
+        void onRelease();
+
+        void onAbsorb(int velocity, int direction);
+    }
+
     ////////////////////////////////////////////////////////////////////////////
     //  Animatable: an thing which can do animation.
     ////////////////////////////////////////////////////////////////////////////
@@ -1367,46 +1349,6 @@ class PositionController {
         public long mAnimationStartTime;
         public int mAnimationKind;
         public int mAnimationDuration;
-
-        // This should be overridden in subclass to change the animation values
-        // give the progress value in [0, 1].
-        protected abstract boolean interpolate(float progress);
-        public abstract boolean startSnapback();
-
-        // Returns true if the animation values changes, so things need to be
-        // redrawn.
-        public boolean advanceAnimation() {
-            if (mAnimationStartTime == NO_ANIMATION) {
-                return false;
-            }
-            if (mAnimationStartTime == LAST_ANIMATION) {
-                mAnimationStartTime = NO_ANIMATION;
-                return startSnapback();
-            }
-
-            float progress;
-            if (mAnimationDuration == 0) {
-                progress = 1;
-            } else {
-                long now = AnimationTime.get();
-                progress =
-                    (float) (now - mAnimationStartTime) / mAnimationDuration;
-            }
-
-            if (progress >= 1) {
-                progress = 1;
-            } else {
-                progress = applyInterpolationCurve(mAnimationKind, progress);
-            }
-
-            boolean done = interpolate(progress);
-
-            if (done) {
-                mAnimationStartTime = LAST_ANIMATION;
-            }
-
-            return true;
-        }
 
         private static float applyInterpolationCurve(int kind, float progress) {
             float f = 1 - progress;
@@ -1430,6 +1372,47 @@ class PositionController {
             }
             return progress;
         }
+
+        // This should be overridden in subclass to change the animation values
+        // give the progress value in [0, 1].
+        protected abstract boolean interpolate(float progress);
+
+        public abstract boolean startSnapback();
+
+        // Returns true if the animation values changes, so things need to be
+        // redrawn.
+        public boolean advanceAnimation() {
+            if (mAnimationStartTime == NO_ANIMATION) {
+                return false;
+            }
+            if (mAnimationStartTime == LAST_ANIMATION) {
+                mAnimationStartTime = NO_ANIMATION;
+                return startSnapback();
+            }
+
+            float progress;
+            if (mAnimationDuration == 0) {
+                progress = 1;
+            } else {
+                long now = AnimationTime.get();
+                progress =
+                        (float) (now - mAnimationStartTime) / mAnimationDuration;
+            }
+
+            if (progress >= 1) {
+                progress = 1;
+            } else {
+                progress = applyInterpolationCurve(mAnimationKind, progress);
+            }
+
+            boolean done = interpolate(progress);
+
+            if (done) {
+                mAnimationStartTime = LAST_ANIMATION;
+            }
+
+            return true;
+        }
     }
 
     ////////////////////////////////////////////////////////////////////////////
@@ -1449,9 +1432,9 @@ class PositionController {
 
             Box b = mBoxes.get(0);
             float scaleMin = mExtraScalingRange ?
-                b.mScaleMin * SCALE_MIN_EXTRA : b.mScaleMin;
+                    b.mScaleMin * SCALE_MIN_EXTRA : b.mScaleMin;
             float scaleMax = mExtraScalingRange ?
-                b.mScaleMax * SCALE_MAX_EXTRA : b.mScaleMax;
+                    b.mScaleMax * SCALE_MAX_EXTRA : b.mScaleMax;
             float scale = Utils.clamp(b.mCurrentScale, scaleMin, scaleMax);
             int x = mCurrentX;
             int y = mDefaultY;
@@ -1629,9 +1612,9 @@ class PositionController {
 
             if (this == mBoxes.get(0)) {
                 float scaleMin = mExtraScalingRange ?
-                    mScaleMin * SCALE_MIN_EXTRA : mScaleMin;
+                        mScaleMin * SCALE_MIN_EXTRA : mScaleMin;
                 float scaleMax = mExtraScalingRange ?
-                    mScaleMax * SCALE_MAX_EXTRA : mScaleMax;
+                        mScaleMax * SCALE_MAX_EXTRA : mScaleMax;
                 scale = Utils.clamp(mCurrentScale, scaleMin, scaleMax);
                 if (mFilmMode) {
                     y = 0;

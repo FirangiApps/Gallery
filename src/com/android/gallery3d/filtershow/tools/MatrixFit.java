@@ -22,11 +22,10 @@ public class MatrixFit {
     // Simple implementation of a matrix fit in N dimensions.
 
     private static final String LOGTAG = "MatrixFit";
-
+    private static double sEPS = 1.0f / 10000000000.0f;
     private double[][] mMatrix;
     private int mDimension;
     private boolean mValid = false;
-    private static double sEPS = 1.0f/10000000000.0f;
 
     public MatrixFit(double[][] from, double[][] to) {
         mValid = fit(from, to);
@@ -51,7 +50,7 @@ public class MatrixFit {
         }
 
         mDimension = from[0].length;
-        mMatrix = new double[mDimension +1][mDimension + mDimension +1];
+        mMatrix = new double[mDimension + 1][mDimension + mDimension + 1];
 
         if (from.length < mDimension) {
             Log.e(LOGTAG, "Too few points => under-determined system");
@@ -73,7 +72,7 @@ public class MatrixFit {
         }
 
         // Make an empty (dim) x (dim + 1) matrix and fill it
-        double[][] c = new double[mDimension+1][mDimension];
+        double[][] c = new double[mDimension + 1][mDimension];
         for (int j = 0; j < mDimension; j++) {
             for (int k = 0; k < mDimension + 1; k++) {
                 for (int i = 0; i < q.length; i++) {
@@ -87,7 +86,7 @@ public class MatrixFit {
         }
 
         // Make an empty (dim+1) x (dim+1) matrix and fill it
-        double[][] Q = new double[mDimension+1][mDimension+1];
+        double[][] Q = new double[mDimension + 1][mDimension + 1];
         for (int qi = 0; qi < q.length; qi++) {
             double[] qt = new double[mDimension + 1];
             for (int i = 0; i < mDimension; i++) {
@@ -110,10 +109,7 @@ public class MatrixFit {
                 mMatrix[i][mDimension + 1 + j] = c[i][j];
             }
         }
-        if (!gaussianElimination(mMatrix)) {
-            return false;
-        }
-        return true;
+        return gaussianElimination(mMatrix);
     }
 
     public double[] apply(double[] point) {
@@ -123,9 +119,9 @@ public class MatrixFit {
         double[] res = new double[mDimension];
         for (int j = 0; j < mDimension; j++) {
             for (int i = 0; i < mDimension; i++) {
-                res[j] += point[i] * mMatrix[i][j+ mDimension +1];
+                res[j] += point[i] * mMatrix[i][j + mDimension + 1];
             }
-            res[j] += mMatrix[mDimension][j+ mDimension +1];
+            res[j] += mMatrix[mDimension][j + mDimension + 1];
         }
         return res;
     }
@@ -134,9 +130,9 @@ public class MatrixFit {
         for (int j = 0; j < mDimension; j++) {
             String str = "x" + j + "' = ";
             for (int i = 0; i < mDimension; i++) {
-                str += "x" + i + " * " + mMatrix[i][j+mDimension+1] + " + ";
+                str += "x" + i + " * " + mMatrix[i][j + mDimension + 1] + " + ";
             }
-            str += mMatrix[mDimension][j+mDimension+1];
+            str += mMatrix[mDimension][j + mDimension + 1];
             Log.v(LOGTAG, str);
         }
     }
@@ -183,7 +179,7 @@ public class MatrixFit {
                 }
             }
         }
-        for (int y = h -1; y > -1; y--) { // Back substitution
+        for (int y = h - 1; y > -1; y--) { // Back substitution
             double c = m[y][y];
             for (int y2 = 0; y2 < y; y2++) {
                 for (int x = w - 1; x > y - 1; x--) {

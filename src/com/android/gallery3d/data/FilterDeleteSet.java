@@ -34,35 +34,11 @@ public class FilterDeleteSet extends MediaSet implements ContentListener {
     private static final int REQUEST_ADD = 1;
     private static final int REQUEST_REMOVE = 2;
     private static final int REQUEST_CLEAR = 3;
-
-    private boolean mIsLoading;
-
-    private static class Request {
-        int type;  // one of the REQUEST_* constants
-        Path path;
-        int indexHint;
-        public Request(int type, Path path, int indexHint) {
-            this.type = type;
-            this.path = path;
-            this.indexHint = indexHint;
-        }
-    }
-
-    private static class Deletion {
-        Path path;
-        int index;
-        public Deletion(Path path, int index) {
-            this.path = path;
-            this.index = index;
-        }
-    }
-
     // The underlying MediaSet
     private final MediaSet mBaseSet;
-
+    private boolean mIsLoading;
     // Pending Requests
     private ArrayList<Request> mRequests = new ArrayList<Request>();
-
     // Deletions currently in effect, ordered by index
     private ArrayList<Deletion> mCurrent = new ArrayList<Deletion>();
 
@@ -266,13 +242,35 @@ public class FilterDeleteSet extends MediaSet implements ContentListener {
     }
 
     public void clearDeletion() {
-        sendRequest(REQUEST_CLEAR, null /* unused */ , 0 /* unused */);
+        sendRequest(REQUEST_CLEAR, null /* unused */, 0 /* unused */);
     }
 
     // Returns number of deletions _in effect_ (the number will only gets
     // updated after a reload()).
     public int getNumberOfDeletions() {
         return mCurrent.size();
+    }
+
+    private static class Request {
+        int type;  // one of the REQUEST_* constants
+        Path path;
+        int indexHint;
+
+        public Request(int type, Path path, int indexHint) {
+            this.type = type;
+            this.path = path;
+            this.indexHint = indexHint;
+        }
+    }
+
+    private static class Deletion {
+        Path path;
+        int index;
+
+        public Deletion(Path path, int index) {
+            this.path = path;
+            this.index = index;
+        }
     }
 
 }

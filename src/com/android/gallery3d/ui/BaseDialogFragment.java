@@ -38,7 +38,7 @@ public class BaseDialogFragment extends DialogFragment {
     public void show(FragmentManager manager, String tag) {
         try {
             super.show(manager, tag);
-        } catch(IllegalStateException e) {
+        } catch (IllegalStateException e) {
             FragmentTransaction transaction = manager.beginTransaction();
             transaction.add(this, tag);
             transaction.commitAllowingStateLoss();

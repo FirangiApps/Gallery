@@ -21,26 +21,23 @@ import android.graphics.Bitmap;
 import android.graphics.Canvas;
 import android.graphics.Matrix;
 import android.graphics.Rect;
-import org.codeaurora.gallery.R;
+import android.renderscript.RenderScript;
+
 import com.android.gallery3d.filtershow.imageshow.MasterImage;
 import com.android.gallery3d.filtershow.pipeline.FilterEnvironment;
-import android.renderscript.Allocation;
-import android.renderscript.Element;
-import android.renderscript.RenderScript;
-import android.renderscript.Script.LaunchOptions;
-import android.renderscript.Type;
-import android.util.Log;
+
+import org.codeaurora.gallery.R;
 
 public class ImageFilterVignette extends ImageFilterRS {
-    private static final String LOGTAG = "ImageFilterVignette";
-    private Bitmap mOverlayBitmap;
-    private ScriptC_vignette mScript;
-    FilterVignetteRepresentation mParameters;
     public static final int MODE_VIGNETTE = FilterVignetteRepresentation.MODE_VIGNETTE;
     public static final int MODE_EXPOSURE = FilterVignetteRepresentation.MODE_EXPOSURE;
     public static final int MODE_SATURATION = FilterVignetteRepresentation.MODE_SATURATION;
     public static final int MODE_CONTRAST = FilterVignetteRepresentation.MODE_CONTRAST;
     public static final int MODE_FALLOFF = FilterVignetteRepresentation.MODE_FALLOFF;
+    private static final String LOGTAG = "ImageFilterVignette";
+    FilterVignetteRepresentation mParameters;
+    private Bitmap mOverlayBitmap;
+    private ScriptC_vignette mScript;
 
     public ImageFilterVignette() {
         mName = "Vignette";
@@ -94,7 +91,7 @@ public class ImageFilterVignette extends ImageFilterRS {
         float rx = r;
         float ry = r;
 
-        float[]c = new float[2];
+        float[] c = new float[2];
         if (mParameters.isCenterSet()) {
             Matrix m = getOriginalToScreenMatrix(w, h);
             Rect bounds = MasterImage.getImage().getOriginalBounds();
@@ -121,7 +118,7 @@ public class ImageFilterVignette extends ImageFilterRS {
         mScript.set_centery(cy);
         mScript.set_radiusx(rx);
         mScript.set_radiusy(ry);
-        mScript.set_strength(mParameters.getValue(MODE_FALLOFF)/10.f);
+        mScript.set_strength(mParameters.getValue(MODE_FALLOFF) / 10.f);
         mScript.invoke_setupVignetteParams();
         mScript.forEach_vignette(getInPixelsAllocation(), getOutPixelsAllocation());
     }

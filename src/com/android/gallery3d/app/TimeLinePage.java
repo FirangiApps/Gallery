@@ -23,12 +23,9 @@ import android.app.Activity;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
-import android.content.IntentFilter;
-import android.content.res.Configuration;
 import android.graphics.Color;
 import android.graphics.Rect;
 import android.net.Uri;
-import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
@@ -55,7 +52,6 @@ import com.android.gallery3d.data.MediaItem;
 import com.android.gallery3d.data.MediaObject;
 import com.android.gallery3d.data.MediaSet;
 import com.android.gallery3d.data.Path;
-import com.android.gallery3d.data.ClusterAlbumSet;
 import com.android.gallery3d.filtershow.crop.CropActivity;
 import com.android.gallery3d.filtershow.crop.CropExtras;
 import com.android.gallery3d.glrenderer.FadeTexture;
@@ -74,6 +70,7 @@ import com.android.gallery3d.ui.TimeLineSlotRenderer;
 import com.android.gallery3d.ui.TimeLineSlotView;
 import com.android.gallery3d.util.Future;
 import com.android.gallery3d.util.GalleryUtils;
+
 import org.codeaurora.gallery.R;
 
 import java.lang.ref.WeakReference;
@@ -84,32 +81,29 @@ public class TimeLinePage extends ActivityState implements
         GalleryActionBar.ClusterRunner, SelectionManager.SelectionListener,
         MediaSet.SyncListener, GalleryActionBar.OnAlbumModeSelectedListener {
 
-    private static final String TAG = "TimeLinePage";
-
     public static final String KEY_MEDIA_PATH = "media-path";
     public static final String KEY_AUTO_SELECT_ALL = "auto-select-all";
     public static final String KEY_SHOW_CLUSTER_MENU = "cluster-menu";
     public static final String KEY_RESUME_ANIMATION = "resume_animation";
-
-    private static final int REQUEST_SLIDESHOW = 1;
     public static final int REQUEST_PHOTO = 2;
+    private static final String TAG = "TimeLinePage";
+    private static final int REQUEST_SLIDESHOW = 1;
     private static final int REQUEST_DO_ANIMATION = 3;
 
     private static final int BIT_LOADING_RELOAD = 1;
     private static final int BIT_LOADING_SYNC = 2;
 
     private static final float USER_DISTANCE_METER = 0.3f;
-
+    private static final int MSG_PICK_PHOTO = 0;
+    protected SelectionManager mSelectionManager;
+    protected ActionModeHandler mActionModeHandler;
     private boolean mIsActive = false;
     private TimeLineSlotRenderer mAlbumView;
     private Path mMediaSetPath;
     private TimeLineSlotView mSlotView;
     private TimeLineDataLoader mAlbumDataAdapter;
-    protected SelectionManager mSelectionManager;
     private boolean mGetContent;
     private boolean mShowClusterMenu;
-
-    protected ActionModeHandler mActionModeHandler;
     private int mFocusIndex = 0;
     private DetailsHelper mDetailsHelper;
     private MyDetailsSource mDetailsSource;
@@ -120,52 +114,16 @@ public class TimeLinePage extends ActivityState implements
     private boolean mLaunchedFromPhotoPage;
     private boolean mInCameraApp;
     private TextView tvEmptyAlbum;
-
     private int mLoadingBits = 0;
     private boolean mInitialSynced = false;
     private int mSyncResult;
     private boolean mLoadingFailed;
     private RelativePosition mOpenCenter = new RelativePosition();
     private HomeIconActionReceiver mHomeIconActionReceiver;
-
     private Handler mHandler;
-    private static final int MSG_PICK_PHOTO = 0;
-
     private PhotoFallbackEffect mResumeEffect;
-    private PhotoFallbackEffect.PositionProvider mPositionProvider =
-            new PhotoFallbackEffect.PositionProvider() {
-                @Override
-                public Rect getPosition(int index) {
-                    Rect rect = mSlotView.getSlotRect(index);
-                    Rect bounds = mSlotView.bounds();
-                    rect.offset(bounds.left - mSlotView.getScrollX(),
-                            bounds.top - mSlotView.getScrollY());
-                    return rect;
-                }
-
-                @Override
-                public int getItemIndex(Path path) {
-                    int start = mSlotView.getVisibleStart();
-                    int end = mSlotView.getVisibleEnd();
-                    for (int i = start; i < end; ++i) {
-                        MediaItem item = mAlbumDataAdapter.get(i);
-                        if (item != null && item.getPath() == path) return i;
-                    }
-                    return -1;
-                }
-            };
-
-    private Button mCameraButton;
-    private boolean mShowedEmptyToastForSelf = false;
-
-
-    @Override
-    protected int getBackgroundColorId() {
-        return R.color.album_background;
-    }
-
     private final GLView mRootPane = new GLView() {
-        private final float mMatrix[] = new float[16];
+        private final float[] mMatrix = new float[16];
 
         @Override
         protected void onLayout(
@@ -178,9 +136,9 @@ public class TimeLinePage extends ActivityState implements
             } else {
                 slotViewTop = mActivity.getGalleryActionBar().getHeight();
             }
-            int padding =0 ;
-            if((right - left) > (bottom - top)) {
-                padding =  (int) mActivity.getResources().getDimension(R.dimen.timeline_land_margin);
+            int padding = 0;
+            if ((right - left) > (bottom - top)) {
+                padding = (int) mActivity.getResources().getDimension(R.dimen.timeline_land_margin);
             } else {
                 padding = (int) mActivity.getResources().getDimension(R.dimen.timeline_port_margin);
             }
@@ -220,6 +178,36 @@ public class TimeLinePage extends ActivityState implements
             canvas.restore();
         }
     };
+    private PhotoFallbackEffect.PositionProvider mPositionProvider =
+            new PhotoFallbackEffect.PositionProvider() {
+                @Override
+                public Rect getPosition(int index) {
+                    Rect rect = mSlotView.getSlotRect(index);
+                    Rect bounds = mSlotView.bounds();
+                    rect.offset(bounds.left - mSlotView.getScrollX(),
+                            bounds.top - mSlotView.getScrollY());
+                    return rect;
+                }
+
+                @Override
+                public int getItemIndex(Path path) {
+                    int start = mSlotView.getVisibleStart();
+                    int end = mSlotView.getVisibleEnd();
+                    for (int i = start; i < end; ++i) {
+                        MediaItem item = mAlbumDataAdapter.get(i);
+                        if (item != null && item.getPath() == path) return i;
+                    }
+                    return -1;
+                }
+            };
+    private Button mCameraButton;
+    private boolean mShowedEmptyToastForSelf = false;
+    private WeakReference<Toast> mEmptyAlbumToast = null;
+
+    @Override
+    protected int getBackgroundColorId() {
+        return R.color.album_background;
+    }
 
     // This are the transitions we want:
     //
@@ -238,10 +226,10 @@ public class TimeLinePage extends ActivityState implements
         } else if (mSelectionManager.inSelectionMode()) {
             mSelectionManager.leaveSelectionMode();
         } else {
-            if(mLaunchedFromPhotoPage) {
-            mActivity.getTransitionStore().putIfNotPresent(
-                    PhotoPage.KEY_ALBUMPAGE_TRANSITION,
-                    PhotoPage.MSG_ALBUMPAGE_RESUMED);
+            if (mLaunchedFromPhotoPage) {
+                mActivity.getTransitionStore().putIfNotPresent(
+                        PhotoPage.KEY_ALBUMPAGE_TRANSITION,
+                        PhotoPage.MSG_ALBUMPAGE_RESUMED);
             }
             if (mInCameraApp) {
                 super.onBackPressed();
@@ -271,33 +259,33 @@ public class TimeLinePage extends ActivityState implements
         }
     }
 
-    private void onSingleTapUp(int slotIndex , boolean isTitle) {
+    private void onSingleTapUp(int slotIndex, boolean isTitle) {
         if (!mIsActive) return;
-            if (mSelectionManager.inSelectionMode()) {
-                if(isTitle){
-                    MediaSet targetSet = mAlbumDataAdapter.getMediaSet(slotIndex);
-                    if (targetSet == null) return;
-                    ArrayList<Path> paths = ((ClusterAlbum)targetSet).getMediaItems();
-                    if (paths == null || paths.size() <= 0) return;
-                    mSelectionManager.toggleTimeLineSet(paths);
-                    mSlotView.invalidate();
-                } else {
-                    MediaItem item = mAlbumDataAdapter.get(slotIndex);
-                    if (item == null) return; // Item not ready yet, ignore the click
-                    if (mSelectionManager.getSelectedCount() > 0) {
-                        if (!ActionModeHandler.isThreadComplete)
-                            return;
-                    }
-                    mSelectionManager.toggle(item.getPath());
-                    mSlotView.invalidate();
+        if (mSelectionManager.inSelectionMode()) {
+            if (isTitle) {
+                MediaSet targetSet = mAlbumDataAdapter.getMediaSet(slotIndex);
+                if (targetSet == null) return;
+                ArrayList<Path> paths = ((ClusterAlbum) targetSet).getMediaItems();
+                if (paths == null || paths.size() <= 0) return;
+                mSelectionManager.toggleTimeLineSet(paths);
+                mSlotView.invalidate();
+            } else {
+                MediaItem item = mAlbumDataAdapter.get(slotIndex);
+                if (item == null) return; // Item not ready yet, ignore the click
+                if (mSelectionManager.getSelectedCount() > 0) {
+                    if (!ActionModeHandler.isThreadComplete)
+                        return;
                 }
-            } else if(!isTitle){
-                // Render transition in pressed state
-                mAlbumView.setPressedIndex(slotIndex);
-                mAlbumView.setPressedUp();
-                mHandler.sendMessageDelayed(mHandler.obtainMessage(MSG_PICK_PHOTO, slotIndex, 0),
-                        FadeTexture.DURATION);
+                mSelectionManager.toggle(item.getPath());
+                mSlotView.invalidate();
             }
+        } else if (!isTitle) {
+            // Render transition in pressed state
+            mAlbumView.setPressedIndex(slotIndex);
+            mAlbumView.setPressedUp();
+            mHandler.sendMessageDelayed(mHandler.obtainMessage(MSG_PICK_PHOTO, slotIndex, 0),
+                    FadeTexture.DURATION);
+        }
     }
 
     private void pickPhoto(int slotIndex) {
@@ -330,7 +318,7 @@ public class TimeLinePage extends ActivityState implements
             if (targetset == null || item == null) return;
 
             Bundle data = new Bundle();
-            data.putInt(PhotoPage.KEY_INDEX_HINT, slotIndex-1);
+            data.putInt(PhotoPage.KEY_INDEX_HINT, slotIndex - 1);
             data.putString(PhotoPage.KEY_MEDIA_SET_PATH,
                     targetset.getPath().toString());
             data.putParcelable(PhotoPage.KEY_OPEN_ANIMATION_RECT,
@@ -371,10 +359,10 @@ public class TimeLinePage extends ActivityState implements
 
     public void onLongTap(int slotIndex, boolean isTitle) {
         if (mGetContent) return;
-        if(isTitle){
+        if (isTitle) {
             MediaSet targetSet = mAlbumDataAdapter.getMediaSet(slotIndex);
             if (targetSet == null) return;
-            ArrayList<Path> paths = ((ClusterAlbum)targetSet).getMediaItems();
+            ArrayList<Path> paths = ((ClusterAlbum) targetSet).getMediaItems();
             if (paths == null || paths.size() <= 0) return;
             mSelectionManager.setAutoLeaveSelectionMode(true);
             mSelectionManager.toggleTimeLineSet(paths);
@@ -458,7 +446,7 @@ public class TimeLinePage extends ActivityState implements
         setLoadingBit(BIT_LOADING_RELOAD);
         if (null != mMediaSet) {
             //set to show timeline title
-            mMediaSet.setShowAlbumsetTimeTitle(true);
+            MediaSet.setShowAlbumsetTimeTitle(true);
         }
         mLoadingFailed = false;
         mAlbumDataAdapter.resume();
@@ -626,7 +614,7 @@ public class TimeLinePage extends ActivityState implements
             targetPhoto = mAlbumDataAdapter.size() - targetPhoto - 1;
         }
         prepareAnimationBackToFilmstrip(targetPhoto);
-        if(mLaunchedFromPhotoPage) {
+        if (mLaunchedFromPhotoPage) {
             onBackPressed();
         } else {
             pickPhoto(targetPhoto, true);
@@ -676,8 +664,7 @@ public class TimeLinePage extends ActivityState implements
     @Override
     protected void onStateResult(int request, int result, Intent data) {
         switch (request) {
-            case REQUEST_SLIDESHOW:
-            {
+            case REQUEST_SLIDESHOW: {
                 // data could be null, if there is no images in the album
                 if (data == null) return;
                 mFocusIndex = data.getIntExtra(SlideshowPage.KEY_PHOTO_INDEX, 0);
@@ -703,12 +690,12 @@ public class TimeLinePage extends ActivityState implements
             case SelectionManager.ENTER_SELECTION_MODE: {
                 mActionModeHandler.startActionMode();
                 performHapticFeedback(HapticFeedbackConstants.LONG_PRESS);
-                ((GalleryActivity)mActivity).toggleNavBar(false);
+                ((GalleryActivity) mActivity).toggleNavBar(false);
                 break;
             }
             case SelectionManager.LEAVE_SELECTION_MODE: {
                 mActionModeHandler.finishActionMode();
-                ((GalleryActivity)mActivity).toggleNavBar(true);
+                ((GalleryActivity) mActivity).toggleNavBar(true);
                 mRootPane.invalidate();
                 break;
             }
@@ -791,6 +778,74 @@ public class TimeLinePage extends ActivityState implements
         }
     }
 
+    @Override
+    public void onAlbumModeSelected(int mode) {
+        if (mode == GalleryActionBar.ALBUM_FILMSTRIP_MODE_SELECTED) {
+            switchToFilmstrip();
+        }
+    }
+
+    private void showCameraButton() {
+        if (mCameraButton == null && !setupCameraButton()) return;
+        mCameraButton.setVisibility(View.VISIBLE);
+    }
+
+    private void hideCameraButton() {
+        if (mCameraButton == null) return;
+        mCameraButton.setVisibility(View.GONE);
+    }
+
+    private boolean setupCameraButton() {
+        if (!GalleryUtils.isAnyCameraAvailable(mActivity)) return false;
+        RelativeLayout galleryRoot = mActivity.findViewById(R.id.gallery_root);
+        if (galleryRoot == null) return false;
+
+        mCameraButton = new Button(mActivity);
+        mCameraButton.setText(R.string.camera_label);
+        mCameraButton.setCompoundDrawablesWithIntrinsicBounds(0, R.drawable.frame_overlay_gallery_camera, 0, 0);
+        mCameraButton.setOnClickListener(new OnClickListener() {
+            @Override
+            public void onClick(View arg0) {
+                GalleryUtils.startCameraActivity(mActivity);
+            }
+        });
+        RelativeLayout.LayoutParams lp = new RelativeLayout.LayoutParams(
+                RelativeLayout.LayoutParams.WRAP_CONTENT,
+                RelativeLayout.LayoutParams.WRAP_CONTENT);
+        lp.addRule(RelativeLayout.CENTER_IN_PARENT);
+        galleryRoot.addView(mCameraButton, lp);
+        return true;
+    }
+
+    private void showEmptyAlbumToast(int toastLength) {
+        RelativeLayout galleryRoot = mActivity.findViewById(R.id.gallery_root);
+        if (galleryRoot == null) return;
+        if (tvEmptyAlbum == null) {
+            tvEmptyAlbum = new TextView(mActivity);
+            tvEmptyAlbum.setText(R.string.tvEmptyAlbum);
+            tvEmptyAlbum.setTextColor(Color.parseColor("#8A000000"));
+            tvEmptyAlbum.setGravity(Gravity.CENTER);
+            tvEmptyAlbum.setTextSize(TypedValue.COMPLEX_UNIT_SP, 20);
+            RelativeLayout.LayoutParams lp = new RelativeLayout.LayoutParams(
+                    RelativeLayout.LayoutParams.WRAP_CONTENT,
+                    RelativeLayout.LayoutParams.WRAP_CONTENT);
+            lp.addRule(RelativeLayout.CENTER_IN_PARENT);
+            galleryRoot.addView(tvEmptyAlbum, lp);
+        }
+        tvEmptyAlbum.setVisibility(View.VISIBLE);
+    }
+
+    private void hideEmptyAlbumToast() {
+        if (tvEmptyAlbum != null) {
+            tvEmptyAlbum.setVisibility(View.GONE);
+        }
+    }
+
+    private void registerHomeReceiver() {
+        mHomeIconActionReceiver = new HomeIconActionReceiver();
+        ((GalleryActivity) mActivity).registerHomeButtonReceiver(mHomeIconActionReceiver);
+    }
+
     private class MyLoadingListener implements LoadingListener {
         @Override
         public void onLoadingStarted() {
@@ -837,71 +892,6 @@ public class TimeLinePage extends ActivityState implements
         }
     }
 
-    @Override
-    public void onAlbumModeSelected(int mode) {
-        if (mode == GalleryActionBar.ALBUM_FILMSTRIP_MODE_SELECTED) {
-            switchToFilmstrip();
-        }
-    }
-
-    private WeakReference<Toast> mEmptyAlbumToast = null;
-
-    private void showCameraButton() {
-        if (mCameraButton == null && !setupCameraButton()) return;
-        mCameraButton.setVisibility(View.VISIBLE);
-    }
-
-    private void hideCameraButton() {
-        if (mCameraButton == null) return;
-        mCameraButton.setVisibility(View.GONE);
-    }
-
-    private boolean setupCameraButton() {
-        if (!GalleryUtils.isAnyCameraAvailable(mActivity)) return false;
-        RelativeLayout galleryRoot = (RelativeLayout)mActivity.findViewById(R.id.gallery_root);
-        if (galleryRoot == null) return false;
-
-        mCameraButton = new Button(mActivity);
-        mCameraButton.setText(R.string.camera_label);
-        mCameraButton.setCompoundDrawablesWithIntrinsicBounds(0, R.drawable.frame_overlay_gallery_camera, 0, 0);
-        mCameraButton.setOnClickListener(new OnClickListener() {
-            @Override
-            public void onClick(View arg0) {
-                GalleryUtils.startCameraActivity(mActivity);
-            }
-        });
-        RelativeLayout.LayoutParams lp = new RelativeLayout.LayoutParams(
-                RelativeLayout.LayoutParams.WRAP_CONTENT,
-                RelativeLayout.LayoutParams.WRAP_CONTENT);
-        lp.addRule(RelativeLayout.CENTER_IN_PARENT);
-        galleryRoot.addView(mCameraButton, lp);
-        return true;
-    }
-
-    private void showEmptyAlbumToast(int toastLength) {
-        RelativeLayout galleryRoot = (RelativeLayout) mActivity.findViewById(R.id.gallery_root);
-        if (galleryRoot == null) return;
-        if (tvEmptyAlbum == null) {
-            tvEmptyAlbum = new TextView(mActivity);
-            tvEmptyAlbum.setText(R.string.tvEmptyAlbum);
-            tvEmptyAlbum.setTextColor(Color.parseColor("#8A000000"));
-            tvEmptyAlbum.setGravity(Gravity.CENTER);
-            tvEmptyAlbum.setTextSize(TypedValue.COMPLEX_UNIT_SP, 20);
-            RelativeLayout.LayoutParams lp = new RelativeLayout.LayoutParams(
-                    RelativeLayout.LayoutParams.WRAP_CONTENT,
-                    RelativeLayout.LayoutParams.WRAP_CONTENT);
-            lp.addRule(RelativeLayout.CENTER_IN_PARENT);
-            galleryRoot.addView(tvEmptyAlbum, lp);
-        }
-        tvEmptyAlbum.setVisibility(View.VISIBLE);
-    }
-
-    private void hideEmptyAlbumToast() {
-        if (tvEmptyAlbum != null) {
-            tvEmptyAlbum.setVisibility(View.GONE);
-        }
-    }
-
     public class HomeIconActionReceiver extends BroadcastReceiver {
         private static final String SYSTEM_DIALOG_REASON_KEY = "reason";
         private static final String SYSTEM_DIALOG_REASON_HOME_KEY = "homekey";
@@ -919,10 +909,5 @@ public class TimeLinePage extends ActivityState implements
                 }
             }
         }
-    }
-
-    private void registerHomeReceiver() {
-        mHomeIconActionReceiver = new HomeIconActionReceiver();
-        ((GalleryActivity) mActivity).registerHomeButtonReceiver(mHomeIconActionReceiver);
     }
 }

@@ -42,8 +42,6 @@ import android.provider.MediaStore.Images.ImageColumns;
 import android.util.Log;
 import android.webkit.URLUtil;
 
-import org.codeaurora.gallery.R;
-
 import com.android.gallery3d.app.GalleryActivity;
 import com.android.gallery3d.app.MovieControllerOverlay;
 import com.android.gallery3d.app.MovieControllerOverlayNew;
@@ -56,19 +54,38 @@ import java.util.Date;
 import java.util.Locale;
 
 public class VideoSnapshotExt implements IVideoSnapshotListener {
-    private static String TAG = "VideoSnapshotExt";
     private static final boolean DEBUG = false;
-
     private static final String FOLDER = Environment.getExternalStorageDirectory() +
             File.separator + "Pictures" + File.separator + "VideoSnapshots";
     private static final String FILE_PREFIX = "VideoSnapshot_";
     private static final String FILE_EXT = ".jpg";
     private static final String TIME_STAMP_NAME = "yyyyMMdd_HHmmss";
     private static final int CONTENT_VALUES_SIZE = 9;
-
+    private static String TAG = "VideoSnapshotExt";
     private CodeauroraVideoView mVideoView;
     private Context mContext;
     private ContentResolver mContentResolver;
+
+    private static void addImage(ContentResolver resolver, String path, String title, long date,
+                                 long size, int orientation, int width, int height) {
+        // Insert into MediaStore.
+        ContentValues values = new ContentValues(CONTENT_VALUES_SIZE);
+        values.put(ImageColumns.TITLE, title);
+        values.put(ImageColumns.DISPLAY_NAME, title + ".jpg");
+        values.put(ImageColumns.DATE_TAKEN, date);
+        values.put(ImageColumns.MIME_TYPE, "image/jpeg");
+        values.put(ImageColumns.ORIENTATION, orientation);
+        values.put(ImageColumns.DATA, path);
+        values.put(ImageColumns.SIZE, size);
+        values.put(ImageColumns.WIDTH, width);
+        values.put(ImageColumns.HEIGHT, height);
+
+        try {
+            resolver.insert(Images.Media.EXTERNAL_CONTENT_URI, values);
+        } catch (Throwable th) {
+            Log.w(TAG, "Failed to write MediaStore" + th);
+        }
+    }
 
     @Override
     public void onVideoSnapshot() {
@@ -131,6 +148,7 @@ public class VideoSnapshotExt implements IVideoSnapshotListener {
 
     private class VideoSnapTask extends AsyncTask<VideoSnapParameters, Void, Bitmap> {
         SimpleDateFormat mDateFormat = new SimpleDateFormat(TIME_STAMP_NAME, Locale.getDefault());
+
         @Override
         protected Bitmap doInBackground(VideoSnapParameters... params) {
             VideoSnapParameters parameters = params[0];
@@ -202,27 +220,6 @@ public class VideoSnapshotExt implements IVideoSnapshotListener {
             } catch (IOException e) {
                 e.printStackTrace();
             }
-        }
-    }
-
-    private static void addImage(ContentResolver resolver, String path, String title, long date,
-                                 long size, int orientation, int width, int height) {
-        // Insert into MediaStore.
-        ContentValues values = new ContentValues(CONTENT_VALUES_SIZE);
-        values.put(ImageColumns.TITLE, title);
-        values.put(ImageColumns.DISPLAY_NAME, title + ".jpg");
-        values.put(ImageColumns.DATE_TAKEN, date);
-        values.put(ImageColumns.MIME_TYPE, "image/jpeg");
-        values.put(ImageColumns.ORIENTATION, orientation);
-        values.put(ImageColumns.DATA, path);
-        values.put(ImageColumns.SIZE, size);
-        values.put(ImageColumns.WIDTH, width);
-        values.put(ImageColumns.HEIGHT, height);
-
-        try {
-            resolver.insert(Images.Media.EXTERNAL_CONTENT_URI, values);
-        } catch (Throwable th) {
-            Log.w(TAG, "Failed to write MediaStore" + th);
         }
     }
 }

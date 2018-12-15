@@ -19,6 +19,7 @@ package com.android.gallery3d.filtershow.filters;
 import android.content.res.Resources;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+
 import com.android.gallery3d.app.Log;
 
 public class ImageFilterFx extends ImageFilter {

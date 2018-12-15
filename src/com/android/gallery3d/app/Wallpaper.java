@@ -31,8 +31,6 @@ import com.android.gallery3d.common.ApiHelper;
 import com.android.gallery3d.filtershow.crop.CropActivity;
 import com.android.gallery3d.filtershow.crop.CropExtras;
 
-import java.lang.IllegalArgumentException;
-
 /**
  * Wallpaper picker for the gallery application. This just redirects to the
  * standard pick action.
@@ -61,7 +59,7 @@ public class Wallpaper extends Activity {
         super.onCreate(bundle);
         if (bundle != null) {
             mState = bundle.getInt(KEY_STATE);
-            mPickedItem = (Uri) bundle.getParcelable(KEY_PICKED_ITEM);
+            mPickedItem = bundle.getParcelable(KEY_PICKED_ITEM);
         }
     }
 
@@ -126,8 +124,8 @@ public class Wallpaper extends Activity {
                     }
                 }
 
-                int width,height;
-                float spotlightX,spotlightY;
+                int width, height;
+                float spotlightX, spotlightY;
 
                 if (fromScreenColor) {
                     width = extras.getInt(KEY_ASPECT_X, 0);
@@ -144,18 +142,18 @@ public class Wallpaper extends Activity {
 
                 //Don't set wallpaper from screencolor.
                 cropAndSetWallpaperIntent = new Intent(CropActivity.CROP_ACTION)
-                    .setClass(this, CropActivity.class)
-                    .setDataAndType(mPickedItem, IMAGE_TYPE)
-                    .addFlags(Intent.FLAG_ACTIVITY_FORWARD_RESULT)
-                    .putExtra(CropExtras.KEY_OUTPUT_X, width)
-                    .putExtra(CropExtras.KEY_OUTPUT_Y, height)
-                    .putExtra(CropExtras.KEY_ASPECT_X, width)
-                    .putExtra(CropExtras.KEY_ASPECT_Y, height)
-                    .putExtra(CropExtras.KEY_SPOTLIGHT_X, spotlightX)
-                    .putExtra(CropExtras.KEY_SPOTLIGHT_Y, spotlightY)
-                    .putExtra(CropExtras.KEY_SCALE, true)
-                    .putExtra(CropExtras.KEY_SCALE_UP_IF_NEEDED, true)
-                    .putExtra(CropExtras.KEY_SET_AS_WALLPAPER, !fromScreenColor);
+                        .setClass(this, CropActivity.class)
+                        .setDataAndType(mPickedItem, IMAGE_TYPE)
+                        .addFlags(Intent.FLAG_ACTIVITY_FORWARD_RESULT)
+                        .putExtra(CropExtras.KEY_OUTPUT_X, width)
+                        .putExtra(CropExtras.KEY_OUTPUT_Y, height)
+                        .putExtra(CropExtras.KEY_ASPECT_X, width)
+                        .putExtra(CropExtras.KEY_ASPECT_Y, height)
+                        .putExtra(CropExtras.KEY_SPOTLIGHT_X, spotlightX)
+                        .putExtra(CropExtras.KEY_SPOTLIGHT_Y, spotlightY)
+                        .putExtra(CropExtras.KEY_SCALE, true)
+                        .putExtra(CropExtras.KEY_SCALE_UP_IF_NEEDED, true)
+                        .putExtra(CropExtras.KEY_SET_AS_WALLPAPER, !fromScreenColor);
                 startActivity(cropAndSetWallpaperIntent);
                 finish();
             }

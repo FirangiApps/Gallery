@@ -18,39 +18,42 @@ package com.android.gallery3d.filtershow.state;
 
 import android.content.Context;
 import android.content.res.Resources;
-import android.graphics.*;
+import android.graphics.Canvas;
+import android.graphics.Paint;
+import android.graphics.Path;
+import android.graphics.Rect;
+import android.graphics.Typeface;
 import android.view.MotionEvent;
 import android.view.View;
 import android.widget.LinearLayout;
-import org.codeaurora.gallery.R;
+
 import com.android.gallery3d.filtershow.FilterShowActivity;
 import com.android.gallery3d.filtershow.category.SwipableView;
 import com.android.gallery3d.filtershow.filters.FilterRepresentation;
 import com.android.gallery3d.filtershow.imageshow.MasterImage;
 import com.android.gallery3d.filtershow.pipeline.ImagePreset;
 
+import org.codeaurora.gallery.R;
+
 public class StateView extends View implements SwipableView {
 
     private static final String LOGTAG = "StateView";
-    private Path mPath = new Path();
-    private Paint mPaint = new Paint();
-
     public static int DEFAULT = 0;
     public static int BEGIN = 1;
     public static int END = 2;
-
     public static int UP = 1;
     public static int DOWN = 2;
     public static int LEFT = 3;
     public static int RIGHT = 4;
-
+    private static int sMargin = 16;
+    private static int sArrowHeight = 16;
+    private static int sArrowWidth = 8;
+    private Path mPath = new Path();
+    private Paint mPaint = new Paint();
     private int mType = DEFAULT;
     private float mAlpha = 1.0f;
     private String mText = "Default";
     private float mTextSize = 32;
-    private static int sMargin = 16;
-    private static int sArrowHeight = 16;
-    private static int sArrowWidth = 8;
     private float mStartTouchX = 0;
     private float mStartTouchY = 0;
     private float mDeleteSlope = 20;
@@ -252,6 +255,10 @@ public class StateView extends View implements SwipableView {
         mPath.close();
     }
 
+    public float getBackgroundAlpha() {
+        return mAlpha;
+    }
+
     public void setBackgroundAlpha(float alpha) {
         if (mType == BEGIN) {
             return;
@@ -259,10 +266,6 @@ public class StateView extends View implements SwipableView {
         mAlpha = alpha;
         setAlpha(alpha);
         invalidate();
-    }
-
-    public float getBackgroundAlpha() {
-        return mAlpha;
     }
 
     public void setOrientation(int orientation) {
@@ -318,7 +321,7 @@ public class StateView extends View implements SwipableView {
             }
         }
         if (event.getActionMasked() == MotionEvent.ACTION_UP
-            || event.getActionMasked() == MotionEvent.ACTION_CANCEL) {
+                || event.getActionMasked() == MotionEvent.ACTION_CANCEL) {
             setTranslationX(0);
             setTranslationY(0);
             MasterImage.getImage().setShowsOriginal(false);

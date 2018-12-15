@@ -21,12 +21,12 @@ import android.os.Message;
 import android.os.Process;
 
 import com.android.gallery3d.common.Utils;
+import com.android.gallery3d.data.ClusterAlbumSet;
 import com.android.gallery3d.data.ContentListener;
 import com.android.gallery3d.data.MediaItem;
 import com.android.gallery3d.data.MediaObject;
 import com.android.gallery3d.data.MediaSet;
 import com.android.gallery3d.data.Path;
-import com.android.gallery3d.data.ClusterAlbumSet;
 import com.android.gallery3d.ui.SynchronizedHandler;
 
 import java.util.ArrayList;
@@ -50,32 +50,20 @@ public class TimeLineDataLoader {
     private final MediaItem[] mData;
     private final long[] mItemVersion;
     private final long[] mSetVersion;
-
-    public static interface DataListener {
-        public void onContentChanged(int index);
-        public void onSizeChanged();
-    }
-
+    private final MediaSet mSource;
+    private final Handler mMainHandler;
     private int mActiveStart = 0;
     private int mActiveEnd = 0;
-
     private int mContentStart = 0;
     private int mContentEnd = 0;
-
-    private final MediaSet mSource;
     private long mSourceVersion = MediaObject.INVALID_DATA_VERSION;
-
-    private final Handler mMainHandler;
     private int mSize = 0;
-
     private ArrayList<DataListener> mDataListener = new ArrayList<>();
     private MySourceListener mSourceListener = new MySourceListener();
     private LoadingListener mLoadingListener;
-
     private ReloadTask mReloadTask;
     // the data version on which last loading failed
     private long mFailedVersion = MediaObject.INVALID_DATA_VERSION;
-
     public TimeLineDataLoader(AbstractGalleryActivity context, MediaSet mediaSet) {
         mSource = mediaSet;
         mData = new MediaItem[DATA_CACHE_SIZE];
@@ -232,13 +220,6 @@ public class TimeLineDataLoader {
         }
     }
 
-    private class MySourceListener implements ContentListener {
-        @Override
-        public void onContentDirty() {
-            if (mReloadTask != null) mReloadTask.notifyDirty();
-        }
-    }
-
     public void setDataListener(DataListener listener) {
         mDataListener.add(listener);
     }
@@ -264,6 +245,12 @@ public class TimeLineDataLoader {
         }
     }
 
+    public interface DataListener {
+        void onContentChanged(int index);
+
+        void onSizeChanged();
+    }
+
     private static class UpdateInfo {
         public long version;
         public int reloadStart;
@@ -271,6 +258,13 @@ public class TimeLineDataLoader {
 
         public int size;
         public ArrayList<MediaItem> items;
+    }
+
+    private class MySourceListener implements ContentListener {
+        @Override
+        public void onContentDirty() {
+            if (mReloadTask != null) mReloadTask.notifyDirty();
+        }
     }
 
     private class GetUpdateInfo implements Callable<UpdateInfo> {
@@ -290,7 +284,7 @@ public class TimeLineDataLoader {
             long version = mVersion;
             info.version = mSourceVersion;
             info.size = mSize;
-            long setVersion[] = mSetVersion;
+            long[] setVersion = mSetVersion;
             for (int i = mContentStart, n = mContentEnd; i < n; ++i) {
                 int index = i % DATA_CACHE_SIZE;
                 if (setVersion[index] != version) {
@@ -353,7 +347,7 @@ public class TimeLineDataLoader {
                             }
                         }
                     }
-               }
+                }
             }
             return null;
         }

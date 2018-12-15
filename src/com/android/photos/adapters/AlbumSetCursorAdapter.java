@@ -19,46 +19,43 @@ package com.android.photos.adapters;
 import android.content.Context;
 import android.database.Cursor;
 import android.graphics.drawable.Drawable;
-import android.text.format.DateFormat;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.CursorAdapter;
 import android.widget.ImageView;
-import android.widget.ProgressBar;
 import android.widget.TextView;
 
-import org.codeaurora.gallery.R;
 import com.android.photos.data.AlbumSetLoader;
 import com.android.photos.shims.LoaderCompatShim;
 
-import java.util.Date;
+import org.codeaurora.gallery.R;
 
 public class AlbumSetCursorAdapter extends CursorAdapter {
 
     private LoaderCompatShim<Cursor> mDrawableFactory;
 
-    public void setDrawableFactory(LoaderCompatShim<Cursor> factory) {
-        mDrawableFactory = factory;
-    }
-
     public AlbumSetCursorAdapter(Context context) {
         super(context, null, false);
     }
 
+    public void setDrawableFactory(LoaderCompatShim<Cursor> factory) {
+        mDrawableFactory = factory;
+    }
+
     @Override
     public void bindView(View v, Context context, Cursor cursor) {
-        TextView titleTextView = (TextView) v.findViewById(
+        TextView titleTextView = v.findViewById(
                 R.id.album_set_item_title);
         titleTextView.setText(cursor.getString(AlbumSetLoader.INDEX_TITLE));
 
-        TextView countTextView = (TextView) v.findViewById(
+        TextView countTextView = v.findViewById(
                 R.id.album_set_item_count);
         int count = cursor.getInt(AlbumSetLoader.INDEX_COUNT);
         countTextView.setText(context.getResources().getQuantityString(
                 R.plurals.number_of_photos, count, count));
 
-        ImageView thumbImageView = (ImageView) v.findViewById(
+        ImageView thumbImageView = v.findViewById(
                 R.id.album_set_item_image);
         Drawable recycle = thumbImageView.getDrawable();
         Drawable drawable = mDrawableFactory.drawableForItem(cursor, recycle);

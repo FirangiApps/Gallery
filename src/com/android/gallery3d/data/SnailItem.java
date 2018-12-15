@@ -65,6 +65,10 @@ public class SnailItem extends MediaItem {
         return mScreenNail;
     }
 
+    public void setScreenNail(ScreenNail screenNail) {
+        mScreenNail = screenNail;
+    }
+
     @Override
     public String getMimeType() {
         return "";
@@ -82,17 +86,13 @@ public class SnailItem extends MediaItem {
         return 0;
     }
 
-    @Override
-    public Uri getContentUri() {
-        return null;
-    }
-
     //////////////////////////////////////////////////////////////////////////
     //  Extra methods for SnailItem
     //////////////////////////////////////////////////////////////////////////
 
-    public void setScreenNail(ScreenNail screenNail) {
-        mScreenNail = screenNail;
+    @Override
+    public Uri getContentUri() {
+        return null;
     }
 
     public void updateVersion() {

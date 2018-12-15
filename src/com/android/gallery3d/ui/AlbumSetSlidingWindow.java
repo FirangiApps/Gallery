@@ -19,7 +19,6 @@ package com.android.gallery3d.ui;
 import android.graphics.Bitmap;
 import android.os.Message;
 
-import org.codeaurora.gallery.R;
 import com.android.gallery3d.app.AbstractGalleryActivity;
 import com.android.gallery3d.app.AlbumSetDataLoader;
 import com.android.gallery3d.common.Utils;
@@ -36,64 +35,33 @@ import com.android.gallery3d.util.Future;
 import com.android.gallery3d.util.FutureListener;
 import com.android.gallery3d.util.ThreadPool;
 
+import org.codeaurora.gallery.R;
+
 public class AlbumSetSlidingWindow implements AlbumSetDataLoader.DataListener {
+    public static final String KEY_ALBUM = "AlbumSet";
     private static final String TAG = "AlbumSetSlidingWindow";
     private static final int MSG_UPDATE_ALBUM_ENTRY = 1;
-    public static final String KEY_ALBUM = "AlbumSet";
-
-    public static interface Listener {
-        public void onSizeChanged(int size);
-        public void onContentChanged();
-    }
-
     private final AlbumSetDataLoader mSource;
-    private int mSize;
-
-    private int mContentStart = 0;
-    private int mContentEnd = 0;
-
-    private int mActiveStart = 0;
-    private int mActiveEnd = 0;
-
-    private Listener mListener;
-
-    private final AlbumSetEntry mData[];
+    private final AlbumSetEntry[] mData;
     private final SynchronizedHandler mHandler;
     private final ThreadPool mThreadPool;
     private final AlbumLabelMaker mLabelMaker;
     private final String mLoadingText;
-
     private final TiledTexture.Uploader mContentUploader;
     private final TextureUploader mLabelUploader;
-
+    private int mSize;
+    private int mContentStart = 0;
+    private int mContentEnd = 0;
+    private int mActiveStart = 0;
+    private int mActiveEnd = 0;
+    private Listener mListener;
     private int mActiveRequestCount = 0;
     private boolean mIsActive = false;
     private BitmapTexture mLoadingLabel;
-
     private int mSlotWidth;
 
-    public static class AlbumSetEntry {
-        public MediaSet album;
-        public MediaItem coverItem;
-        public Texture content;
-        public BitmapTexture labelTexture;
-        public TiledTexture bitmapTexture;
-        public Path setPath;
-        public String title;
-        public int totalCount;
-        public int sourceType;
-        public int cacheFlag;
-        public int cacheStatus;
-        public int rotation;
-        public boolean isWaitLoadingDisplayed;
-        public long setDataVersion;
-        public long coverDataVersion;
-        private BitmapLoader labelLoader;
-        private BitmapLoader coverLoader;
-    }
-
     public AlbumSetSlidingWindow(AbstractGalleryActivity activity,
-            AlbumSetDataLoader source, AlbumSetSlotRenderer.LabelSpec labelSpec, int cacheSize) {
+                                 AlbumSetDataLoader source, AlbumSetSlotRenderer.LabelSpec labelSpec, int cacheSize) {
         source.setModelListener(this);
         mSource = source;
         mData = new AlbumSetEntry[cacheSize];
@@ -112,6 +80,36 @@ public class AlbumSetSlidingWindow implements AlbumSetDataLoader.DataListener {
                 ((EntryUpdater) message.obj).updateEntry();
             }
         };
+    }
+
+    private static long getDataVersion(MediaObject object) {
+        return object == null
+                ? MediaSet.INVALID_DATA_VERSION
+                : object.getDataVersion();
+    }
+
+    private static boolean startLoadBitmap(BitmapLoader loader) {
+        if (loader == null) return false;
+        loader.startLoad();
+        return loader.isRequestInProgress();
+    }
+
+    private static int identifyCacheFlag(MediaSet set) {
+        if (set == null || (set.getSupportedOperations()
+                & MediaSet.SUPPORT_CACHE) == 0) {
+            return MediaSet.CACHE_FLAG_NO;
+        }
+
+        return set.getCacheFlag();
+    }
+
+    private static int identifyCacheStatus(MediaSet set) {
+        if (set == null || (set.getSupportedOperations()
+                & MediaSet.SUPPORT_CACHE) == 0) {
+            return MediaSet.CACHE_STATUS_NOT_CACHED;
+        }
+
+        return set.getCacheStatus();
     }
 
     public void setListener(Listener listener) {
@@ -171,7 +169,7 @@ public class AlbumSetSlidingWindow implements AlbumSetDataLoader.DataListener {
                     start, end, mData.length, mSize);
         }
 
-        AlbumSetEntry data[] = mData;
+        AlbumSetEntry[] data = mData;
         mActiveStart = start;
         mActiveEnd = end;
         int contentStart = Utils.clamp((start + end) / 2 - data.length / 2,
@@ -193,7 +191,7 @@ public class AlbumSetSlidingWindow implements AlbumSetDataLoader.DataListener {
     private void requestNonactiveImages() {
         int range = Math.max(
                 mContentEnd - mActiveEnd, mActiveStart - mContentStart);
-        for (int i = 0 ;i < range; ++i) {
+        for (int i = 0; i < range; ++i) {
             requestImagesInSlot(mActiveEnd + i);
             requestImagesInSlot(mActiveStart - 1 - i);
         }
@@ -202,7 +200,7 @@ public class AlbumSetSlidingWindow implements AlbumSetDataLoader.DataListener {
     private void cancelNonactiveImages() {
         int range = Math.max(
                 mContentEnd - mActiveEnd, mActiveStart - mContentStart);
-        for (int i = 0 ;i < range; ++i) {
+        for (int i = 0; i < range; ++i) {
             cancelImagesInSlot(mActiveEnd + i);
             cancelImagesInSlot(mActiveStart - 1 - i);
         }
@@ -220,12 +218,6 @@ public class AlbumSetSlidingWindow implements AlbumSetDataLoader.DataListener {
         AlbumSetEntry entry = mData[slotIndex % mData.length];
         if (entry.coverLoader != null) entry.coverLoader.cancelLoad();
         if (entry.labelLoader != null) entry.labelLoader.cancelLoad();
-    }
-
-    private static long getDataVersion(MediaObject object) {
-        return object == null
-                ? MediaSet.INVALID_DATA_VERSION
-                : object.getDataVersion();
     }
 
     private void freeSlotContent(int slotIndex) {
@@ -292,12 +284,6 @@ public class AlbumSetSlidingWindow implements AlbumSetDataLoader.DataListener {
         AlbumSetEntry entry = new AlbumSetEntry();
         updateAlbumSetEntry(entry, slotIndex);
         mData[slotIndex % mData.length] = entry;
-    }
-
-    private static boolean startLoadBitmap(BitmapLoader loader) {
-        if (loader == null) return false;
-        loader.startLoad();
-        return loader.isRequestInProgress();
     }
 
     private void uploadBackgroundTextureInSlot(int index) {
@@ -371,7 +357,7 @@ public class AlbumSetSlidingWindow implements AlbumSetDataLoader.DataListener {
         if (index < mContentStart || index >= mContentEnd) {
             Log.w(TAG, String.format(
                     "invalid update: %s is outside (%s, %s)",
-                    index, mContentStart, mContentEnd) );
+                    index, mContentStart, mContentEnd));
             return;
         }
 
@@ -414,13 +400,64 @@ public class AlbumSetSlidingWindow implements AlbumSetDataLoader.DataListener {
         updateAllImageRequests();
     }
 
-    private static interface EntryUpdater {
-        public void updateEntry();
+    public void onSlotSizeChanged(int width, int height) {
+        if (mSlotWidth == width) return;
+
+        mSlotWidth = width;
+        mLoadingLabel = null;
+        mLabelMaker.setLabelWidth(mSlotWidth, KEY_ALBUM);
+
+        if (!mIsActive) return;
+
+        for (int i = mContentStart, n = mContentEnd; i < n; ++i) {
+            AlbumSetEntry entry = mData[i % mData.length];
+            if (entry.labelLoader != null) {
+                entry.labelLoader.recycle();
+                entry.labelLoader = null;
+                entry.labelTexture = null;
+            }
+            if (entry.album != null) {
+                entry.labelLoader = new AlbumLabelLoader(i,
+                        entry.title, entry.totalCount, entry.sourceType);
+            }
+        }
+        updateAllImageRequests();
+        updateTextureUploadQueue();
+    }
+
+    public interface Listener {
+        void onSizeChanged(int size);
+
+        void onContentChanged();
+    }
+
+    private interface EntryUpdater {
+        void updateEntry();
+    }
+
+    public static class AlbumSetEntry {
+        public MediaSet album;
+        public MediaItem coverItem;
+        public Texture content;
+        public BitmapTexture labelTexture;
+        public TiledTexture bitmapTexture;
+        public Path setPath;
+        public String title;
+        public int totalCount;
+        public int sourceType;
+        public int cacheFlag;
+        public int cacheStatus;
+        public int rotation;
+        public boolean isWaitLoadingDisplayed;
+        public long setDataVersion;
+        public long coverDataVersion;
+        private BitmapLoader labelLoader;
+        private BitmapLoader coverLoader;
     }
 
     private class AlbumCoverLoader extends BitmapLoader implements EntryUpdater {
-        private MediaItem mMediaItem;
         private final int mSlotIndex;
+        private MediaItem mMediaItem;
 
         public AlbumCoverLoader(int slotIndex, MediaItem item) {
             mSlotIndex = slotIndex;
@@ -457,24 +494,6 @@ public class AlbumSetSlidingWindow implements AlbumSetDataLoader.DataListener {
                 mContentUploader.addTexture(texture);
             }
         }
-    }
-
-    private static int identifyCacheFlag(MediaSet set) {
-        if (set == null || (set.getSupportedOperations()
-                & MediaSet.SUPPORT_CACHE) == 0) {
-            return MediaSet.CACHE_FLAG_NO;
-        }
-
-        return set.getCacheFlag();
-    }
-
-    private static int identifyCacheStatus(MediaSet set) {
-        if (set == null || (set.getSupportedOperations()
-                & MediaSet.SUPPORT_CACHE) == 0) {
-            return MediaSet.CACHE_STATUS_NOT_CACHED;
-        }
-
-        return set.getCacheStatus();
     }
 
     private class AlbumLabelLoader extends BitmapLoader implements EntryUpdater {
@@ -521,30 +540,5 @@ public class AlbumSetSlidingWindow implements AlbumSetDataLoader.DataListener {
                 mLabelUploader.addBgTexture(texture);
             }
         }
-    }
-
-    public void onSlotSizeChanged(int width, int height) {
-        if (mSlotWidth == width) return;
-
-        mSlotWidth = width;
-        mLoadingLabel = null;
-        mLabelMaker.setLabelWidth(mSlotWidth,KEY_ALBUM);
-
-        if (!mIsActive) return;
-
-        for (int i = mContentStart, n = mContentEnd; i < n; ++i) {
-            AlbumSetEntry entry = mData[i % mData.length];
-            if (entry.labelLoader != null) {
-                entry.labelLoader.recycle();
-                entry.labelLoader = null;
-                entry.labelTexture = null;
-            }
-            if (entry.album != null) {
-                entry.labelLoader = new AlbumLabelLoader(i,
-                        entry.title, entry.totalCount, entry.sourceType);
-            }
-        }
-        updateAllImageRequests();
-        updateTextureUploadQueue();
     }
 }

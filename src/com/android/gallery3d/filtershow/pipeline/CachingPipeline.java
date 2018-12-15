@@ -23,7 +23,6 @@ import android.graphics.Canvas;
 import android.graphics.Matrix;
 import android.graphics.Paint;
 import android.graphics.Rect;
-import android.graphics.RectF;
 import android.renderscript.Allocation;
 import android.renderscript.RenderScript;
 import android.util.Log;
@@ -39,25 +38,18 @@ import java.util.Vector;
 
 public class CachingPipeline implements PipelineInterface {
     private static final String LOGTAG = "CachingPipeline";
-    private boolean DEBUG = false;
-
     private static final Bitmap.Config BITMAP_CONFIG = Bitmap.Config.ARGB_8888;
-
     private static volatile RenderScript sRS = null;
-
+    protected volatile Allocation mInPixelsAllocation;
+    protected volatile Allocation mOutPixelsAllocation;
+    private boolean DEBUG = false;
     private FiltersManager mFiltersManager = null;
     private volatile Bitmap mOriginalBitmap = null;
     private volatile Bitmap mResizedOriginalBitmap = null;
-
     private FilterEnvironment mEnvironment = new FilterEnvironment();
     private CacheProcessing mCachedProcessing = new CacheProcessing();
-
-
     private volatile Allocation mOriginalAllocation = null;
-    private volatile Allocation mFiltersOnlyOriginalAllocation =  null;
-
-    protected volatile Allocation mInPixelsAllocation;
-    protected volatile Allocation mOutPixelsAllocation;
+    private volatile Allocation mFiltersOnlyOriginalAllocation = null;
     private volatile int mWidth = 0;
     private volatile int mHeight = 0;
 
@@ -176,7 +168,7 @@ public class CachingPipeline implements PipelineInterface {
 
     public void setOriginal(Bitmap bitmap) {
         mOriginalBitmap = bitmap;
-        Log.v(LOGTAG,"setOriginal, size " + bitmap.getWidth() + " x " + bitmap.getHeight());
+        Log.v(LOGTAG, "setOriginal, size " + bitmap.getWidth() + " x " + bitmap.getHeight());
         ImagePreset preset = MasterImage.getImage().getPreset();
         setupEnvironment(preset, false);
         updateOriginalAllocation(preset);
@@ -288,7 +280,7 @@ public class CachingPipeline implements PipelineInterface {
                 return;
             }
             if ((request.getType() != RenderingRequest.PARTIAL_RENDERING
-                  && request.getType() != RenderingRequest.ICON_RENDERING
+                    && request.getType() != RenderingRequest.ICON_RENDERING
                     && request.getBitmap() == null)
                     || request.getImagePreset() == null) {
                 return;
@@ -361,8 +353,8 @@ public class CachingPipeline implements PipelineInterface {
                         float maxSize = Math.max(iconBounds.width(), iconBounds.height());
                         float scale = maxSize / minSize;
                         m.setScale(scale, scale);
-                        float dx = (iconBounds.width() - (source.getWidth() * scale))/2.0f;
-                        float dy = (iconBounds.height() - (source.getHeight() * scale))/2.0f;
+                        float dx = (iconBounds.width() - (source.getWidth() * scale)) / 2.0f;
+                        float dy = (iconBounds.height() - (source.getHeight() * scale)) / 2.0f;
                         m.postTranslate(dx, dy);
                         canvas.drawBitmap(source, m, new Paint(Paint.FILTER_BITMAP_FLAG));
                     } else {

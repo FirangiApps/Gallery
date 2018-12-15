@@ -23,13 +23,14 @@ import android.content.Context;
 import android.view.MotionEvent;
 import android.view.View;
 
-import org.codeaurora.gallery.R;
 import com.android.gallery3d.common.ApiHelper;
+
+import org.codeaurora.gallery.R;
 
 /**
  * The controller for the Trimming Video.
  */
-public class TrimControllerOverlay extends CommonControllerOverlay  {
+public class TrimControllerOverlay extends CommonControllerOverlay {
 
     public TrimControllerOverlay(Context context) {
         super(context);

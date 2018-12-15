@@ -29,21 +29,21 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.GridView;
 
-import org.codeaurora.gallery.R;
 import com.android.photos.adapters.AlbumSetCursorAdapter;
 import com.android.photos.data.AlbumSetLoader;
 import com.android.photos.shims.LoaderCompatShim;
 import com.android.photos.shims.MediaSetLoader;
+
+import org.codeaurora.gallery.R;
 
 import java.util.ArrayList;
 
 
 public class AlbumSetFragment extends MultiSelectGridFragment implements LoaderCallbacks<Cursor> {
 
+    private static final int LOADER_ALBUMSET = 1;
     private AlbumSetCursorAdapter mAdapter;
     private LoaderCompatShim<Cursor> mLoaderCompatShim;
-
-    private static final int LOADER_ALBUMSET = 1;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -54,7 +54,7 @@ public class AlbumSetFragment extends MultiSelectGridFragment implements LoaderC
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
-            Bundle savedInstanceState) {
+                             Bundle savedInstanceState) {
         View root = super.onCreateView(inflater, container, savedInstanceState);
         getLoaderManager().initLoader(LOADER_ALBUMSET, null, this);
         return root;
@@ -78,7 +78,7 @@ public class AlbumSetFragment extends MultiSelectGridFragment implements LoaderC
 
     @Override
     public void onLoadFinished(Loader<Cursor> loader,
-            Cursor data) {
+                               Cursor data) {
         mAdapter.swapCursor(data);
         setAdapter(mAdapter);
     }

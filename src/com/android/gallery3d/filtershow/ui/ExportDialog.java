@@ -33,13 +33,14 @@ import android.widget.EditText;
 import android.widget.SeekBar;
 import android.widget.TextView;
 
-import org.codeaurora.gallery.R;
 import com.android.gallery3d.filtershow.FilterShowActivity;
 import com.android.gallery3d.filtershow.imageshow.MasterImage;
 import com.android.gallery3d.filtershow.pipeline.ImagePreset;
 import com.android.gallery3d.filtershow.pipeline.ProcessingService;
 import com.android.gallery3d.filtershow.tools.SaveImage;
 import com.android.gallery3d.ui.BaseDialogFragment;
+
+import org.codeaurora.gallery.R;
 
 import java.io.ByteArrayOutputStream;
 import java.io.File;
@@ -69,26 +70,6 @@ public class ExportDialog extends BaseDialogFragment implements SeekBar.OnSeekBa
             updateSize();
         }
     };
-
-    private class Watcher implements TextWatcher {
-        private EditText mEditText;
-        Watcher(EditText text) {
-            mEditText = text;
-        }
-
-        @Override
-        public void beforeTextChanged(CharSequence s, int start, int count, int after) {
-        }
-
-        @Override
-        public void onTextChanged(CharSequence s, int start, int before, int count) {
-        }
-
-        @Override
-        public void afterTextChanged(Editable s) {
-            textChanged(mEditText);
-        }
-    }
 
     @Override
     public Dialog onCreateDialog(Bundle savedInstanceState) {
@@ -130,15 +111,15 @@ public class ExportDialog extends BaseDialogFragment implements SeekBar.OnSeekBa
     private View initCustomLayout() {
         LayoutInflater inflater = getActivity().getLayoutInflater();
         View view = inflater.inflate(R.layout.filtershow_export_dialog, null);
-        mSeekBar = (SeekBar) view.findViewById(R.id.qualitySeekBar);
-        mSeekVal = (TextView) view.findViewById(R.id.qualityTextView);
+        mSeekBar = view.findViewById(R.id.qualitySeekBar);
+        mSeekVal = view.findViewById(R.id.qualityTextView);
         mSliderLabel = getString(R.string.quality) + ": ";
         mSeekBar.setProgress(mQuality);
         mSeekVal.setText(mSliderLabel + mSeekBar.getProgress());
         mSeekBar.setOnSeekBarChangeListener(this);
-        mWidthText = (EditText) view.findViewById(R.id.editableWidth);
-        mHeightText = (EditText) view.findViewById(R.id.editableHeight);
-        mEstimatedSize = (TextView) view.findViewById(R.id.estimadedSize);
+        mWidthText = view.findViewById(R.id.editableWidth);
+        mHeightText = view.findViewById(R.id.editableHeight);
+        mEstimatedSize = view.findViewById(R.id.estimadedSize);
 
         mOriginalBounds = MasterImage.getImage().getOriginalBounds();
         ImagePreset preset = MasterImage.getImage().getPreset();
@@ -267,6 +248,27 @@ public class ExportDialog extends BaseDialogFragment implements SeekBar.OnSeekBa
         mExportHeight = height;
         updateSize();
         mEditing = false;
+    }
+
+    private class Watcher implements TextWatcher {
+        private EditText mEditText;
+
+        Watcher(EditText text) {
+            mEditText = text;
+        }
+
+        @Override
+        public void beforeTextChanged(CharSequence s, int start, int count, int after) {
+        }
+
+        @Override
+        public void onTextChanged(CharSequence s, int start, int before, int count) {
+        }
+
+        @Override
+        public void afterTextChanged(Editable s) {
+            textChanged(mEditText);
+        }
     }
 
 }

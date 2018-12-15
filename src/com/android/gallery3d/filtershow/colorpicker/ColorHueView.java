@@ -21,7 +21,6 @@ import android.graphics.Bitmap;
 import android.graphics.BitmapShader;
 import android.graphics.Canvas;
 import android.graphics.Color;
-import android.graphics.LinearGradient;
 import android.graphics.Paint;
 import android.graphics.RadialGradient;
 import android.graphics.RectF;
@@ -37,28 +36,26 @@ import java.util.ArrayList;
 
 public class ColorHueView extends View implements ColorListener {
 
+    public final static float DOT_SIZE = 20;
+    public final static float BORDER_SIZE = 20;
+    Bitmap mBitmap;
+    RectF mRect = new RectF();
+    int[] mTmpBuff;
+    float[] mTmpHSV = new float[3];
+    ArrayList<ColorListener> mColorListeners = new ArrayList<ColorListener>();
     private float mWidth;
-
     private Paint mLinePaint1;
     private Paint mLinePaint2;
     private Paint mPaint = new Paint();
     private float mHeight;
     private Paint mDotPaint;
     private int mBgcolor = 0;
-    Bitmap mBitmap;
     private float mDotRadius;
     private float mBorder;
-
-    private float[] mHSVO = {0.f,0.f,0.f,0.f};
+    private float[] mHSVO = {0.f, 0.f, 0.f, 0.f};
     private int mSliderColor;
     private float mDotX = mBorder;
     private float mDotY = mBorder;
-
-    public final static float DOT_SIZE = 20;
-    public final static float BORDER_SIZE = 20;
-    RectF mRect = new RectF();
-    int[] mTmpBuff;
-    float[] mTmpHSV = new float[3];
     private Paint mCheckPaint;
 
     public ColorHueView(Context ctx, AttributeSet attrs) {
@@ -107,7 +104,6 @@ public class ColorHueView extends View implements ColorListener {
 
         mBitmap.setPixels(mTmpBuff, 0, w, 0, 0, w, h);
     }
-
 
     public boolean onDown(MotionEvent e) {
         return true;
@@ -163,7 +159,6 @@ public class ColorHueView extends View implements ColorListener {
         setupButton();
     }
 
-
     @Override
     protected void onDraw(Canvas canvas) {
         super.onDraw(canvas);
@@ -173,7 +168,7 @@ public class ColorHueView extends View implements ColorListener {
         mRect.right = mWidth - mBorder;
         mRect.top = 0;
         mRect.bottom = mHeight;
-        canvas.drawRect(mRect,mCheckPaint);
+        canvas.drawRect(mRect, mCheckPaint);
         canvas.drawBitmap(mBitmap, null, mRect, mPaint);
 
 
@@ -184,9 +179,9 @@ public class ColorHueView extends View implements ColorListener {
         }
     }
 
-    private void makeCheckPaint(){
+    private void makeCheckPaint() {
         int block = 16;
-        int checkdim = block*2;
+        int checkdim = block * 2;
         int[] colors = new int[checkdim * checkdim];
         for (int i = 0; i < colors.length; i++) {
             int y = i / (checkdim * block);
@@ -206,8 +201,6 @@ public class ColorHueView extends View implements ColorListener {
         setupButton();
         invalidate();
     }
-
-    ArrayList<ColorListener> mColorListeners = new ArrayList<ColorListener>();
 
     public void notifyColorListeners(float[] hsvo) {
         for (ColorListener l : mColorListeners) {

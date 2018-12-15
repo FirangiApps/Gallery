@@ -32,9 +32,8 @@ import java.util.List;
 
 public class FilterStackSource {
     private static final String LOGTAG = "FilterStackSource";
-
-    private SQLiteDatabase database = null;
     private final FilterStackDBHelper dbHelper;
+    private SQLiteDatabase database = null;
 
     public FilterStackSource(Context context) {
         dbHelper = new FilterStackDBHelper(context);
@@ -74,7 +73,7 @@ public class FilterStackSource {
         database.beginTransaction();
         try {
             database.update(FilterStack.TABLE, val, FilterStack._ID + " = ?",
-                    new String[] { "" + id});
+                    new String[]{"" + id});
             database.setTransactionSuccessful();
         } finally {
             database.endTransaction();
@@ -86,7 +85,7 @@ public class FilterStackSource {
         database.beginTransaction();
         try {
             ret = (0 != database.delete(FilterStack.TABLE, FilterStack._ID + " = ?",
-                    new String[] { "" + id }));
+                    new String[]{"" + id}));
             database.setTransactionSuccessful();
         } finally {
             database.endTransaction();
@@ -110,9 +109,9 @@ public class FilterStackSource {
         database.beginTransaction();
         try {
             c = database.query(FilterStack.TABLE,
-                    new String[] { FilterStack.FILTER_STACK },
+                    new String[]{FilterStack.FILTER_STACK},
                     FilterStack.STACK_ID + " = ?",
-                    new String[] { stackName }, null, null, null, null);
+                    new String[]{stackName}, null, null, null, null);
             if (c != null && c.moveToFirst() && !c.isNull(0)) {
                 ret = c.getBlob(0);
             }
@@ -134,15 +133,15 @@ public class FilterStackSource {
         database.beginTransaction();
         try {
             c = database.query(FilterStack.TABLE,
-                    new String[] { FilterStack._ID,
+                    new String[]{FilterStack._ID,
                             FilterStack.STACK_ID,
-                            FilterStack.FILTER_STACK },
+                            FilterStack.FILTER_STACK},
                     null, null, null, null, null, null);
             if (c != null) {
                 boolean loopCheck = c.moveToFirst();
                 while (loopCheck) {
                     int id = c.getInt(0);
-                    String name = (c.isNull(1)) ?  null : c.getString(1);
+                    String name = (c.isNull(1)) ? null : c.getString(1);
                     byte[] b = (c.isNull(2)) ? null : c.getBlob(2);
                     String json = new String(b);
 
@@ -171,12 +170,12 @@ public class FilterStackSource {
         database.beginTransaction();
         try {
             c = database.query(FilterStack.TABLE,
-                    new String[] { FilterStack.STACK_ID, FilterStack.FILTER_STACK },
+                    new String[]{FilterStack.STACK_ID, FilterStack.FILTER_STACK},
                     null, null, null, null, null, null);
             if (c != null) {
                 boolean loopCheck = c.moveToFirst();
                 while (loopCheck) {
-                    String name = (c.isNull(0)) ?  null : c.getString(0);
+                    String name = (c.isNull(0)) ? null : c.getString(0);
                     byte[] b = (c.isNull(1)) ? null : c.getBlob(1);
                     ret.add(new Pair<String, byte[]>(name, b));
                     loopCheck = c.moveToNext();

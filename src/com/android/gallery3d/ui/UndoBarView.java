@@ -19,7 +19,6 @@ package com.android.gallery3d.ui;
 import android.content.Context;
 import android.view.MotionEvent;
 
-import org.codeaurora.gallery.R;
 import com.android.gallery3d.common.Utils;
 import com.android.gallery3d.glrenderer.GLCanvas;
 import com.android.gallery3d.glrenderer.NinePatchTexture;
@@ -27,13 +26,16 @@ import com.android.gallery3d.glrenderer.ResourceTexture;
 import com.android.gallery3d.glrenderer.StringTexture;
 import com.android.gallery3d.util.GalleryUtils;
 
+import org.codeaurora.gallery.R;
+
 public class UndoBarView extends GLView {
     @SuppressWarnings("unused")
     private static final String TAG = "UndoBarView";
 
     private static final int WHITE = 0xFFFFFFFF;
     private static final int GRAY = 0xFFAAAAAA;
-
+    private static final long NO_ANIMATION = -1;
+    private static long ANIM_TIME = 200;
     private final NinePatchTexture mPanel;
     private final StringTexture mUndoText;
     private final StringTexture mDeletedText;
@@ -49,9 +51,11 @@ public class UndoBarView extends GLView {
     private final int mSeparatorWidth;
     private final int mDeletedTextMargin;
     private final int mClickRegion;
-
     private OnClickListener mOnClickListener;
     private boolean mDownOnButton;
+    private long mAnimationStartTime = NO_ANIMATION;
+    private float mFromAlpha, mToAlpha;
+    private float mAlpha;
 
     // This is the layout of UndoBarView. The unit is dp.
     //
@@ -81,6 +85,14 @@ public class UndoBarView extends GLView {
                 context, R.drawable.ic_menu_revert_holo_dark);
         mClickRegion = mBarMargin + mUndoTextMargin + mUndoText.getWidth()
                 + mIconMargin + mIconSize + mSeparatorRightMargin;
+    }
+
+    ////////////////////////////////////////////////////////////////////////////
+    //  Alpha Animation
+    ////////////////////////////////////////////////////////////////////////////
+
+    private static float getTargetAlpha(int visibility) {
+        return (visibility == VISIBLE) ? 1f : 0f;
     }
 
     public void setOnClickListener(OnClickListener listener) {
@@ -155,20 +167,6 @@ public class UndoBarView extends GLView {
         int w = getWidth();
         int h = getHeight();
         return (x >= w - mClickRegion && x < w && y >= 0 && y < h);
-    }
-
-    ////////////////////////////////////////////////////////////////////////////
-    //  Alpha Animation
-    ////////////////////////////////////////////////////////////////////////////
-
-    private static final long NO_ANIMATION = -1;
-    private static long ANIM_TIME = 200;
-    private long mAnimationStartTime = NO_ANIMATION;
-    private float mFromAlpha, mToAlpha;
-    private float mAlpha;
-
-    private static float getTargetAlpha(int visibility) {
-        return (visibility == VISIBLE) ? 1f : 0f;
     }
 
     @Override

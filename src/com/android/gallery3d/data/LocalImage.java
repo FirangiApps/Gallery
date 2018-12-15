@@ -20,7 +20,6 @@ import android.annotation.TargetApi;
 import android.content.ContentResolver;
 import android.content.ContentValues;
 import android.database.Cursor;
-//import android.drm.DrmHelper;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.BitmapRegionDecoder;
@@ -47,12 +46,28 @@ import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 
+//import android.drm.DrmHelper;
+
 // LocalImage represents an image in the local storage.
 public class LocalImage extends LocalMediaItem {
-    private static final String TAG = "LocalImage";
-
     static final Path ITEM_PATH = Path.fromString("/local/image/item");
-
+    static final String[] PROJECTION = {
+            ImageColumns._ID,           // 0
+            ImageColumns.TITLE,         // 1
+            ImageColumns.MIME_TYPE,     // 2
+            ImageColumns.LATITUDE,      // 3
+            ImageColumns.LONGITUDE,     // 4
+            ImageColumns.DATE_TAKEN,    // 5
+            ImageColumns.DATE_ADDED,    // 6
+            ImageColumns.DATE_MODIFIED, // 7
+            ImageColumns.DATA,          // 8
+            ImageColumns.ORIENTATION,   // 9
+            ImageColumns.BUCKET_ID,     // 10
+            ImageColumns.SIZE,          // 11
+            "0",                        // 12
+            "0"                         // 13
+    };
+    private static final String TAG = "LocalImage";
     // Must preserve order between these indices and the order of the terms in
     // the following PROJECTION array.
     private static final int INDEX_ID = 0;
@@ -70,39 +85,12 @@ public class LocalImage extends LocalMediaItem {
     private static final int INDEX_WIDTH = 12;
     private static final int INDEX_HEIGHT = 13;
 
-    static final String[] PROJECTION =  {
-            ImageColumns._ID,           // 0
-            ImageColumns.TITLE,         // 1
-            ImageColumns.MIME_TYPE,     // 2
-            ImageColumns.LATITUDE,      // 3
-            ImageColumns.LONGITUDE,     // 4
-            ImageColumns.DATE_TAKEN,    // 5
-            ImageColumns.DATE_ADDED,    // 6
-            ImageColumns.DATE_MODIFIED, // 7
-            ImageColumns.DATA,          // 8
-            ImageColumns.ORIENTATION,   // 9
-            ImageColumns.BUCKET_ID,     // 10
-            ImageColumns.SIZE,          // 11
-            "0",                        // 12
-            "0"                         // 13
-    };
-
     static {
         updateWidthAndHeightProjection();
     }
 
-    @TargetApi(Build.VERSION_CODES.JELLY_BEAN)
-    private static void updateWidthAndHeightProjection() {
-        if (ApiHelper.HAS_MEDIA_COLUMNS_WIDTH_AND_HEIGHT) {
-            PROJECTION[INDEX_WIDTH] = MediaColumns.WIDTH;
-            PROJECTION[INDEX_HEIGHT] = MediaColumns.HEIGHT;
-        }
-    }
-
     private final GalleryApp mApplication;
-
     public int rotation;
-
     private PanoramaMetadataSupport mPanoramaMetadata = new PanoramaMetadataSupport(this);
 
     public LocalImage(Path path, GalleryApp application, Cursor cursor) {
@@ -128,6 +116,14 @@ public class LocalImage extends LocalMediaItem {
             }
         } finally {
             cursor.close();
+        }
+    }
+
+    @TargetApi(Build.VERSION_CODES.JELLY_BEAN)
+    private static void updateWidthAndHeightProjection() {
+        if (ApiHelper.HAS_MEDIA_COLUMNS_WIDTH_AND_HEIGHT) {
+            PROJECTION[INDEX_WIDTH] = MediaColumns.WIDTH;
+            PROJECTION[INDEX_HEIGHT] = MediaColumns.HEIGHT;
         }
     }
 
@@ -177,80 +173,9 @@ public class LocalImage extends LocalMediaItem {
                 type, filePath, mimeType);
     }
 
-    public static class LocalImageRequest extends ImageCacheRequest {
-        private String mLocalFilePath;
-
-        LocalImageRequest(GalleryApp application, Path path, long timeModified,
-                int type, String localFilePath) {
-            super(application, path, timeModified, type,
-                    MediaItem.getTargetSize(type));
-            mLocalFilePath = localFilePath;
-        }
-
-        LocalImageRequest(GalleryApp application, Path path, long timeModified,
-                int type, String localFilePath, String mimeType) {
-            super(application, path, timeModified, type,
-                    MediaItem.getTargetSize(type),localFilePath, mimeType);
-            mLocalFilePath = localFilePath;
-        }
-
-        @Override
-        public Bitmap onDecodeOriginal(JobContext jc, final int type) {
-            BitmapFactory.Options options = new BitmapFactory.Options();
-            options.inPreferredConfig = Bitmap.Config.ARGB_8888;
-
-//            if (DrmHelper.isDrmFile(mLocalFilePath)) {
-//                return DecodeUtils.ensureGLCompatibleBitmap(DrmHelper
-//                        .getBitmap(mLocalFilePath, options));
-//            }
-
-            int targetSize = MediaItem.getTargetSize(type);
-
-            // try to decode from JPEG EXIF
-            if (type == MediaItem.TYPE_MICROTHUMBNAIL) {
-                ExifInterface exif = new ExifInterface();
-                byte[] thumbData = null;
-                try {
-                    exif.readExif(mLocalFilePath);
-                    thumbData = exif.getThumbnail();
-                } catch (FileNotFoundException e) {
-                    Log.w(TAG, "failed to find file to read thumbnail: " + mLocalFilePath);
-                } catch (IOException e) {
-                    Log.w(TAG, "failed to get thumbnail from: " + mLocalFilePath);
-                }
-                if (thumbData != null) {
-                    Bitmap bitmap = DecodeUtils.decodeIfBigEnough(
-                            jc, thumbData, options, targetSize);
-                    if (bitmap != null) return bitmap;
-                }
-            }
-
-            return DecodeUtils.decodeThumbnail(jc, mLocalFilePath, options, targetSize, type);
-        }
-    }
-
     @Override
     public Job<BitmapRegionDecoder> requestLargeImage() {
         return new LocalLargeImageRequest(filePath);
-    }
-
-    public static class LocalLargeImageRequest
-            implements Job<BitmapRegionDecoder> {
-        String mLocalFilePath;
-
-        public LocalLargeImageRequest(String localFilePath) {
-            mLocalFilePath = localFilePath;
-        }
-
-        @Override
-        public BitmapRegionDecoder run(JobContext jc) {
-//            if (DrmHelper.isDrmFile(mLocalFilePath)) {
-//                return DrmHelper.createBitmapRegionDecoder(mLocalFilePath,
-//                        false);
-//            }
-
-            return DecodeUtils.createBitmapRegionDecoder(jc, mLocalFilePath, false);
-        }
     }
 
     @Override
@@ -267,19 +192,19 @@ public class LocalImage extends LocalMediaItem {
 //                operation |= SUPPORT_SHARE;
 //            }
 //        } else {
-            operation = SUPPORT_DELETE | SUPPORT_SHARE | SUPPORT_CROP
+        operation = SUPPORT_DELETE | SUPPORT_SHARE | SUPPORT_CROP
                 | SUPPORT_SETAS | SUPPORT_PRINT | SUPPORT_INFO;
-            if (BitmapUtils.isSupportedByRegionDecoder(mimeType)) {
-                operation |= SUPPORT_FULL_IMAGE | SUPPORT_EDIT;
-            }
+        if (BitmapUtils.isSupportedByRegionDecoder(mimeType)) {
+            operation |= SUPPORT_FULL_IMAGE | SUPPORT_EDIT;
+        }
 
-            if (BitmapUtils.isRotationSupported(mimeType)) {
-                operation |= SUPPORT_ROTATE;
-            }
+        if (BitmapUtils.isRotationSupported(mimeType)) {
+            operation |= SUPPORT_ROTATE;
+        }
 
-            if (GalleryUtils.isValidLocation(latitude, longitude)) {
-                operation |= SUPPORT_SHOW_ON_MAP;
-            }
+        if (GalleryUtils.isValidLocation(latitude, longitude)) {
+            operation |= SUPPORT_SHOW_ON_MAP;
+        }
 //        }
         return operation;
     }
@@ -316,7 +241,7 @@ public class LocalImage extends LocalMediaItem {
             ExifInterface exifInterface = new ExifInterface();
             ExifTag tag = exifInterface.buildTag(ExifInterface.TAG_ORIENTATION,
                     ExifInterface.getOrientationValueForRotation(rotation));
-            if(tag != null) {
+            if (tag != null) {
                 exifInterface.setTag(tag);
                 try {
                     exifInterface.forceRewriteExif(filePath);
@@ -382,5 +307,76 @@ public class LocalImage extends LocalMediaItem {
     @Override
     public String getFilePath() {
         return filePath;
+    }
+
+    public static class LocalImageRequest extends ImageCacheRequest {
+        private String mLocalFilePath;
+
+        LocalImageRequest(GalleryApp application, Path path, long timeModified,
+                          int type, String localFilePath) {
+            super(application, path, timeModified, type,
+                    MediaItem.getTargetSize(type));
+            mLocalFilePath = localFilePath;
+        }
+
+        LocalImageRequest(GalleryApp application, Path path, long timeModified,
+                          int type, String localFilePath, String mimeType) {
+            super(application, path, timeModified, type,
+                    MediaItem.getTargetSize(type), localFilePath, mimeType);
+            mLocalFilePath = localFilePath;
+        }
+
+        @Override
+        public Bitmap onDecodeOriginal(JobContext jc, final int type) {
+            BitmapFactory.Options options = new BitmapFactory.Options();
+            options.inPreferredConfig = Bitmap.Config.ARGB_8888;
+
+//            if (DrmHelper.isDrmFile(mLocalFilePath)) {
+//                return DecodeUtils.ensureGLCompatibleBitmap(DrmHelper
+//                        .getBitmap(mLocalFilePath, options));
+//            }
+
+            int targetSize = MediaItem.getTargetSize(type);
+
+            // try to decode from JPEG EXIF
+            if (type == MediaItem.TYPE_MICROTHUMBNAIL) {
+                ExifInterface exif = new ExifInterface();
+                byte[] thumbData = null;
+                try {
+                    exif.readExif(mLocalFilePath);
+                    thumbData = exif.getThumbnail();
+                } catch (FileNotFoundException e) {
+                    Log.w(TAG, "failed to find file to read thumbnail: " + mLocalFilePath);
+                } catch (IOException e) {
+                    Log.w(TAG, "failed to get thumbnail from: " + mLocalFilePath);
+                }
+                if (thumbData != null) {
+                    Bitmap bitmap = DecodeUtils.decodeIfBigEnough(
+                            jc, thumbData, options, targetSize);
+                    if (bitmap != null) return bitmap;
+                }
+            }
+
+            return DecodeUtils.decodeThumbnail(jc, mLocalFilePath, options, targetSize, type);
+        }
+    }
+
+    public static class LocalLargeImageRequest
+            implements Job<BitmapRegionDecoder> {
+        String mLocalFilePath;
+
+        public LocalLargeImageRequest(String localFilePath) {
+            mLocalFilePath = localFilePath;
+        }
+
+        @Override
+        public BitmapRegionDecoder run(JobContext jc) {
+//            if (DrmHelper.isDrmFile(mLocalFilePath)) {
+//                return DrmHelper.createBitmapRegionDecoder(mLocalFilePath,
+//                        false);
+//            }
+
+            return DecodeUtils.createBitmapRegionDecoder(jc, mLocalFilePath, false);
+        }
     }
 }

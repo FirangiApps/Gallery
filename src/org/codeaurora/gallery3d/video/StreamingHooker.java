@@ -10,18 +10,15 @@ import android.view.MenuItem;
 import android.widget.Toast;
 
 import org.codeaurora.gallery.R;
-import org.codeaurora.gallery3d.ext.MovieUtils;
 
 public class StreamingHooker extends MovieHooker {
+    public static final String KEY_LOGO_BITMAP = "logo-bitmap";
     private static final String TAG = "StreamingHooker";
     private static final boolean LOG = true;
-
     private static final String ACTION_STREAMING = "org.codeaurora.settings.streaming";
     private static final int MENU_INPUT_URL = 1;
     private static final int MENU_SETTINGS = 2;
     private static final int MENU_DETAIL = 3;
-
-    public static final String KEY_LOGO_BITMAP = "logo-bitmap";
 
     @Override
     public boolean onCreateOptionsMenu(final Menu menu) {

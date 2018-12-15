@@ -33,13 +33,11 @@ import java.util.Stack;
 public class StateManager {
     @SuppressWarnings("unused")
     private static final String TAG = "StateManager";
-    private boolean mIsResumed = false;
-
     private static final String KEY_MAIN = "activity-state";
     private static final String KEY_DATA = "data";
     private static final String KEY_STATE = "bundle";
     private static final String KEY_CLASS = "class";
-
+    private boolean mIsResumed = false;
     private AbstractGalleryActivity mActivity;
     private Stack<StateEntry> mStack = new Stack<StateEntry>();
     private ActivityState.ResultEntry mResult;
@@ -49,7 +47,7 @@ public class StateManager {
     }
 
     public void startState(Class<? extends ActivityState> klass,
-            Bundle data) {
+                           Bundle data) {
         Log.v(TAG, "startState " + klass);
         ActivityState state = null;
         try {
@@ -75,7 +73,7 @@ public class StateManager {
     }
 
     public void startStateForResult(Class<? extends ActivityState> klass,
-            int requestCode, Bundle data) {
+                                    int requestCode, Bundle data) {
         Log.v(TAG, "startStateForResult " + klass + ", " + requestCode);
         ActivityState state = null;
         try {
@@ -225,7 +223,7 @@ public class StateManager {
     }
 
     public void switchState(ActivityState oldState,
-            Class<? extends ActivityState> klass, Bundle data) {
+                            Class<? extends ActivityState> klass, Bundle data) {
         Log.v(TAG, "switchState " + oldState + ", " + klass);
         if (oldState != mStack.peek().activityState) {
             throw new IllegalArgumentException("The stateview to be finished"
@@ -268,7 +266,7 @@ public class StateManager {
     @SuppressWarnings("unchecked")
     public void restoreFromState(Bundle inState) {
         Log.v(TAG, "restoreFromState");
-        Parcelable list[] = inState.getParcelableArray(KEY_MAIN);
+        Parcelable[] list = inState.getParcelableArray(KEY_MAIN);
         ActivityState topState = null;
         for (Parcelable parcelable : list) {
             Bundle bundle = (Bundle) parcelable;
@@ -299,7 +297,7 @@ public class StateManager {
     public void saveState(Bundle outState) {
         Log.v(TAG, "saveState");
 
-        Parcelable list[] = new Parcelable[mStack.size()];
+        Parcelable[] list = new Parcelable[mStack.size()];
         int i = 0;
         for (StateEntry entry : mStack) {
             Bundle bundle = new Bundle();

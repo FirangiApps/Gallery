@@ -21,7 +21,6 @@ import android.app.ActionBar.Tab;
 import android.app.Activity;
 import android.app.Fragment;
 import android.app.FragmentTransaction;
-import android.content.Intent;
 import android.os.Bundle;
 import android.support.v13.app.FragmentPagerAdapter;
 import android.support.v4.view.ViewPager;
@@ -78,16 +77,21 @@ public class GalleryActivity extends Activity implements MultiChoiceManager.Prov
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         switch (item.getItemId()) {
-        case R.id.menu_camera:
-            // TODO: Call the correct Camera intent.
-            throw new RuntimeException("Not implemented yet.");
+            case R.id.menu_camera:
+                // TODO: Call the correct Camera intent.
+                throw new RuntimeException("Not implemented yet.");
 //            Intent intent = new Intent(this, CameraActivity.class);
 //            intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
 //            startActivity(intent);
 //            return true;
-        default:
-            return super.onOptionsItemSelected(item);
+            default:
+                return super.onOptionsItemSelected(item);
         }
+    }
+
+    @Override
+    public MultiChoiceManager getMultiChoiceManager() {
+        return mMultiChoiceManager;
     }
 
     public static class TabsAdapter extends FragmentPagerAdapter implements
@@ -97,17 +101,6 @@ public class GalleryActivity extends Activity implements MultiChoiceManager.Prov
         private final ActionBar mActionBar;
         private final ViewPager mViewPager;
         private final ArrayList<TabInfo> mTabs = new ArrayList<TabInfo>();
-
-        static final class TabInfo {
-
-            private final Class<?> clss;
-            private final Bundle args;
-
-            TabInfo(Class<?> _class, Bundle _args) {
-                clss = _class;
-                args = _args;
-            }
-        }
 
         public TabsAdapter(GalleryActivity activity, ViewPager pager) {
             super(activity.getFragmentManager());
@@ -141,7 +134,7 @@ public class GalleryActivity extends Activity implements MultiChoiceManager.Prov
 
         @Override
         public void onPageScrolled(int position, float positionOffset,
-                int positionOffsetPixels) {
+                                   int positionOffsetPixels) {
         }
 
         @Override
@@ -176,10 +169,16 @@ public class GalleryActivity extends Activity implements MultiChoiceManager.Prov
         @Override
         public void onTabReselected(Tab tab, FragmentTransaction ft) {
         }
-    }
 
-    @Override
-    public MultiChoiceManager getMultiChoiceManager() {
-        return mMultiChoiceManager;
+        static final class TabInfo {
+
+            private final Class<?> clss;
+            private final Bundle args;
+
+            TabInfo(Class<?> _class, Bundle _args) {
+                clss = _class;
+                args = _args;
+            }
+        }
     }
 }

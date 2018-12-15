@@ -23,8 +23,11 @@ import java.io.IOException;
 import java.io.InputStream;
 
 public class JPEGInputStream extends FilterInputStream {
-    private long JNIPointer = 0; // Used by JNI code. Don't touch.
+    static {
+        System.loadLibrary("jni_gallery_jpegstream");
+    }
 
+    private long JNIPointer = 0; // Used by JNI code. Don't touch.
     private boolean mValidConfig = false;
     private boolean mConfigChanged = false;
     private int mFormat = -1;
@@ -165,7 +168,7 @@ public class JPEGInputStream extends FilterInputStream {
             cleanup();
             Point dimens = new Point(0, 0);
             int flag = setup(dimens, in, mFormat);
-            switch(flag) {
+            switch (flag) {
                 case JpegConfig.J_SUCCESS:
                     break; // allow setup to continue
                 case JpegConfig.J_ERROR_BAD_ARGS:
@@ -183,11 +186,7 @@ public class JPEGInputStream extends FilterInputStream {
 
     native private void cleanup();
 
-    native private int readDecodedBytes( byte[] inBuffer, int offset, int inCount);
+    native private int readDecodedBytes(byte[] inBuffer, int offset, int inCount);
 
     native private int skipDecodedBytes(int bytes);
-
-    static {
-        System.loadLibrary("jni_gallery_jpegstream");
-    }
 }

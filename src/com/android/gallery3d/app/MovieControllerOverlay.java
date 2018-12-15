@@ -38,7 +38,6 @@ import android.widget.ImageView.ScaleType;
 import android.widget.LinearLayout;
 
 import org.codeaurora.gallery.R;
-
 import org.codeaurora.gallery3d.ext.IContrllerOverlayExt;
 import org.codeaurora.gallery3d.video.IControllerRewindAndForward;
 import org.codeaurora.gallery3d.video.ScreenModeManager;
@@ -54,19 +53,16 @@ public class MovieControllerOverlay extends CommonControllerOverlay implements
 
     private static final String TAG = "Gallery3D/MovieControllerOverlay";
     private static final boolean LOG = true;
-
-    private ScreenModeManager mScreenModeManager;
-    protected ScreenModeExt mScreenModeExt = new ScreenModeExt();
-    protected ControllerRewindAndForwardExt mControllerRewindAndForwardExt = new ControllerRewindAndForwardExt();
-    private OverlayExtension mOverlayExt = new OverlayExtension();
-    private boolean hidden;
-
     private final Handler handler;
     private final Runnable startHidingRunnable;
     private final Animation hideAnimation;
-
-    private boolean enableRewindAndForward = false;
+    protected ScreenModeExt mScreenModeExt = new ScreenModeExt();
+    protected ControllerRewindAndForwardExt mControllerRewindAndForwardExt = new ControllerRewindAndForwardExt();
     protected Context mContext;
+    private ScreenModeManager mScreenModeManager;
+    private OverlayExtension mOverlayExt = new OverlayExtension();
+    private boolean hidden;
+    private boolean enableRewindAndForward = false;
 
     public MovieControllerOverlay(Context context) {
         super(context);
@@ -395,7 +391,7 @@ public class MovieControllerOverlay extends CommonControllerOverlay implements
         if (!mOverlayExt.handleUpdateViews()) {
             mPlayPauseReplayView.setVisibility(
                     (mState != State.LOADING && mState != State.ERROR &&
-                    !(mState == State.ENDED && !mCanReplay))
+                            !(mState == State.ENDED && !mCanReplay))
                             ? View.VISIBLE : View.GONE);
         }
         requestLayout();
@@ -650,15 +646,14 @@ public class MovieControllerOverlay extends CommonControllerOverlay implements
         public boolean canHidePanel() {
             return !mAlwaysShowBottom;
         }
-    };
+    }
 
     class ScreenModeExt implements View.OnClickListener, ScreenModeListener {
+        private static final int MARGIN = 10; // dip
         // for screen mode feature
         private ImageView mScreenView;
         private int mScreenPadding;
         private int mScreenWidth;
-
-        private static final int MARGIN = 10; // dip
         private ViewGroup mParent;
         private ImageView mSeprator;
 
@@ -749,11 +744,11 @@ public class MovieControllerOverlay extends CommonControllerOverlay implements
             // layout screen view position
             int sw = getAddedRightPadding();
             mScreenView.layout(width - paddingRight - sw, yPosition
-                    - mTimeBar.getPreferredHeight(), width - paddingRight,
+                            - mTimeBar.getPreferredHeight(), width - paddingRight,
                     yPosition);
             if (enableRewindAndForward) {
                 mSeprator.layout(width - paddingRight - sw - 22, yPosition
-                        - mTimeBar.getPreferredHeight(), width - paddingRight - sw - 20,
+                                - mTimeBar.getPreferredHeight(), width - paddingRight - sw - 20,
                         yPosition);
             }
         }
@@ -770,13 +765,13 @@ public class MovieControllerOverlay extends CommonControllerOverlay implements
 
     class ControllerRewindAndForwardExt implements View.OnClickListener,
             IControllerRewindAndForward {
+        private static final int BUTTON_PADDING = 40;
         private LinearLayout mContollerButtons;
         private ImageView mStop;
         private ImageView mForward;
         private ImageView mRewind;
         private IRewindAndForwardListener mListenerForRewind;
         private int mButtonWidth;
-        private static final int BUTTON_PADDING = 40;
         private int mTimeBarHeight = 0;
 
         public ImageView getStopBtn() {
@@ -874,7 +869,7 @@ public class MovieControllerOverlay extends CommonControllerOverlay implements
         }
 
         public void onShow() {
-            Log.v(TAG, "ControllerRewindAndForwardExt onShow: "+mState);
+            Log.v(TAG, "ControllerRewindAndForwardExt onShow: " + mState);
             mContollerButtons.setVisibility(View.VISIBLE);
             updateBackgroundColor();
         }

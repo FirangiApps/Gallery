@@ -17,5 +17,5 @@
 package com.android.gallery3d.filtershow.filters;
 
 public interface FiltersManagerInterface {
-   ImageFilter getFilterForRepresentation(FilterRepresentation representation);
+    ImageFilter getFilterForRepresentation(FilterRepresentation representation);
 }

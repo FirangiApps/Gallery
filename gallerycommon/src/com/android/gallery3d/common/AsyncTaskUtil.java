@@ -29,6 +29,7 @@ import java.util.concurrent.Executor;
 public class AsyncTaskUtil {
     private static Method sMethodExecuteOnExecutor;
     private static Executor sExecutor;
+
     static {
         if (Build.VERSION.SDK_INT >= 11) {
             try {
@@ -46,6 +47,9 @@ public class AsyncTaskUtil {
         }
     }
 
+    private AsyncTaskUtil() {
+    }
+
     public static <Param> void executeInParallel(AsyncTask<Param, ?, ?> task, Param... params) {
         if (Build.VERSION.SDK_INT < 11) {
             task.execute(params);
@@ -58,9 +62,6 @@ public class AsyncTaskUtil {
                 throw new RuntimeException(e);
             }
         }
-    }
-
-    private AsyncTaskUtil() {
     }
 }
 

@@ -30,11 +30,12 @@ import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 
 public class BitmapUtils {
+    public static final int UNCONSTRAINED = -1;
     private static final String TAG = "BitmapUtils";
     private static final int DEFAULT_JPEG_QUALITY = 90;
-    public static final int UNCONSTRAINED = -1;
 
-    private BitmapUtils(){}
+    private BitmapUtils() {
+    }
 
     /*
      * Compute the sample size as a function of minSideLength
@@ -56,7 +57,7 @@ public class BitmapUtils {
      * request is 3. So we round up the sample size to avoid OOM.
      */
     public static int computeSampleSize(int width, int height,
-            int minSideLength, int maxNumOfPixels) {
+                                        int minSideLength, int maxNumOfPixels) {
         int initialSize = computeInitialSampleSize(
                 width, height, minSideLength, maxNumOfPixels);
 
@@ -66,7 +67,7 @@ public class BitmapUtils {
     }
 
     private static int computeInitialSampleSize(int w, int h,
-            int minSideLength, int maxNumOfPixels) {
+                                                int minSideLength, int maxNumOfPixels) {
         if (maxNumOfPixels == UNCONSTRAINED
                 && minSideLength == UNCONSTRAINED) return 1;
 
@@ -84,7 +85,7 @@ public class BitmapUtils {
     // This computes a sample size which makes the longer side at least
     // minSideLength long. If that's not possible, return 1.
     public static int computeSampleSizeLarger(int w, int h,
-            int minSideLength) {
+                                              int minSideLength) {
         int initialSize = Math.max(w / minSideLength, h / minSideLength);
         if (initialSize <= 1) return 1;
 
@@ -152,7 +153,7 @@ public class BitmapUtils {
 
         // scale the image so that the shorter side equals to the target;
         // the longer side will be center-cropped.
-        float scale = (float) size / Math.min(w,  h);
+        float scale = (float) size / Math.min(w, h);
 
         Bitmap target = Bitmap.createBitmap(size, size, getConfig(bitmap));
         int width = Math.round(scale * bitmap.getWidth());

@@ -29,7 +29,6 @@
 package com.android.gallery3d.app;
 
 import android.Manifest;
-import android.app.Activity;
 import android.content.pm.PackageManager;
 import android.os.Build;
 import android.os.Bundle;
@@ -43,6 +42,7 @@ public abstract class AbstractPermissionActivity extends FragmentActivity {
     private boolean permissionGranted = false;
 
     protected abstract void onGetPermissionsSuccess();
+
     protected abstract void onGetPermissionsFailure();
 
     @Override

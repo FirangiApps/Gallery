@@ -16,9 +16,10 @@
 
 package com.android.gallery3d.app;
 
-import org.codeaurora.gallery.R;
 import com.android.gallery3d.data.MediaObject;
 import com.android.gallery3d.data.Path;
+
+import org.codeaurora.gallery.R;
 
 // This class handles filtering and clustering.
 //
@@ -54,9 +55,6 @@ import com.android.gallery3d.data.Path;
 // functions. setupMenuItems() makes sure those types cannot be selected.
 //
 public class FilterUtils {
-    @SuppressWarnings("unused")
-    private static final String TAG = "FilterUtils";
-
     public static final int CLUSTER_BY_ALBUM = 1;
     public static final int CLUSTER_BY_TIME = 2;
     public static final int CLUSTER_BY_LOCATION = 4;
@@ -64,11 +62,11 @@ public class FilterUtils {
     public static final int CLUSTER_BY_SIZE = 16;
     public static final int CLUSTER_BY_FACE = 32;
     public static final int CLUSTER_BY_VIDEOS = 64;
-
     public static final int FILTER_IMAGE_ONLY = 1;
     public static final int FILTER_VIDEO_ONLY = 2;
     public static final int FILTER_ALL = 4;
-
+    @SuppressWarnings("unused")
+    private static final String TAG = "FilterUtils";
     // These are indices of the return values of getAppliedFilters().
     // The _F suffix means "fixed".
     private static final int CLUSTER_TYPE = 0;

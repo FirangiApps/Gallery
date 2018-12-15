@@ -8,18 +8,18 @@ public interface IMoviePlayer {
     void addBookmark();
 
     /**
-     * Loop current video.
-     *
-     * @param loop
-     */
-    void setLoop(boolean loop);
-
-    /**
      * Loop current video or not
      *
      * @return
      */
     boolean getLoop();
+
+    /**
+     * Loop current video.
+     *
+     * @param loop
+     */
+    void setLoop(boolean loop);
 
     /**
      * Can stop current video or not.

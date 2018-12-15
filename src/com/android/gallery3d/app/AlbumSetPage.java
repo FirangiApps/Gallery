@@ -41,7 +41,6 @@ import android.widget.RelativeLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import org.codeaurora.gallery.R;
 import com.android.gallery3d.common.Utils;
 import com.android.gallery3d.data.DataManager;
 import com.android.gallery3d.data.MediaDetails;
@@ -52,7 +51,6 @@ import com.android.gallery3d.data.Path;
 import com.android.gallery3d.glrenderer.FadeTexture;
 import com.android.gallery3d.glrenderer.GLCanvas;
 import com.android.gallery3d.picasasource.PicasaSource;
-import com.android.gallery3d.settings.GallerySettings;
 import com.android.gallery3d.ui.ActionModeHandler;
 import com.android.gallery3d.ui.ActionModeHandler.ActionModeListener;
 import com.android.gallery3d.ui.AlbumSetSlotRenderer;
@@ -67,43 +65,39 @@ import com.android.gallery3d.util.Future;
 import com.android.gallery3d.util.GalleryUtils;
 import com.android.gallery3d.util.HelpUtils;
 
+import org.codeaurora.gallery.R;
+
 import java.lang.ref.WeakReference;
 import java.util.ArrayList;
 
 public class AlbumSetPage extends ActivityState implements
         SelectionManager.SelectionListener, GalleryActionBar.ClusterRunner,
         EyePosition.EyePositionListener, MediaSet.SyncListener {
-    @SuppressWarnings("unused")
-    private static final String TAG = "AlbumSetPage";
-
-    private static final int MSG_PICK_ALBUM = 1;
-
     public static final String KEY_MEDIA_PATH = "media-path";
     public static final String KEY_SET_TITLE = "set-title";
     public static final String KEY_SET_SUBTITLE = "set-subtitle";
     public static final String KEY_SELECTED_CLUSTER_TYPE = "selected-cluster";
-
+    @SuppressWarnings("unused")
+    private static final String TAG = "AlbumSetPage";
+    private static final int MSG_PICK_ALBUM = 1;
     private static final int DATA_CACHE_SIZE = 256;
     private static final int REQUEST_DO_ANIMATION = 1;
 
     private static final int BIT_LOADING_RELOAD = 1;
     private static final int BIT_LOADING_SYNC = 2;
-
+    protected SelectionManager mSelectionManager;
+    WeakReference<Toast> mEmptyAlbumToast = null;
     private boolean mIsActive = false;
     private SlotView mSlotView;
     private AlbumSetSlotRenderer mAlbumSetView;
     private Config.AlbumSetPage mConfig;
-
     private MediaSet mMediaSet;
     private String mTitle;
     private String mSubtitle;
     private boolean mShowClusterMenu;
     private GalleryActionBar mActionBar;
     private int mSelectedAction;
-
-    protected SelectionManager mSelectionManager;
     private AlbumSetDataLoader mAlbumSetDataAdapter;
-
     private boolean mGetContent;
     private boolean mGetAlbum;
     private ActionModeHandler mActionModeHandler;
@@ -112,29 +106,13 @@ public class AlbumSetPage extends ActivityState implements
     private boolean mShowDetails;
     private EyePosition mEyePosition;
     private Handler mHandler;
-
     // The eyes' position of the user, the origin is at the center of the
     // device and the unit is in pixels.
     private float mX;
     private float mY;
     private float mZ;
-
-    private Future<Integer> mSyncTask = null;
-
-    private int mLoadingBits = 0;
-    private boolean mInitialSynced = false;
-
-    private Button mCameraButton;
-    private boolean mShowedEmptyToastForSelf = false;
-    private TextView tvEmptyAlbum;
-
-    @Override
-    protected int getBackgroundColorId() {
-        return R.color.albumset_background;
-    }
-
     private final GLView mRootPane = new GLView() {
-        private final float mMatrix[] = new float[16];
+        private final float[] mMatrix = new float[16];
 
         @Override
         protected void onLayout(
@@ -151,9 +129,7 @@ public class AlbumSetPage extends ActivityState implements
                 paddingBottom = mConfig.paddingBottomLand;
                 paddingRight = mConfig.paddingRightLand;
                 paddingLeft = mConfig.paddingLeftLand;
-            }
-            else
-            {
+            } else {
                 paddingTop = mConfig.paddingTop;
                 paddingBottom = mConfig.paddingBottom;
                 paddingRight = mConfig.paddingRight;
@@ -169,7 +145,7 @@ public class AlbumSetPage extends ActivityState implements
             }
             int slotViewBottom = bottom - top - paddingBottom;
             int slotViewRight = right - left - paddingRight;
-            int slotViewLeft = paddingLeft ;
+            int slotViewLeft = paddingLeft;
 
 
             if (mShowDetails) {
@@ -191,6 +167,24 @@ public class AlbumSetPage extends ActivityState implements
             canvas.restore();
         }
     };
+    private Future<Integer> mSyncTask = null;
+    private int mLoadingBits = 0;
+    private boolean mInitialSynced = false;
+    private Button mCameraButton;
+    private boolean mShowedEmptyToastForSelf = false;
+    private TextView tvEmptyAlbum;
+
+    private static boolean albumShouldOpenInFilmstrip(MediaSet album) {
+        int itemCount = album.getMediaItemCount();
+        ArrayList<MediaItem> list = (itemCount == 1) ? album.getMediaItem(0, 1) : null;
+        // open in film strip only if there's one item in the album and the item exists
+        return (list != null && !list.isEmpty());
+    }
+
+    @Override
+    protected int getBackgroundColorId() {
+        return R.color.albumset_background;
+    }
 
     @Override
     public void onEyePositionChanged(float x, float y, float z) {
@@ -213,7 +207,7 @@ public class AlbumSetPage extends ActivityState implements
         }
     }
 
-    private void getSlotCenter(int slotIndex, int center[]) {
+    private void getSlotCenter(int slotIndex, int[] center) {
         Rect offset = new Rect();
         mRootPane.getBoundsOf(mSlotView, offset);
         Rect r = mSlotView.getSlotRect(slotIndex);
@@ -240,21 +234,12 @@ public class AlbumSetPage extends ActivityState implements
         }
     }
 
-    private static boolean albumShouldOpenInFilmstrip(MediaSet album) {
-        int itemCount = album.getMediaItemCount();
-        ArrayList<MediaItem> list = (itemCount == 1) ? album.getMediaItem(0, 1) : null;
-        // open in film strip only if there's one item in the album and the item exists
-        return (list != null && !list.isEmpty());
-    }
-
-    WeakReference<Toast> mEmptyAlbumToast = null;
-
     private void showEmptyAlbumToast(int toastLength) {
         //CRs-Fixed:951767 java.lang.NullPointerException: Attempt to invoke virtual method
         // 'void android.widget.RelativeLayout.addView(android.view.View
-        RelativeLayout galleryRoot = (RelativeLayout) ((Activity) mActivity)
+        RelativeLayout galleryRoot = mActivity
                 .findViewById(R.id.gallery_root);
-        if (galleryRoot == null) return ;
+        if (galleryRoot == null) return;
         if (tvEmptyAlbum == null) {
             tvEmptyAlbum = new TextView(mActivity);
             tvEmptyAlbum.setText(R.string.tvEmptyAlbum);
@@ -381,7 +366,8 @@ public class AlbumSetPage extends ActivityState implements
                         pickAlbum(message.arg1);
                         break;
                     }
-                    default: throw new AssertionError(message.what);
+                    default:
+                        throw new AssertionError(message.what);
                 }
             }
         };
@@ -396,7 +382,7 @@ public class AlbumSetPage extends ActivityState implements
 
     private boolean setupCameraButton() {
         if (!GalleryUtils.isCameraAvailable(mActivity)) return false;
-        RelativeLayout galleryRoot = (RelativeLayout) ((Activity) mActivity)
+        RelativeLayout galleryRoot = mActivity
                 .findViewById(R.id.gallery_root);
         if (galleryRoot == null) return false;
 
@@ -419,7 +405,7 @@ public class AlbumSetPage extends ActivityState implements
 
     private void cleanupCameraButton() {
         if (mCameraButton == null) return;
-        RelativeLayout galleryRoot = (RelativeLayout) ((Activity) mActivity)
+        RelativeLayout galleryRoot = mActivity
                 .findViewById(R.id.gallery_root);
         if (galleryRoot == null) return;
         galleryRoot.removeView(mCameraButton);
@@ -581,7 +567,7 @@ public class AlbumSetPage extends ActivityState implements
             int typeBits = mData.getInt(
                     GalleryActivity.KEY_TYPE_BITS, DataManager.INCLUDE_IMAGE);
             mActionBar.setTitle(GalleryUtils.getSelectionModePrompt(typeBits));
-        } else  if (mGetAlbum) {
+        } else if (mGetAlbum) {
             inflater.inflate(R.menu.pickup, menu);
             mActionBar.setTitle(R.string.select_album);
         } else {
@@ -595,8 +581,8 @@ public class AlbumSetPage extends ActivityState implements
                     mActionBar.disableClusterMenu(true);
                 }
             }*/
-            boolean selectAlbums = !inAlbum ;// &&
-                   // mActionBar.getClusterTypeAction() == FilterUtils.CLUSTER_BY_ALBUM;
+            boolean selectAlbums = !inAlbum;// &&
+            // mActionBar.getClusterTypeAction() == FilterUtils.CLUSTER_BY_ALBUM;
             MenuItem selectItem = menu.findItem(R.id.action_select);
             selectItem.setTitle(activity.getString(
                     selectAlbums ? R.string.select_album : R.string.select_group));
@@ -657,7 +643,7 @@ public class AlbumSetPage extends ActivityState implements
             case R.id.action_manage_offline: {
                 Bundle data = new Bundle();
                 String mediaPath = mActivity.getDataManager().getTopSetPath(
-                    DataManager.INCLUDE_ALL);
+                        DataManager.INCLUDE_ALL);
                 data.putString(AlbumSetPage.KEY_MEDIA_PATH, mediaPath);
                 mActivity.getStateManager().startState(ManageCachePage.class, data);
                 return true;
@@ -704,12 +690,12 @@ public class AlbumSetPage extends ActivityState implements
                 //mActionBar.disableClusterMenu(true);
                 mActionModeHandler.startActionMode();
                 performHapticFeedback(HapticFeedbackConstants.LONG_PRESS);
-                ((GalleryActivity)mActivity).toggleNavBar(false);
+                ((GalleryActivity) mActivity).toggleNavBar(false);
                 break;
             }
             case SelectionManager.LEAVE_SELECTION_MODE: {
                 mActionModeHandler.finishActionMode();
-                ((GalleryActivity)mActivity).toggleNavBar(true);
+                ((GalleryActivity) mActivity).toggleNavBar(true);
                 /*if (mShowClusterMenu) {
                     mActionBar.enableClusterMenu(mSelectedAction, this);
                 }*/
@@ -735,13 +721,13 @@ public class AlbumSetPage extends ActivityState implements
         mDetailsHelper.hide();
         mAlbumSetView.setHighlightItemPath(null);
         mSlotView.invalidate();
-        ((GalleryActivity)mActivity).toggleNavBar(true);
+        ((GalleryActivity) mActivity).toggleNavBar(true);
     }
 
     private void showDetails() {
         mShowDetails = true;
         if (mDetailsHelper == null) {
-            ((GalleryActivity)mActivity).toggleNavBar(false);
+            ((GalleryActivity) mActivity).toggleNavBar(false);
             mDetailsHelper = new DetailsHelper(mActivity, mRootPane, mDetailsSource);
             mDetailsHelper.setCloseListener(new CloseListener() {
                 @Override
@@ -759,7 +745,7 @@ public class AlbumSetPage extends ActivityState implements
             Log.d(TAG, "onSyncDone: " + Utils.maskDebugInfo(mediaSet.getName()) + " result="
                     + resultCode);
         }
-        ((Activity) mActivity).runOnUiThread(new Runnable() {
+        mActivity.runOnUiThread(new Runnable() {
             @Override
             public void run() {
                 GLRoot root = mActivity.getGLRoot();

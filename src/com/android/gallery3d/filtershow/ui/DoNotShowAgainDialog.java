@@ -39,10 +39,10 @@ import android.view.View;
 import android.widget.CheckBox;
 import android.widget.TextView;
 
-import org.codeaurora.gallery.R;
-
 import com.android.gallery3d.ui.BaseDialogFragment;
 import com.android.gallery3d.util.GalleryUtils;
+
+import org.codeaurora.gallery.R;
 
 public class DoNotShowAgainDialog extends BaseDialogFragment {
     private int mSharedPrefKeyId = -1;
@@ -71,11 +71,11 @@ public class DoNotShowAgainDialog extends BaseDialogFragment {
     public Dialog onCreateDialog(Bundle savedInstanceState) {
         LayoutInflater inflater = getActivity().getLayoutInflater();
         View view = inflater.inflate(R.layout.do_not_show_again_dialog, null);
-        TextView message = (TextView) view.findViewById(R.id.message);
+        TextView message = view.findViewById(R.id.message);
         if (-1 != mMessageId) {
             message.setText(mMessageId);
         }
-        mDoNotShowAgainChk = (CheckBox) view.findViewById(R.id.do_not_show_chk);
+        mDoNotShowAgainChk = view.findViewById(R.id.do_not_show_chk);
 
         AlertDialog.Builder ab = new AlertDialog.Builder(getActivity());
         if (-1 != mTitleId) {
@@ -90,7 +90,7 @@ public class DoNotShowAgainDialog extends BaseDialogFragment {
                     GalleryUtils.setBooleanPref(context,
                             context.getString(mSharedPrefKeyId), mDoNotShowAgainChk.isChecked());
                 }
-                if(mButtonClickListener != null) mButtonClickListener.onClick(dialog, id);
+                if (mButtonClickListener != null) mButtonClickListener.onClick(dialog, id);
             }
         });
         return ab.create();
@@ -100,7 +100,7 @@ public class DoNotShowAgainDialog extends BaseDialogFragment {
         mButtonClickListener = listener;
     }
 
-    public void setOnDismissListener (DialogInterface.OnDismissListener listener) {
+    public void setOnDismissListener(DialogInterface.OnDismissListener listener) {
         mDialogDismissListener = listener;
     }
 

@@ -67,7 +67,7 @@ public class TextureUploader implements OnGLIdleListener {
     }
 
     private int upload(GLCanvas canvas, ArrayDeque<UploadedTexture> deque,
-            int uploadQuota, boolean isBackground) {
+                       int uploadQuota, boolean isBackground) {
         while (uploadQuota > 0) {
             UploadedTexture t;
             synchronized (this) {

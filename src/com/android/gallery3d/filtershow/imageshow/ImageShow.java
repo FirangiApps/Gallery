@@ -16,9 +16,6 @@
 
 package com.android.gallery3d.filtershow.imageshow;
 
-import java.io.File;
-import java.util.ArrayList;
-
 import android.animation.Animator;
 import android.animation.ValueAnimator;
 import android.content.Context;
@@ -45,7 +42,6 @@ import android.view.ScaleGestureDetector;
 import android.view.View;
 import android.widget.LinearLayout;
 
-import org.codeaurora.gallery.R;
 import com.android.gallery3d.filtershow.FilterShowActivity;
 import com.android.gallery3d.filtershow.filters.FilterMirrorRepresentation;
 import com.android.gallery3d.filtershow.filters.FilterRepresentation;
@@ -53,67 +49,72 @@ import com.android.gallery3d.filtershow.filters.ImageFilter;
 import com.android.gallery3d.filtershow.pipeline.ImagePreset;
 import com.android.gallery3d.filtershow.tools.SaveImage;
 
+import org.codeaurora.gallery.R;
+
+import java.io.File;
+import java.util.ArrayList;
+
 public class ImageShow extends View implements OnGestureListener,
-                                                ScaleGestureDetector.OnScaleGestureListener,
-                                                OnDoubleTapListener {
+        ScaleGestureDetector.OnScaleGestureListener,
+        OnDoubleTapListener {
 
-    private static final String LOGTAG = "ImageShow";
-    private static final boolean ENABLE_ZOOMED_COMPARISON = false;
-
-    protected Paint mPaint = new Paint();
-    protected int mTextSize;
-    protected int mTextPadding;
-
-    protected int mBackgroundColor;
-
-    protected GestureDetector mGestureDetector = null;
-    protected ScaleGestureDetector mScaleGestureDetector = null;
-
-    private RectF mFusionBounds = new RectF();
-    protected Rect mImageBounds = new Rect();
-    private boolean mTouchShowOriginal = false;
-
-    private NinePatchDrawable mShadow = null;
-    private Rect mShadowBounds = new Rect();
-    private int mShadowMargin = 15; // not scaled, fixed in the asset
-    private boolean mShadowDrawn = false;
-
-    protected Point mTouchDown = new Point();
-    protected Point mTouch = new Point();
-    protected boolean mFinishedScalingOperation = false;
-
-    private boolean mZoomIn = false;
-    Point mOriginalTranslation = new Point();
-    float mOriginalScale;
-    float mStartFocusX, mStartFocusY;
-
-    protected EdgeEffectCompat mEdgeEffect = null;
     protected static final int EDGE_LEFT = 1;
     protected static final int EDGE_TOP = 2;
     protected static final int EDGE_RIGHT = 3;
     protected static final int EDGE_BOTTOM = 4;
-    protected int mCurrentEdgeEffect = 0;
-    protected int mEdgeSize = 100;
-
     protected static final int mAnimationSnapDelay = 200;
     protected static final int mAnimationZoomDelay = 400;
+    private static final String LOGTAG = "ImageShow";
+    private static final boolean ENABLE_ZOOMED_COMPARISON = false;
+    private static Bitmap sMask;
+    protected Paint mPaint = new Paint();
+    protected int mTextSize;
+    protected int mTextPadding;
+    protected int mBackgroundColor;
+    protected GestureDetector mGestureDetector = null;
+    protected ScaleGestureDetector mScaleGestureDetector = null;
+    protected Rect mImageBounds = new Rect();
+    protected Point mTouchDown = new Point();
+    protected Point mTouch = new Point();
+    protected boolean mFinishedScalingOperation = false;
+    protected EdgeEffectCompat mEdgeEffect = null;
+    protected int mCurrentEdgeEffect = 0;
+    protected int mEdgeSize = 100;
     protected ValueAnimator mAnimatorScale = null;
     protected ValueAnimator mAnimatorTranslateX = null;
     protected ValueAnimator mAnimatorTranslateY = null;
-
     protected boolean mAllowScaleAndTranslate = false;
-
-    protected enum InteractionMode {
-        NONE,
-        SCALE,
-        MOVE
-    }
+    Point mOriginalTranslation = new Point();
+    float mOriginalScale;
+    float mStartFocusX, mStartFocusY;
     InteractionMode mInteractionMode = InteractionMode.NONE;
-
-    private static Bitmap sMask;
+    private RectF mFusionBounds = new RectF();
+    private boolean mTouchShowOriginal = false;
+    private NinePatchDrawable mShadow = null;
+    private Rect mShadowBounds = new Rect();
+    private int mShadowMargin = 15; // not scaled, fixed in the asset
+    private boolean mShadowDrawn = false;
+    private boolean mZoomIn = false;
     private Paint mMaskPaint = new Paint();
     private Matrix mShaderMatrix = new Matrix();
     private boolean mDidStartAnimation = false;
+    private FilterShowActivity mActivity = null;
+
+    public ImageShow(Context context, AttributeSet attrs, int defStyle) {
+        super(context, attrs, defStyle);
+        setupImageShow(context);
+    }
+
+    public ImageShow(Context context, AttributeSet attrs) {
+        super(context, attrs);
+        setupImageShow(context);
+
+    }
+
+    public ImageShow(Context context) {
+        super(context);
+        setupImageShow(context);
+    }
 
     private static Bitmap convertToAlphaMask(Bitmap b) {
         Bitmap a = Bitmap.createBitmap(b.getWidth(), b.getHeight(), Bitmap.Config.ALPHA_8);
@@ -125,8 +126,6 @@ public class ImageShow extends View implements OnGestureListener,
     private static Shader createShader(Bitmap b) {
         return new BitmapShader(b, Shader.TileMode.CLAMP, Shader.TileMode.CLAMP);
     }
-
-    private FilterShowActivity mActivity = null;
 
     public FilterShowActivity getActivity() {
         return mActivity;
@@ -146,22 +145,6 @@ public class ImageShow extends View implements OnGestureListener,
 
     public void onNewValue(int parameter) {
         invalidate();
-    }
-
-    public ImageShow(Context context, AttributeSet attrs, int defStyle) {
-        super(context, attrs, defStyle);
-        setupImageShow(context);
-    }
-
-    public ImageShow(Context context, AttributeSet attrs) {
-        super(context, attrs);
-        setupImageShow(context);
-
-    }
-
-    public ImageShow(Context context) {
-        super(context);
-        setupImageShow(context);
     }
 
     private void setupImageShow(Context context) {
@@ -207,7 +190,6 @@ public class ImageShow extends View implements OnGestureListener,
         return MasterImage.getImage().getCurrentFilter();
     }
 
-    /* consider moving the following 2 methods into a subclass */
     /**
      * This function calculates a Image to Screen Transformation matrix
      *
@@ -227,6 +209,8 @@ public class ImageShow extends View implements OnGestureListener,
         m.postScale(scaleFactor, scaleFactor, getWidth() / 2.0f, getHeight() / 2.0f);
         return m;
     }
+
+    /* consider moving the following 2 methods into a subclass */
 
     /**
      * This function calculates a to Screen Image Transformation matrix
@@ -251,8 +235,8 @@ public class ImageShow extends View implements OnGestureListener,
         mPaint.setAntiAlias(true);
         mPaint.setFilterBitmap(true);
         MasterImage.getImage().setImageShowSize(
-                getWidth() - 2*mShadowMargin,
-                getHeight() - 2*mShadowMargin);
+                getWidth() - 2 * mShadowMargin,
+                getHeight() - 2 * mShadowMargin);
 
         MasterImage img = MasterImage.getImage();
         // Hide the loading indicator as needed
@@ -264,13 +248,13 @@ public class ImageShow extends View implements OnGestureListener,
         }
 
         Bitmap fusionUnderlay = MasterImage.getImage().getFusionUnderlay();
-        if(fusionUnderlay != null) {
+        if (fusionUnderlay != null) {
             float canvWidth = canvas.getWidth();
             float canvHeight = canvas.getHeight();
             float width, height;
-            float underlayAspect = (float)fusionUnderlay.getWidth() / (float)fusionUnderlay.getHeight();
+            float underlayAspect = (float) fusionUnderlay.getWidth() / (float) fusionUnderlay.getHeight();
 
-            if(canvHeight * underlayAspect > canvWidth) {
+            if (canvHeight * underlayAspect > canvWidth) {
                 // width is constraint
                 width = canvWidth;
                 height = canvWidth / underlayAspect;
@@ -281,9 +265,9 @@ public class ImageShow extends View implements OnGestureListener,
             }
 
             // center in canvas
-            mFusionBounds.top = (canvHeight - height)/2;
+            mFusionBounds.top = (canvHeight - height) / 2;
             mFusionBounds.bottom = mFusionBounds.top + height;
-            mFusionBounds.left = (canvWidth - width)/2;
+            mFusionBounds.left = (canvWidth - width) / 2;
             mFusionBounds.right = mFusionBounds.left + width;
 
             canvas.drawBitmap(fusionUnderlay, null, mFusionBounds, null);
@@ -305,15 +289,15 @@ public class ImageShow extends View implements OnGestureListener,
             canvas.save();
             float dx = (getHeight() - getWidth()) / 2f;
             if (getWidth() > getHeight()) {
-                dx = - (getWidth() - getHeight()) / 2f;
+                dx = -(getWidth() - getHeight()) / 2f;
             }
             if (mCurrentEdgeEffect == EDGE_BOTTOM) {
-                canvas.rotate(180, getWidth()/2, getHeight()/2);
+                canvas.rotate(180, getWidth() / 2, getHeight() / 2);
             } else if (mCurrentEdgeEffect == EDGE_RIGHT) {
-                canvas.rotate(90, getWidth()/2, getHeight()/2);
+                canvas.rotate(90, getWidth() / 2, getHeight() / 2);
                 canvas.translate(0, dx);
             } else if (mCurrentEdgeEffect == EDGE_LEFT) {
-                canvas.rotate(270, getWidth()/2, getHeight()/2);
+                canvas.rotate(270, getWidth() / 2, getHeight() / 2);
                 canvas.translate(0, dx);
             }
             if (mCurrentEdgeEffect != 0) {
@@ -486,7 +470,7 @@ public class ImageShow extends View implements OnGestureListener,
                             canvas.scale(master.getAnimRotationValue(), 1, centerX, centerY);
                         } else if (rep.isVertical() && !rep.isHorizontal()) {
                             canvas.scale(master.getAnimRotationValue(), 1, centerX, centerY);
-                        } else  if (rep.isHorizontal() && rep.isVertical()) {
+                        } else if (rep.isHorizontal() && rep.isVertical()) {
                             canvas.scale(1, master.getAnimRotationValue(), centerX, centerY);
                         } else {
                             canvas.scale(1, master.getAnimRotationValue(), centerX, centerY);
@@ -498,7 +482,7 @@ public class ImageShow extends View implements OnGestureListener,
             if (needsToDrawImage) {
                 drawShadow(canvas, previousBounds); // as needed
 
-                if(hasFusionApplied() || this instanceof ImageFusion) {
+                if (hasFusionApplied() || this instanceof ImageFusion) {
                     previousImage.setHasAlpha(true);
                 }
                 canvas.drawBitmap(previousImage, mp, mPaint);
@@ -508,7 +492,7 @@ public class ImageShow extends View implements OnGestureListener,
         } else {
             drawShadow(canvas, mImageBounds); // as needed
 
-            if(hasFusionApplied() || this instanceof ImageFusion) {
+            if (hasFusionApplied() || this instanceof ImageFusion) {
                 image.setHasAlpha(true);
             }
             canvas.drawBitmap(image, m, mPaint);
@@ -571,7 +555,6 @@ public class ImageShow extends View implements OnGestureListener,
         SaveImage.saveImage(getImagePreset(), filterShowActivity, file);
     }
 
-
     public boolean scaleInProgress() {
         return mScaleGestureDetector.isInProgress();
     }
@@ -582,10 +565,10 @@ public class ImageShow extends View implements OnGestureListener,
         int action = event.getAction();
         action = action & MotionEvent.ACTION_MASK;
 
-        if(!hasFusionApplied() || mAllowScaleAndTranslate)
+        if (!hasFusionApplied() || mAllowScaleAndTranslate)
             mGestureDetector.onTouchEvent(event);
         boolean scaleInProgress = scaleInProgress();
-        if(!hasFusionApplied() || mAllowScaleAndTranslate)
+        if (!hasFusionApplied() || mAllowScaleAndTranslate)
             mScaleGestureDetector.onTouchEvent(event);
 
         if (mInteractionMode == InteractionMode.SCALE) {
@@ -648,7 +631,7 @@ public class ImageShow extends View implements OnGestureListener,
     }
 
     private void startAnimTranslation(int fromX, int toX,
-            int fromY, int toY, int delay) {
+                                      int fromY, int toY, int delay) {
         if (fromX == toX && fromY == toY) {
             return;
         }
@@ -704,7 +687,7 @@ public class ImageShow extends View implements OnGestureListener,
 
     @Override
     public boolean onDoubleTap(MotionEvent arg0) {
-        if(hasFusionApplied())
+        if (hasFusionApplied())
             return true;
 
         mZoomIn = !mZoomIn;
@@ -721,7 +704,7 @@ public class ImageShow extends View implements OnGestureListener,
             mAnimatorScale = ValueAnimator.ofFloat(
                     MasterImage.getImage().getScaleFactor(),
                     scale
-                    );
+            );
             float translateX = (getWidth() / 2 - x);
             float translateY = (getHeight() / 2 - y);
             Point translation = MasterImage.getImage().getTranslation();
@@ -823,7 +806,7 @@ public class ImageShow extends View implements OnGestureListener,
             }
         } else {
             float ty = screenPos.bottom - translation.y * scale;
-            float dy = (getHeight()- 2 * mShadowMargin - screenPos.height()) / 2f;
+            float dy = (getHeight() - 2 * mShadowMargin - screenPos.height()) / 2f;
             translation.y = (int) ((getHeight() - mShadowMargin - ty - dy) / scale);
         }
 
@@ -859,10 +842,7 @@ public class ImageShow extends View implements OnGestureListener,
         if (mActivity == null) {
             return false;
         }
-        if (endEvent.getPointerCount() == 2) {
-            return false;
-        }
-        return true;
+        return endEvent.getPointerCount() != 2;
     }
 
     @Override
@@ -951,7 +931,7 @@ public class ImageShow extends View implements OnGestureListener,
     public void scaleImage(boolean isScaled, Context context) {
         float scale = 1.0f;
         Bitmap bitmap = MasterImage.getImage().getOriginalBitmapLarge();
-        if(bitmap == null)
+        if (bitmap == null)
             return;
         int bitmapWidth = bitmap.getWidth();
         int bitmapheight = bitmap.getHeight();
@@ -963,16 +943,21 @@ public class ImageShow extends View implements OnGestureListener,
         int scaledWidth = context.getResources().getDimensionPixelSize(R.dimen.scaled_image_width);
         int scaledHeight = context.getResources().getDimensionPixelSize(R.dimen.scaled_image_height);
         if (isScaled) {
-          scale = (float) scaledHeight / height  ;
+            scale = (float) scaledHeight / height;
         }
         MasterImage.getImage().setScaleFactor(scale);
 
         invalidate();
     }
 
-    public void toggleComparisonButtonVisibility()
-    {
-       mActivity.toggleComparisonButtonVisibility();
+    public void toggleComparisonButtonVisibility() {
+        mActivity.toggleComparisonButtonVisibility();
+    }
+
+    protected enum InteractionMode {
+        NONE,
+        SCALE,
+        MOVE
     }
 
 }

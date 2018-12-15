@@ -25,6 +25,11 @@ public class ImageFilterCurves extends ImageFilter {
     private static final String LOGTAG = "ImageFilterCurves";
     FilterCurvesRepresentation mParameters = new FilterCurvesRepresentation();
 
+    public ImageFilterCurves() {
+        mName = "Curves";
+        reset();
+    }
+
     @Override
     public FilterRepresentation getDefaultRepresentation() {
         return new FilterCurvesRepresentation();
@@ -34,11 +39,6 @@ public class ImageFilterCurves extends ImageFilter {
     public void useRepresentation(FilterRepresentation representation) {
         FilterCurvesRepresentation parameters = (FilterCurvesRepresentation) representation;
         mParameters = parameters;
-    }
-
-    public ImageFilterCurves() {
-        mName = "Curves";
-        reset();
     }
 
     public void populateArray(int[] array, int curveIndex) {

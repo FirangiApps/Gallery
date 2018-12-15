@@ -25,11 +25,11 @@ import android.graphics.RectF;
 
 public class ImageFilterColorBorder extends ImageFilter {
     private static final String LOGTAG = "ImageFilterColorBorder";
-    private FilterColorBorderRepresentation mParameters = null;
     Paint mPaint = new Paint();
     RectF mBounds = new RectF();
     RectF mInsideBounds = new RectF();
     Path mBorderPath = new Path();
+    private FilterColorBorderRepresentation mParameters = null;
 
     public ImageFilterColorBorder() {
         mName = "Border";

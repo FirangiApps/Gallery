@@ -21,12 +21,10 @@ import com.android.gallery3d.ui.AnimationTime;
 
 // FadeTexture is a texture which fades the given texture along the time.
 public abstract class FadeTexture implements Texture {
-    @SuppressWarnings("unused")
-    private static final String TAG = "FadeTexture";
-
     // The duration of the fading animation in milliseconds
     public static final int DURATION = 180;
-
+    @SuppressWarnings("unused")
+    private static final String TAG = "FadeTexture";
     private final long mStartTime;
     private final int mWidth;
     private final int mHeight;
@@ -71,7 +69,7 @@ public abstract class FadeTexture implements Texture {
     }
 
     protected float getRatio() {
-        float r = (float)(now() - mStartTime) / DURATION;
+        float r = (float) (now() - mStartTime) / DURATION;
         return Utils.clamp(1.0f - r, 0.0f, 1.0f);
     }
 

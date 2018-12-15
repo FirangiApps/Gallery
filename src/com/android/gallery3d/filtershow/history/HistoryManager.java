@@ -64,24 +64,15 @@ public class HistoryManager {
     }
 
     public boolean canReset() {
-        if (getCount() <= 0) {
-            return false;
-        }
-        return true;
+        return getCount() > 0;
     }
 
     public boolean canUndo() {
-        if (mCurrentPresetPosition >= getCount() - 1) {
-            return false;
-        }
-        return true;
+        return mCurrentPresetPosition < getCount() - 1;
     }
 
     public boolean canRedo() {
-        if (mCurrentPresetPosition == 0) {
-            return false;
-        }
-        return true;
+        return mCurrentPresetPosition != 0;
     }
 
     public void updateMenuItems() {
@@ -176,7 +167,7 @@ public class HistoryManager {
 
     public int backToOriginal() {
         saveComparePresetPosition();
-            mCurrentPresetPosition = getCount() - 1;
+        mCurrentPresetPosition = getCount() - 1;
         return mCurrentPresetPosition;
     }
 
@@ -184,21 +175,21 @@ public class HistoryManager {
         mCurrentPresetPosition = getCurrentPresetPosition();
         return mCurrentPresetPosition;
     }
-    public int setActiveFilter(int value)
-    {
+
+    public int setActiveFilter(int value) {
         mActiveFilter = value;
         return mActiveFilter;
     }
-    private void insertActiveFilter(HistoryItem preset, int position)
-    {
+
+    private void insertActiveFilter(HistoryItem preset, int position) {
         mHistoryItemsActiveFilter.add(preset);
     }
-    public void resetActiveFilter()
-    {
+
+    public void resetActiveFilter() {
         mHistoryItemsActiveFilter.clear();
     }
-    public int undoCurrentFilter()
-    {
+
+    public int undoCurrentFilter() {
         mCurrentPresetPosition = mCurrentPresetPosition + mHistoryItemsActiveFilter.size();
         if (mCurrentPresetPosition >= getCount()) {
             mCurrentPresetPosition = getCount() - 1;
@@ -207,12 +198,11 @@ public class HistoryManager {
         return mCurrentPresetPosition;
     }
 
-    public void saveComparePresetPosition()
-    {
-        mComparePresetPosition = mCurrentPresetPosition ;
+    public void saveComparePresetPosition() {
+        mComparePresetPosition = mCurrentPresetPosition;
     }
-    public int getCurrentPresetPosition()
-    {
+
+    public int getCurrentPresetPosition() {
         return mComparePresetPosition;
     }
 

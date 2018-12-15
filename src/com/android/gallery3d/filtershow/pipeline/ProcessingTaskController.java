@@ -25,17 +25,14 @@ import android.util.Log;
 import java.util.HashMap;
 
 public class ProcessingTaskController implements Handler.Callback {
+    public final static int RESULT = 1;
+    public final static int UPDATE = 2;
     private static final String LOGTAG = "ProcessingTaskController";
-
     private Context mContext;
     private HandlerThread mHandlerThread = null;
     private Handler mProcessingHandler = null;
     private int mCurrentType;
     private HashMap<Integer, ProcessingTask> mTasks = new HashMap<Integer, ProcessingTask>();
-
-    public final static int RESULT = 1;
-    public final static int UPDATE = 2;
-
     private final Handler mResultHandler = new Handler() {
         @Override
         public void handleMessage(Message msg) {
@@ -52,6 +49,14 @@ public class ProcessingTaskController implements Handler.Callback {
         }
     };
 
+    public ProcessingTaskController(Context context) {
+        mContext = context;
+        mHandlerThread = new HandlerThread("ProcessingTaskController",
+                android.os.Process.THREAD_PRIORITY_FOREGROUND);
+        mHandlerThread.start();
+        mProcessingHandler = new Handler(mHandlerThread.getLooper(), this);
+    }
+
     @Override
     public boolean handleMessage(Message msg) {
         ProcessingTask task = mTasks.get(msg.what);
@@ -60,14 +65,6 @@ public class ProcessingTaskController implements Handler.Callback {
             return true;
         }
         return false;
-    }
-
-    public ProcessingTaskController(Context context) {
-        mContext = context;
-        mHandlerThread = new HandlerThread("ProcessingTaskController",
-                android.os.Process.THREAD_PRIORITY_FOREGROUND);
-        mHandlerThread.start();
-        mProcessingHandler = new Handler(mHandlerThread.getLooper(), this);
     }
 
     public Handler getProcessingHandler() {

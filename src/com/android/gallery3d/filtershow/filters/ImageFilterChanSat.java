@@ -24,17 +24,14 @@ import android.renderscript.RenderScript;
 import android.renderscript.Script.LaunchOptions;
 import android.renderscript.Type;
 
-import org.codeaurora.gallery.R;
 import com.android.gallery3d.filtershow.pipeline.FilterEnvironment;
 
 public class ImageFilterChanSat extends ImageFilterRS {
     private static final String LOGTAG = "ImageFilterChanSat";
+    private static final int STRIP_SIZE = 64;
+    FilterChanSatRepresentation mParameters = new FilterChanSatRepresentation();
     private ScriptC_saturation mScript;
     private Bitmap mSourceBitmap;
-
-    private static final int STRIP_SIZE = 64;
-
-    FilterChanSatRepresentation mParameters = new FilterChanSatRepresentation();
     private Bitmap mOverlayBitmap;
 
     public ImageFilterChanSat() {
@@ -63,6 +60,7 @@ public class ImageFilterChanSat extends ImageFilterRS {
             mScript = null;
         }
     }
+
     @Override
     protected void createFilter(android.content.res.Resources res, float scaleFactor,
                                 int quality) {
@@ -106,12 +104,11 @@ public class ImageFilterChanSat extends ImageFilterRS {
     }
 
 
-
     @Override
     protected void runFilter() {
-        int []sat = new int[7];
-        for(int i = 0;i<sat.length ;i ++){
-          sat[i] =   mParameters.getValue(i);
+        int[] sat = new int[7];
+        for (int i = 0; i < sat.length; i++) {
+            sat[i] = mParameters.getValue(i);
         }
 
 
@@ -152,10 +149,7 @@ public class ImageFilterChanSat extends ImageFilterRS {
     private boolean checkStop() {
         RenderScript rsCtx = getRenderScriptContext();
         rsCtx.finish();
-        if (getEnvironment().needsStop()) {
-            return true;
-        }
-        return false;
+        return getEnvironment().needsStop();
     }
 }
 

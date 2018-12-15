@@ -79,7 +79,7 @@ public class VideoUtils {
     }
 
     private static void startMuteUsingMp4Parser(String filePath,
-            SaveVideoFileInfo dstFileInfo) throws FileNotFoundException, IOException {
+                                                SaveVideoFileInfo dstFileInfo) throws IOException {
         File dst = dstFileInfo.mFile;
         File src = new File(filePath);
         RandomAccessFile randomAccessFile = new RandomAccessFile(src, "r");
@@ -114,18 +114,18 @@ public class VideoUtils {
     }
 
     /**
-     * @param srcPath the path of source video file.
-     * @param dstPath the path of destination video file.
-     * @param startMs starting time in milliseconds for trimming. Set to
-     *            negative if starting from beginning.
-     * @param endMs end time for trimming in milliseconds. Set to negative if
-     *            no trimming at the end.
+     * @param srcPath  the path of source video file.
+     * @param dstPath  the path of destination video file.
+     * @param startMs  starting time in milliseconds for trimming. Set to
+     *                 negative if starting from beginning.
+     * @param endMs    end time for trimming in milliseconds. Set to negative if
+     *                 no trimming at the end.
      * @param useAudio true if keep the audio track from the source.
      * @param useVideo true if keep the video track from the source.
      * @throws IOException
      */
     private static void genVideoUsingMuxer(String srcPath, String dstPath,
-            int startMs, int endMs, boolean useAudio, boolean useVideo)
+                                           int startMs, int endMs, boolean useAudio, boolean useVideo)
             throws IOException {
         // Set up MediaExtractor to read from the source.
         MediaExtractor extractor = new MediaExtractor();
@@ -238,7 +238,7 @@ public class VideoUtils {
     }
 
     private static void trimUsingMp4Parser(File src, File dst, int startMs, int endMs)
-            throws FileNotFoundException, IOException {
+            throws IOException {
         RandomAccessFile randomAccessFile = new RandomAccessFile(src, "r");
         Movie movie = MovieCreator.build(randomAccessFile.getChannel());
 
@@ -264,7 +264,7 @@ public class VideoUtils {
                     // file)
                     throw new RuntimeException(
                             "The startTime has already been corrected by" +
-                            " another track with SyncSample. Not Supported.");
+                                    " another track with SyncSample. Not Supported.");
                 }
                 startTime = correctTimeToSyncSample(track, startTime, false);
                 endTime = correctTimeToSyncSample(track, endTime, true);
@@ -308,7 +308,7 @@ public class VideoUtils {
     }
 
     private static double correctTimeToSyncSample(Track track, double cutHere,
-            boolean next) {
+                                                  boolean next) {
         double[] timeOfSyncSamples = new double[track.getSyncSamples().length];
         long currentSample = 0;
         double currentTime = 0;

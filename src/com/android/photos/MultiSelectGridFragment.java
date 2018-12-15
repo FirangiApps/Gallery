@@ -36,16 +36,14 @@ public abstract class MultiSelectGridFragment extends Fragment
         implements MultiChoiceManager.Delegate, AdapterView.OnItemClickListener {
 
     final private Handler mHandler = new Handler();
-
+    ListAdapter mAdapter;
+    GridView mGrid;
     final private Runnable mRequestFocus = new Runnable() {
         @Override
         public void run() {
             mGrid.focusableViewAvailable(mGrid);
         }
     };
-
-    ListAdapter mAdapter;
-    GridView mGrid;
     TextView mEmptyView;
     View mProgressContainer;
     View mGridContainer;
@@ -66,7 +64,7 @@ public abstract class MultiSelectGridFragment extends Fragment
      */
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
-            Bundle savedInstanceState) {
+                             Bundle savedInstanceState) {
         return inflater.inflate(R.layout.multigrid_content, container, false);
     }
 
@@ -113,28 +111,12 @@ public abstract class MultiSelectGridFragment extends Fragment
      * getGridView().getItemAtPosition(position) if they need to access the data
      * associated with the selected item.
      *
-     * @param g The GridView where the click happened
-     * @param v The view that was clicked within the GridView
+     * @param g        The GridView where the click happened
+     * @param v        The view that was clicked within the GridView
      * @param position The position of the view in the grid
-     * @param id The id of the item that was clicked
+     * @param id       The id of the item that was clicked
      */
     public void onGridItemClick(GridView g, View v, int position, long id) {
-    }
-
-    /**
-     * Provide the cursor for the grid view.
-     */
-    public void setAdapter(ListAdapter adapter) {
-        boolean hadAdapter = mAdapter != null;
-        mAdapter = adapter;
-        if (mGrid != null) {
-            mGrid.setAdapter(adapter);
-            if (!mGridShown && !hadAdapter) {
-                // The grid was hidden, and previously didn't have an
-                // adapter. It is now time to show it.
-                setGridShown(true, getView().getWindowToken() != null);
-            }
-        }
     }
 
     /**
@@ -202,7 +184,7 @@ public abstract class MultiSelectGridFragment extends Fragment
      * the hidden state.
      *
      * @param shown If true, the grid view is shown; if false, the progress
-     *            indicator. The initial value is true.
+     *              indicator. The initial value is true.
      */
     public void setGridShown(boolean shown) {
         setGridShown(shown, true);
@@ -221,10 +203,10 @@ public abstract class MultiSelectGridFragment extends Fragment
      * displayed if you are waiting for the initial data to show in it. During
      * this time an indeterminate progress indicator will be shown instead.
      *
-     * @param shown If true, the grid view is shown; if false, the progress
-     *            indicator. The initial value is true.
+     * @param shown   If true, the grid view is shown; if false, the progress
+     *                indicator. The initial value is true.
      * @param animate If true, an animation will be used to transition to the
-     *            new state.
+     *                new state.
      */
     private void setGridShown(boolean shown, boolean animate) {
         ensureGrid();
@@ -267,6 +249,22 @@ public abstract class MultiSelectGridFragment extends Fragment
      */
     public ListAdapter getAdapter() {
         return mGrid.getAdapter();
+    }
+
+    /**
+     * Provide the cursor for the grid view.
+     */
+    public void setAdapter(ListAdapter adapter) {
+        boolean hadAdapter = mAdapter != null;
+        mAdapter = adapter;
+        if (mGrid != null) {
+            mGrid.setAdapter(adapter);
+            if (!mGridShown && !hadAdapter) {
+                // The grid was hidden, and previously didn't have an
+                // adapter. It is now time to show it.
+                setGridShown(true, getView().getWindowToken() != null);
+            }
+        }
     }
 
     private void ensureGrid() {

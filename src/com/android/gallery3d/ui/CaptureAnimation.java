@@ -32,7 +32,7 @@ public class CaptureAnimation {
     private static final Interpolator sZoomInInterpolator =
             new AccelerateInterpolator();
     private static final Interpolator sSlideInterpolator =
-        new AccelerateDecelerateInterpolator();
+            new AccelerateDecelerateInterpolator();
 
     // Calculate the slide factor based on the give time fraction.
     public static float calculateSlide(float fraction) {

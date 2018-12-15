@@ -11,39 +11,33 @@ import android.util.Log;
 import org.codeaurora.gallery.R;
 
 public class BookmarkEnhance {
-    private static final String TAG = "BookmarkEnhance";
-    private static final boolean LOG = true;
-
-    private static final Uri BOOKMARK_URI = Uri.parse("content://media/internal/bookmark");
-
     public static final String COLUMN_ID = "_id";
     public static final String COLUMN_DATA = "_data";
     public static final String COLUMN_TITLE = "_display_name";
     public static final String COLUMN_ADD_DATE = "date_added";
     public static final String COLUMN_MEDIA_TYPE = "mime_type";
-    private static final String COLUMN_POSITION = "position";
-    private static final String COLUMN_MIME_TYPE = "media_type";
-
-    private static final String NULL_HOCK = COLUMN_POSITION;
     public static final String ORDER_COLUMN = COLUMN_ADD_DATE + " ASC ";
-    private static final String VIDEO_STREAMING_MEDIA_TYPE = "streaming";
-
     public static final int INDEX_ID = 0;
     public static final int INDEX_DATA = 1;
     public static final int INDEX_TITLE = 2;
     public static final int INDEX_ADD_DATE = 3;
     public static final int INDEX_MIME_TYPE = 4;
-    private static final int INDEX_POSITION = 5;
-    private static final int INDEX_MEDIA_TYPE = 6;
-
-    public static final String[] PROJECTION = new String[] {
+    private static final String TAG = "BookmarkEnhance";
+    private static final boolean LOG = true;
+    private static final Uri BOOKMARK_URI = Uri.parse("content://media/internal/bookmark");
+    private static final String COLUMN_POSITION = "position";
+    private static final String COLUMN_MIME_TYPE = "media_type";
+    public static final String[] PROJECTION = new String[]{
             COLUMN_ID,
             COLUMN_DATA,
             COLUMN_TITLE,
             COLUMN_ADD_DATE,
             COLUMN_MIME_TYPE,
     };
-
+    private static final String NULL_HOCK = COLUMN_POSITION;
+    private static final String VIDEO_STREAMING_MEDIA_TYPE = "streaming";
+    private static final int INDEX_POSITION = 5;
+    private static final int INDEX_MEDIA_TYPE = 6;
     private final Context mContext;
     private final ContentResolver mCr;
 
@@ -53,7 +47,7 @@ public class BookmarkEnhance {
     }
 
     public Uri insert(final String title, final String uri, final String mimeType,
-            final long position) {
+                      final long position) {
         final ContentValues values = new ContentValues();
         final String mytitle = (title == null ? mContext.getString(R.string.default_title) : title);
         values.put(COLUMN_TITLE, mytitle);
@@ -80,8 +74,8 @@ public class BookmarkEnhance {
     }
 
     public int deleteAll() {
-        final int count = mCr.delete(BOOKMARK_URI, COLUMN_MEDIA_TYPE + "=? ", new String[] {
-            VIDEO_STREAMING_MEDIA_TYPE
+        final int count = mCr.delete(BOOKMARK_URI, COLUMN_MEDIA_TYPE + "=? ", new String[]{
+                VIDEO_STREAMING_MEDIA_TYPE
         });
         if (LOG) {
             Log.v(TAG, "deleteAll() return " + count);
@@ -93,11 +87,11 @@ public class BookmarkEnhance {
         final Cursor cursor = mCr.query(BOOKMARK_URI,
                 PROJECTION,
                 COLUMN_DATA + "=? and " + COLUMN_MEDIA_TYPE + "=? ",
-                new String[] {
+                new String[]{
                         uri, VIDEO_STREAMING_MEDIA_TYPE
                 },
                 null
-                );
+        );
         boolean exist = false;
         if (cursor != null) {
             exist = cursor.moveToFirst();
@@ -115,7 +109,7 @@ public class BookmarkEnhance {
                 COLUMN_MEDIA_TYPE + "='" + VIDEO_STREAMING_MEDIA_TYPE + "' ",
                 null,
                 ORDER_COLUMN
-                );
+        );
         if (LOG) {
             Log.v(TAG, "query() return cursor=" + (cursor == null ? -1 : cursor.getCount()));
         }

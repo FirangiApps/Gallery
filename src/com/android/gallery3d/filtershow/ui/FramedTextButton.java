@@ -29,13 +29,28 @@ import org.codeaurora.gallery.R;
 
 public class FramedTextButton extends ImageButton {
     private static final String LOGTAG = "FramedTextButton";
-    private String mText = null;
     private static int mTextSize = 24;
     private static int mTextPadding = 20;
     private static Paint gPaint = new Paint();
     private static Path gPath = new Path();
     private static int mTrianglePadding = 2;
     private static int mTriangleSize = 30;
+    private String mText = null;
+
+    public FramedTextButton(Context context) {
+        this(context, null);
+    }
+
+    public FramedTextButton(Context context, AttributeSet attrs) {
+        super(context, attrs);
+        if (attrs == null) {
+            return;
+        }
+        TypedArray a = getContext().obtainStyledAttributes(
+                attrs, R.styleable.ImageButtonTitle);
+
+        mText = a.getString(R.styleable.ImageButtonTitle_android_text);
+    }
 
     public static void setTextSize(int value) {
         mTextSize = value;
@@ -51,11 +66,6 @@ public class FramedTextButton extends ImageButton {
 
     public static void setTriangleSize(int value) {
         mTriangleSize = value;
-    }
-
-    public void setText(String text) {
-        mText = text;
-        invalidate();
     }
 
     public void setTextFrom(int itemId) {
@@ -80,23 +90,13 @@ public class FramedTextButton extends ImageButton {
         invalidate();
     }
 
-    public FramedTextButton(Context context) {
-        this(context, null);
-    }
-
-    public FramedTextButton(Context context, AttributeSet attrs) {
-        super(context, attrs);
-        if (attrs == null) {
-            return;
-        }
-        TypedArray a = getContext().obtainStyledAttributes(
-                attrs, R.styleable.ImageButtonTitle);
-
-        mText = a.getString(R.styleable.ImageButtonTitle_android_text);
-    }
-
-    public String getText(){
+    public String getText() {
         return mText;
+    }
+
+    public void setText(String text) {
+        mText = text;
+        invalidate();
     }
 
     @Override
@@ -110,11 +110,11 @@ public class FramedTextButton extends ImageButton {
                 h - mTextPadding, gPaint);
         gPath.reset();
         gPath.moveTo(w - mTextPadding - mTrianglePadding - mTriangleSize,
-                     h - mTextPadding - mTrianglePadding);
+                h - mTextPadding - mTrianglePadding);
         gPath.lineTo(w - mTextPadding - mTrianglePadding,
-                     h - mTextPadding - mTrianglePadding - mTriangleSize);
+                h - mTextPadding - mTrianglePadding - mTriangleSize);
         gPath.lineTo(w - mTextPadding - mTrianglePadding,
-                     h - mTextPadding - mTrianglePadding);
+                h - mTextPadding - mTrianglePadding);
         gPath.close();
         gPaint.setARGB(128, 255, 255, 255);
         gPaint.setStrokeWidth(1);

@@ -16,8 +16,9 @@
 
 package com.android.gallery3d.filtershow.filters;
 
-import org.codeaurora.gallery.R;
 import com.android.gallery3d.filtershow.editors.ImageOnlyEditor;
+
+import org.codeaurora.gallery.R;
 
 public class FilterImageBorderRepresentation extends FilterRepresentation {
     private int mDrawableResource = 0;
@@ -65,9 +66,7 @@ public class FilterImageBorderRepresentation extends FilterRepresentation {
         }
         if (representation instanceof FilterImageBorderRepresentation) {
             FilterImageBorderRepresentation border = (FilterImageBorderRepresentation) representation;
-            if (border.mDrawableResource == mDrawableResource) {
-                return true;
-            }
+            return border.mDrawableResource == mDrawableResource;
         }
         return false;
     }

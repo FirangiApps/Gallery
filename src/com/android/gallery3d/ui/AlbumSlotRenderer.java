@@ -21,7 +21,6 @@ package com.android.gallery3d.ui;
 
 import com.android.gallery3d.app.AbstractGalleryActivity;
 import com.android.gallery3d.app.AlbumDataLoader;
-import com.android.gallery3d.app.AlbumPage;
 import com.android.gallery3d.data.MediaObject;
 import com.android.gallery3d.data.Path;
 import com.android.gallery3d.glrenderer.ColorTexture;
@@ -35,44 +34,25 @@ import com.android.gallery3d.ui.AlbumSlidingWindow.AlbumEntry;
 public class AlbumSlotRenderer extends AbstractSlotRenderer {
     @SuppressWarnings("unused")
     private static final String TAG = "AlbumView";
-    private boolean mIsGridViewShown;
-
-    public static class LabelSpec {
-        public int labelBackgroundHeight;
-        public int titleFontSize;
-        public int leftMargin;
-        public int iconSize;
-        public int titleLeftMargin;
-        public int backgroundColor;
-        public int titleColor;
-        public int borderSize;
-    }
-
-    public interface SlotFilter {
-        public boolean acceptSlot(int index);
-    }
-
-    private final int mPlaceholderColor;
     private static final int CACHE_SIZE = 96;
-
-    private AlbumSlidingWindow mDataWindow;
+    protected final LabelSpec mLabelSpec;
+    private final int mPlaceholderColor;
     private final AbstractGalleryActivity mActivity;
     private final ColorTexture mWaitLoadingTexture;
-    private SlotView mSlotView;
     private final SelectionManager mSelectionManager;
-
+    private boolean mIsGridViewShown;
+    private AlbumSlidingWindow mDataWindow;
+    private SlotView mSlotView;
     private int mPressedIndex = -1;
     private boolean mAnimatePressedUp;
     private Path mHighlightItemPath = null;
     private boolean mInSelectionMode;
-
     private SlotFilter mSlotFilter;
-    protected final LabelSpec mLabelSpec;
 
     public AlbumSlotRenderer(AbstractGalleryActivity activity,
-            SlotView slotView, LabelSpec labelSpec,
-            SelectionManager selectionManager, int placeholderColor,
-            boolean viewType) {
+                             SlotView slotView, LabelSpec labelSpec,
+                             SelectionManager selectionManager, int placeholderColor,
+                             boolean viewType) {
         super(activity);
         mActivity = activity;
         mSlotView = slotView;
@@ -82,6 +62,16 @@ public class AlbumSlotRenderer extends AbstractSlotRenderer {
         mWaitLoadingTexture = new ColorTexture(mPlaceholderColor);
         mWaitLoadingTexture.setSize(1, 1);
         mIsGridViewShown = viewType;
+    }
+
+    private static Texture checkTexture(Texture texture) {
+        return (texture instanceof TiledTexture)
+                && !((TiledTexture) texture).isReady() ? null : texture;
+    }
+
+    private static Texture checkLabelTexture(Texture texture) {
+        return ((texture instanceof UploadedTexture) && ((UploadedTexture) texture)
+                .isUploading()) ? null : texture;
     }
 
     public void setPressedIndex(int index) {
@@ -120,14 +110,9 @@ public class AlbumSlotRenderer extends AbstractSlotRenderer {
         }
     }
 
-    private static Texture checkTexture(Texture texture) {
-        return (texture instanceof TiledTexture)
-                && !((TiledTexture) texture).isReady() ? null : texture;
-    }
-
     @Override
     public int renderSlot(GLCanvas canvas, int index, int pass, int width,
-            int height) {
+                          int height) {
         int thumbSize = 0;
         if (!mIsGridViewShown) {
             thumbSize = mLabelSpec.iconSize;
@@ -183,7 +168,7 @@ public class AlbumSlotRenderer extends AbstractSlotRenderer {
     }
 
     protected int renderLabel(GLCanvas canvas, AlbumEntry entry, int width,
-            int height) {
+                              int height) {
         Texture content = checkLabelTexture(entry.labelTexture);
         if (content == null) {
             content = mWaitLoadingTexture;
@@ -196,7 +181,7 @@ public class AlbumSlotRenderer extends AbstractSlotRenderer {
     }
 
     private int renderOverlay(GLCanvas canvas, int index,
-            AlbumSlidingWindow.AlbumEntry entry, int width, int height) {
+                              AlbumSlidingWindow.AlbumEntry entry, int width, int height) {
         int renderRequestFlags = 0;
         if (mPressedIndex == index) {
             if (mAnimatePressedUp) {
@@ -216,26 +201,6 @@ public class AlbumSlotRenderer extends AbstractSlotRenderer {
             drawSelectedFrame(canvas, width, height);
         }
         return renderRequestFlags;
-    }
-
-    private static Texture checkLabelTexture(Texture texture) {
-        return ((texture instanceof UploadedTexture) && ((UploadedTexture) texture)
-                .isUploading()) ? null : texture;
-    }
-
-    private class MyDataModelListener implements AlbumSlidingWindow.Listener {
-        @Override
-        public void onContentChanged() {
-            mSlotView.invalidate();
-
-        }
-
-        @Override
-        public void onSizeChanged(int size) {
-            mSlotView.setSlotCount(size);
-            mSlotView.invalidate();
-
-        }
     }
 
     public void resume() {
@@ -267,5 +232,35 @@ public class AlbumSlotRenderer extends AbstractSlotRenderer {
 
     public void setSlotFilter(SlotFilter slotFilter) {
         mSlotFilter = slotFilter;
+    }
+
+    public interface SlotFilter {
+        boolean acceptSlot(int index);
+    }
+
+    public static class LabelSpec {
+        public int labelBackgroundHeight;
+        public int titleFontSize;
+        public int leftMargin;
+        public int iconSize;
+        public int titleLeftMargin;
+        public int backgroundColor;
+        public int titleColor;
+        public int borderSize;
+    }
+
+    private class MyDataModelListener implements AlbumSlidingWindow.Listener {
+        @Override
+        public void onContentChanged() {
+            mSlotView.invalidate();
+
+        }
+
+        @Override
+        public void onSizeChanged(int size) {
+            mSlotView.setSlotCount(size);
+            mSlotView.invalidate();
+
+        }
     }
 }

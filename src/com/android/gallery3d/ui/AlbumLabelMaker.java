@@ -30,23 +30,19 @@ import android.text.TextPaint;
 import android.text.TextUtils;
 import android.view.View;
 
-import org.codeaurora.gallery.R;
-import com.android.gallery3d.data.DataSourceType;
-import com.android.photos.data.GalleryBitmapPool;
 import com.android.gallery3d.util.ThreadPool;
 import com.android.gallery3d.util.ThreadPool.JobContext;
+import com.android.photos.data.GalleryBitmapPool;
 
 import java.util.Locale;
 
 public class AlbumLabelMaker {
     private static final int BORDER_SIZE = 0;
-
+    private final Context mContext;
     private AlbumSetSlotRenderer.LabelSpec mSpec;
     private AlbumSlotRenderer.LabelSpec mAlbumListSpec;
     private TextPaint mTitlePaint;
     private TextPaint mCountPaint;
-    private final Context mContext;
-
     private int mLabelWidth;
     private int mBitmapWidth;
     private int mBitmapHeight;
@@ -101,22 +97,13 @@ public class AlbumLabelMaker {
         return paint;
     }
 
-    private class LazyLoadedBitmap {
-        private Bitmap mBitmap;
-        private int mResId;
-
-        public LazyLoadedBitmap(int resId) {
-            mResId = resId;
-        }
-
-        public synchronized Bitmap get() {
-            if (mBitmap == null) {
-                BitmapFactory.Options options = new BitmapFactory.Options();
-                options.inPreferredConfig = Bitmap.Config.ARGB_8888;
-                mBitmap = BitmapFactory.decodeResource(
-                        mContext.getResources(), mResId, options);
-            }
-            return mBitmap;
+    static void drawText(Canvas canvas,
+                         int x, int y, String text, int lengthLimit, TextPaint p) {
+        // The TextPaint cannot be used concurrently
+        synchronized (p) {
+            text = TextUtils.ellipsize(
+                    text, p, lengthLimit, TextUtils.TruncateAt.END).toString();
+            canvas.drawText(text, x, y - p.getFontMetricsInt().ascent, p);
         }
     }
 
@@ -141,13 +128,26 @@ public class AlbumLabelMaker {
         return new AlbumLabelJob(title);
     }
 
-    static void drawText(Canvas canvas,
-            int x, int y, String text, int lengthLimit, TextPaint p) {
-        // The TextPaint cannot be used concurrently
-        synchronized (p) {
-            text = TextUtils.ellipsize(
-                    text, p, lengthLimit, TextUtils.TruncateAt.END).toString();
-            canvas.drawText(text, x, y - p.getFontMetricsInt().ascent, p);
+    public void recycleLabel(Bitmap label) {
+        GalleryBitmapPool.getInstance().put(label);
+    }
+
+    private class LazyLoadedBitmap {
+        private Bitmap mBitmap;
+        private int mResId;
+
+        public LazyLoadedBitmap(int resId) {
+            mResId = resId;
+        }
+
+        public synchronized Bitmap get() {
+            if (mBitmap == null) {
+                BitmapFactory.Options options = new BitmapFactory.Options();
+                options.inPreferredConfig = Bitmap.Config.ARGB_8888;
+                mBitmap = BitmapFactory.decodeResource(
+                        mContext.getResources(), mResId, options);
+            }
+            return mBitmap;
         }
     }
 
@@ -205,7 +205,7 @@ public class AlbumLabelMaker {
                     bitmap.getWidth() - BORDER_SIZE,
                     bitmap.getHeight() - BORDER_SIZE);
             if (!isAlbumListViewShown) {
-                 canvas.drawColor(mSpec.backgroundColor, PorterDuff.Mode.SRC);
+                canvas.drawColor(mSpec.backgroundColor, PorterDuff.Mode.SRC);
             }
 
             canvas.translate(BORDER_SIZE, BORDER_SIZE);
@@ -239,7 +239,7 @@ public class AlbumLabelMaker {
                 }
 
             } else { // LTR
-                                // draw title
+                // draw title
                 if (jc.isCancelled())
                     return null;
                 if (!isAlbumListViewShown) {
@@ -266,12 +266,8 @@ public class AlbumLabelMaker {
                     drawText(canvas, x, y, title, labelWidth - s1.leftMargin
                             - x, mTitlePaint);
                 }
-          }
+            }
             return bitmap;
         }
-    }
-
-    public void recycleLabel(Bitmap label) {
-        GalleryBitmapPool.getInstance().put(label);
     }
 }

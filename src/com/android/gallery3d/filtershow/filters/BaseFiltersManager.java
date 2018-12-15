@@ -23,10 +23,6 @@ import android.util.Log;
 import android.view.ContextThemeWrapper;
 import android.view.Gravity;
 
-import org.codeaurora.gallery.R;
-
-import com.android.gallery3d.filtershow.FilterShowActivity;
-import com.android.gallery3d.filtershow.data.FilterPresetDBHelper;
 import com.android.gallery3d.filtershow.data.FilterPresetSource;
 import com.android.gallery3d.filtershow.data.FilterPresetSource.SaveOption;
 import com.android.gallery3d.filtershow.editors.EditorTruePortraitBasic;
@@ -34,15 +30,17 @@ import com.android.gallery3d.filtershow.editors.EditorTruePortraitImageOnly;
 import com.android.gallery3d.filtershow.editors.ImageOnlyEditor;
 import com.android.gallery3d.filtershow.pipeline.ImagePreset;
 
+import org.codeaurora.gallery.R;
+
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Vector;
 
 public abstract class BaseFiltersManager implements FiltersManagerInterface {
+    private static final String LOGTAG = "BaseFiltersManager";
+    private static int mImageBorderSize = 4; // in percent
     protected HashMap<Class, ImageFilter> mFilters = null;
     protected HashMap<String, FilterRepresentation> mRepresentationLookup = null;
-    private static final String LOGTAG = "BaseFiltersManager";
-
     protected ArrayList<FilterRepresentation> mLooks = new ArrayList<>();
     protected ArrayList<FilterRepresentation> mBorders = new ArrayList<>();
     protected ArrayList<FilterRepresentation> mTools = new ArrayList<>();
@@ -60,7 +58,6 @@ public abstract class BaseFiltersManager implements FiltersManagerInterface {
     protected ArrayList<FilterRepresentation> mWeathers = new ArrayList<>();
     protected ArrayList<FilterRepresentation> mEmotions = new ArrayList<>();
     protected ArrayList<FilterRepresentation> mFoods = new ArrayList<>();
-    private static int mImageBorderSize = 4; // in percent
 
     protected void init() {
         mFilters = new HashMap<Class, ImageFilter>();
@@ -174,7 +171,7 @@ public abstract class BaseFiltersManager implements FiltersManagerInterface {
         filters.add(ImageFilterPreset.class);
         filters.add(SaveWaterMark.class);
 
-        if(SimpleMakeupImageFilter.HAS_TS_MAKEUP) {
+        if (SimpleMakeupImageFilter.HAS_TS_MAKEUP) {
             filters.add(ImageFilterMakeupWhiten.class);
             filters.add(ImageFilterMakeupSoften.class);
             filters.add(ImageFilterMakeupTrimface.class);
@@ -210,7 +207,9 @@ public abstract class BaseFiltersManager implements FiltersManagerInterface {
         return mTruePortrait;
     }
 
-    public ArrayList<FilterRepresentation> getFilterPreset(){ return mFilterPreset; }
+    public ArrayList<FilterRepresentation> getFilterPreset() {
+        return mFilterPreset;
+    }
 
     public ArrayList<FilterRepresentation> getTools() {
         return mTools;
@@ -223,30 +222,39 @@ public abstract class BaseFiltersManager implements FiltersManagerInterface {
     public ArrayList<FilterRepresentation> getMakeup() {
         return mMakeup;
     }
+
     public ArrayList<FilterRepresentation> getTrueScanner() {
         return mTrueScanner;
     }
+
     public ArrayList<FilterRepresentation> getHazeBuster() {
         return mHazeBuster;
     }
+
     public ArrayList<FilterRepresentation> getSeeStraight() {
         return mSeeStraight;
     }
+
     public ArrayList<FilterRepresentation> getWaterMarks() {
         return mWaterMarks;
     }
+
     public ArrayList<FilterRepresentation> getLocations() {
         return mLocations;
     }
+
     public ArrayList<FilterRepresentation> getTimes() {
         return mTimes;
     }
+
     public ArrayList<FilterRepresentation> getWeathers() {
         return mWeathers;
     }
+
     public ArrayList<FilterRepresentation> getEmotions() {
         return mEmotions;
     }
+
     public ArrayList<FilterRepresentation> getFoods() {
         return mFoods;
     }
@@ -273,7 +281,7 @@ public abstract class BaseFiltersManager implements FiltersManagerInterface {
         mBorders.add(rep);
 
         // Regular borders
-        ArrayList <FilterRepresentation> borderList = new ArrayList<FilterRepresentation>();
+        ArrayList<FilterRepresentation> borderList = new ArrayList<FilterRepresentation>();
 
 
         rep = new FilterImageBorderRepresentation(R.drawable.filtershow_border_4x5);
@@ -402,7 +410,7 @@ public abstract class BaseFiltersManager implements FiltersManagerInterface {
     }
 
     public void addMakeups(Context context) {
-        if(SimpleMakeupImageFilter.HAS_TS_MAKEUP) {
+        if (SimpleMakeupImageFilter.HAS_TS_MAKEUP) {
             mMakeup.add(getRepresentation(ImageFilterMakeupWhiten.class));
             mMakeup.add(getRepresentation(ImageFilterMakeupSoften.class));
             mMakeup.add(getRepresentation(ImageFilterMakeupTrimface.class));
@@ -497,6 +505,7 @@ public abstract class BaseFiltersManager implements FiltersManagerInterface {
             mWaterMarks.add(waterMark);
         }
     }
+
     public void addLocations(Context context) {
         int[] textId = {
                 R.string.location_pin,
@@ -515,18 +524,18 @@ public abstract class BaseFiltersManager implements FiltersManagerInterface {
         FilterWatermarkRepresentation[] waterMarkFilters = {
                 new FilterWatermarkRepresentation(context, "LOCATION_PIN", "SAN DIEGO"),
                 new FilterWatermarkRepresentation(context, "LOCATION_CITY", "SAN DIEGO"),
-                new FilterWatermarkRepresentation(context, "LOCATION_HELLO","SAN DIEGO"),
-                new FilterWatermarkRepresentation(context, "LOCATION_STAMP","SAN DIEGO")
+                new FilterWatermarkRepresentation(context, "LOCATION_HELLO", "SAN DIEGO"),
+                new FilterWatermarkRepresentation(context, "LOCATION_STAMP", "SAN DIEGO")
         };
 
         waterMarkFilters[0].new PositionInfo(0,
                 context.getResources().getDimensionPixelSize(R.dimen.watermark_default_size),
-                0,0, Gravity.CENTER_HORIZONTAL);
+                0, 0, Gravity.CENTER_HORIZONTAL);
         waterMarkFilters[1].new PositionInfo(0,
                 context.getResources().getDimensionPixelSize(R.dimen.watermark_default_size),
-                0,0, Gravity.CENTER_HORIZONTAL);
-        waterMarkFilters[2].new PositionInfo(0,60,0,0, Gravity.RIGHT, true);
-        waterMarkFilters[3].new PositionInfo(0,0,0,0, Gravity.CENTER);
+                0, 0, Gravity.CENTER_HORIZONTAL);
+        waterMarkFilters[2].new PositionInfo(0, 60, 0, 0, Gravity.RIGHT, true);
+        waterMarkFilters[3].new PositionInfo(0, 0, 0, 0, Gravity.CENTER);
 
         for (int i = 0; i < waterMarkFilters.length; i++) {
             FilterWatermarkRepresentation waterMark = waterMarkFilters[i];
@@ -538,6 +547,7 @@ public abstract class BaseFiltersManager implements FiltersManagerInterface {
             mLocations.add(waterMark);
         }
     }
+
     public void addTimes(Context context) {
         int[] textId = {
                 R.string.time_hourglass,
@@ -563,14 +573,14 @@ public abstract class BaseFiltersManager implements FiltersManagerInterface {
         FilterWatermarkRepresentation.PositionInfo[] positionInfos = {
                 waterMarkFilters[0].new PositionInfo(
                         context.getResources().getDimensionPixelSize(R.dimen.watermark_default_size),
-                        0,0,0, Gravity.CENTER_VERTICAL),
+                        0, 0, 0, Gravity.CENTER_VERTICAL),
                 waterMarkFilters[1].new PositionInfo(0,
                         context.getResources().getDimensionPixelSize(R.dimen.watermark_default_size),
-                        0,0, Gravity.CENTER_HORIZONTAL),
+                        0, 0, Gravity.CENTER_HORIZONTAL),
                 waterMarkFilters[2].new PositionInfo(0,
                         context.getResources().getDimensionPixelSize(R.dimen.watermark_default_size),
-                        0,0, Gravity.RIGHT),
-                waterMarkFilters[3].new PositionInfo(0,0,0,0, Gravity.CENTER)
+                        0, 0, Gravity.RIGHT),
+                waterMarkFilters[3].new PositionInfo(0, 0, 0, 0, Gravity.CENTER)
 
         };
 
@@ -584,6 +594,7 @@ public abstract class BaseFiltersManager implements FiltersManagerInterface {
             mTimes.add(waterMark);
         }
     }
+
     public void addWeather(Context context) {
         int[] textId = {
                 R.string.weather_rain,
@@ -621,6 +632,7 @@ public abstract class BaseFiltersManager implements FiltersManagerInterface {
             mWeathers.add(waterMark);
         }
     }
+
     public void addEmotions(Context context) {
         int[] textId = {
                 R.string.emotion_party,
@@ -672,6 +684,7 @@ public abstract class BaseFiltersManager implements FiltersManagerInterface {
             mEmotions.add(waterMark);
         }
     }
+
     public void addFoods(Context context) {
         int[] textId = {
                 R.string.food_fork_knife,
@@ -694,7 +707,7 @@ public abstract class BaseFiltersManager implements FiltersManagerInterface {
                 new FilterWatermarkRepresentation(context, "FOOD_YUM", null)
         };
 
-        waterMarkFilters[0].new PositionInfo(0,32,0,0,Gravity.CENTER_HORIZONTAL,true);
+        waterMarkFilters[0].new PositionInfo(0, 32, 0, 0, Gravity.CENTER_HORIZONTAL, true);
         waterMarkFilters[1].new PositionInfo(0,
                 context.getResources().getDimensionPixelSize(R.dimen.watermark_default_size),
                 0, 0, Gravity.CENTER_HORIZONTAL);
@@ -810,11 +823,11 @@ public abstract class BaseFiltersManager implements FiltersManagerInterface {
         };
 
         int[][] minMaxValues = {
-                {0,0,0},
-                {0,3,7},
-                {0,3,7},
-                {0,3,7},
-                {0,0,0}
+                {0, 0, 0},
+                {0, 3, 7},
+                {0, 3, 7},
+                {0, 3, 7},
+                {0, 0, 0}
         };
 
         boolean[] showParams = {
@@ -852,13 +865,13 @@ public abstract class BaseFiltersManager implements FiltersManagerInterface {
         mTruePortrait.add(getRepresentation(ImageFilterTruePortraitFusion.class));
     }
 
-    public void addFilterPreset (Context context) {
+    public void addFilterPreset(Context context) {
         FilterPresetSource fp = new FilterPresetSource(context);
         ArrayList<SaveOption> ret = fp.getAllUserPresets();
         if (ret == null) return;
-        for (int id = 0; id<ret.size(); id++){
-            FilterPresetRepresentation representation= new FilterPresetRepresentation (
-                    ret.get(id).name,ret.get(id)._id,id+1);
+        for (int id = 0; id < ret.size(); id++) {
+            FilterPresetRepresentation representation = new FilterPresetRepresentation(
+                    ret.get(id).name, ret.get(id)._id, id + 1);
             Uri filteredUri = Uri.parse(ret.get(id).Uri);
             representation.setUri(filteredUri);
             representation.setSerializationName("Custom");
@@ -870,7 +883,7 @@ public abstract class BaseFiltersManager implements FiltersManagerInterface {
     }
 
     public void removeRepresentation(ArrayList<FilterRepresentation> list,
-            FilterRepresentation representation) {
+                                     FilterRepresentation representation) {
         for (int i = 0; i < list.size(); i++) {
             FilterRepresentation r = list.get(i);
             if (r.getFilterClass() == representation.getFilterClass()) {

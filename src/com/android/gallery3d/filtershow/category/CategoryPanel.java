@@ -17,19 +17,18 @@
 package com.android.gallery3d.filtershow.category;
 
 import android.app.Activity;
-import android.graphics.Rect;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.ImageButton;
 import android.widget.LinearLayout;
 import android.widget.ListView;
-import android.widget.TextView;
-import org.codeaurora.gallery.R;
+
 import com.android.gallery3d.filtershow.FilterShowActivity;
-import android.util.Log;
+
+import org.codeaurora.gallery.R;
+
 public class CategoryPanel extends Fragment implements View.OnClickListener {
 
     public static final String FRAGMENT_TAG = "CategoryPanel";
@@ -126,20 +125,20 @@ public class CategoryPanel extends Fragment implements View.OnClickListener {
                 }
                 break;
             }
-           case MainPanel.MAKEUP: {
+            case MainPanel.MAKEUP: {
                 mAdapter = activity.getCategoryMakeupAdapter();
                 if (mAdapter != null) {
                     mAdapter.initializeSelection(MainPanel.MAKEUP);
                 }
                 break;
             }
-           case MainPanel.WATERMARK: {
-               mAdapter = activity.getCategoryWatermarkAdapter();
-               if (mAdapter != null) {
-                   mAdapter.initializeSelection(MainPanel.WATERMARK);
-               }
-               break;
-           }
+            case MainPanel.WATERMARK: {
+                mAdapter = activity.getCategoryWatermarkAdapter();
+                if (mAdapter != null) {
+                    mAdapter.initializeSelection(MainPanel.WATERMARK);
+                }
+                break;
+            }
         }
         updateAddButtonVisibility();
     }
@@ -171,12 +170,12 @@ public class CategoryPanel extends Fragment implements View.OnClickListener {
                 mAdapter.setContainer(panel);
             }
         } else if (mAdapter != null) {
-            ListView panel = (ListView) main.findViewById(R.id.listItems);
+            ListView panel = main.findViewById(R.id.listItems);
             panel.setAdapter(mAdapter);
             mAdapter.setContainer(panel);
         }
 
-        mAddButton = (IconView) main.findViewById(R.id.addButton);
+        mAddButton = main.findViewById(R.id.addButton);
         if (mAddButton != null) {
             mAddButton.setOnClickListener(this);
             updateAddButtonVisibility();

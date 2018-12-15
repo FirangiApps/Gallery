@@ -23,7 +23,6 @@ import android.graphics.Matrix;
 import android.graphics.Paint;
 import android.graphics.Rect;
 import android.graphics.RectF;
-import android.util.Log;
 
 import com.android.gallery3d.filtershow.cache.BitmapCache;
 import com.android.gallery3d.filtershow.cache.ImageLoader;
@@ -40,59 +39,10 @@ import java.util.Collection;
 import java.util.Iterator;
 
 public final class GeometryMathUtils {
-    private static final String TAG = "GeometryMathUtils";
     public static final float SHOW_SCALE = .9f;
+    private static final String TAG = "GeometryMathUtils";
 
-    private GeometryMathUtils() {};
-
-    // Holder class for Geometry data.
-    public static final class GeometryHolder {
-        public Rotation rotation = FilterRotateRepresentation.getNil();
-        public float straighten = FilterStraightenRepresentation.getNil();
-        public RectF crop = FilterCropRepresentation.getNil();
-        public Mirror mirror = FilterMirrorRepresentation.getNil();
-
-        public void set(GeometryHolder h) {
-            rotation = h.rotation;
-            straighten = h.straighten;
-            crop.set(h.crop);
-            mirror = h.mirror;
-        }
-
-        public void wipe() {
-            rotation = FilterRotateRepresentation.getNil();
-            straighten = FilterStraightenRepresentation.getNil();
-            crop = FilterCropRepresentation.getNil();
-            mirror = FilterMirrorRepresentation.getNil();
-        }
-
-        public boolean isNil() {
-            return rotation == FilterRotateRepresentation.getNil() &&
-                    straighten == FilterStraightenRepresentation.getNil() &&
-                    crop.equals(FilterCropRepresentation.getNil()) &&
-                    mirror == FilterMirrorRepresentation.getNil();
-        }
-
-        @Override
-        public boolean equals(Object o) {
-            if (this == o) {
-                return true;
-            }
-            if (!(o instanceof GeometryHolder)) {
-                return false;
-            }
-            GeometryHolder h = (GeometryHolder) o;
-            return rotation == h.rotation && straighten == h.straighten &&
-                    ((crop == null && h.crop == null) || (crop != null && crop.equals(h.crop))) &&
-                    mirror == h.mirror;
-        }
-
-        @Override
-        public String toString() {
-            return getClass().getSimpleName() + "[" + "rotation:" + rotation.value()
-                    + ",straighten:" + straighten + ",crop:" + crop.toString()
-                    + ",mirror:" + mirror.value() + "]";
-        }
+    private GeometryMathUtils() {
     }
 
     // Math operations for 2d vectors
@@ -258,7 +208,7 @@ public final class GeometryMathUtils {
     }
 
     public static void unpackGeometry(GeometryHolder out,
-            Collection<FilterRepresentation> geometry) {
+                                      Collection<FilterRepresentation> geometry) {
         out.wipe();
         // Get geometry data from filters
         for (FilterRepresentation r : geometry) {
@@ -279,7 +229,7 @@ public final class GeometryMathUtils {
     }
 
     public static void replaceInstances(Collection<FilterRepresentation> geometry,
-            FilterRepresentation rep) {
+                                        FilterRepresentation rep) {
         Iterator<FilterRepresentation> iter = geometry.iterator();
         while (iter.hasNext()) {
             FilterRepresentation r = iter.next();
@@ -293,7 +243,7 @@ public final class GeometryMathUtils {
     }
 
     public static void initializeHolder(GeometryHolder outHolder,
-            FilterRepresentation currentLocal) {
+                                        FilterRepresentation currentLocal) {
         Collection<FilterRepresentation> geometry = MasterImage.getImage().getPreset()
                 .getGeometryFilters();
         replaceInstances(geometry, currentLocal);
@@ -331,7 +281,7 @@ public final class GeometryMathUtils {
     }
 
     public static Matrix getImageToScreenMatrix(Collection<FilterRepresentation> geometry,
-            boolean reflectRotation, Rect bmapDimens, float viewWidth, float viewHeight) {
+                                                boolean reflectRotation, Rect bmapDimens, float viewWidth, float viewHeight) {
         GeometryHolder h = unpackGeometry(geometry);
         return GeometryMathUtils.getOriginalToScreen(h, reflectRotation, bmapDimens.width(),
                 bmapDimens.height(), viewWidth, viewHeight);
@@ -372,13 +322,13 @@ public final class GeometryMathUtils {
     }
 
     public static Matrix getOriginalToScreen(GeometryHolder holder, boolean rotate,
-            float originalWidth, float originalHeight, float viewWidth, float viewHeight) {
+                                             float originalWidth, float originalHeight, float viewWidth, float viewHeight) {
         return getOriginalToScreen(holder, null, rotate, originalWidth, originalHeight, viewWidth, viewHeight);
     }
 
     public static Matrix getOriginalToScreen(GeometryHolder holder, RectF outCrop,
-            boolean rotate, float originalWidth, float originalHeight,
-            float viewWidth, float viewHeight) {
+                                             boolean rotate, float originalWidth, float originalHeight,
+                                             float viewWidth, float viewHeight) {
         RectF crop = new RectF();
         Matrix m;
         int orientation = MasterImage.getImage().getZoomOrientation();
@@ -388,30 +338,30 @@ public final class GeometryMathUtils {
                 orientation == ImageLoader.ORI_TRANSPOSE ||
                 orientation == ImageLoader.ORI_TRANSVERSE) {
 
-            crop = getTrueCropRect(holder, (int)originalHeight, (int)originalWidth);
+            crop = getTrueCropRect(holder, (int) originalHeight, (int) originalWidth);
         } else {
-            crop = getTrueCropRect(holder, (int)originalWidth, (int)originalHeight);
+            crop = getTrueCropRect(holder, (int) originalWidth, (int) originalHeight);
         }
 
         float scale = scale(crop.width(), crop.height(), viewWidth, viewHeight);
 
-        m = getFullGeometryMatrix(holder, (int)originalWidth, (int)originalHeight);
-        if(orientation != ImageLoader.ORI_NORMAL) {
-            addOrientationToMatrix(m, (int)originalWidth, (int)originalHeight, orientation);
+        m = getFullGeometryMatrix(holder, (int) originalWidth, (int) originalHeight);
+        if (orientation != ImageLoader.ORI_NORMAL) {
+            addOrientationToMatrix(m, (int) originalWidth, (int) originalHeight, orientation);
         }
 
         m.postScale(scale, scale);
         GeometryMathUtils.scaleRect(crop, scale);
         m.postTranslate(viewWidth / 2f - crop.centerX(), viewHeight / 2f - crop.centerY());
         crop.offset(viewWidth / 2f - crop.centerX(), viewHeight / 2f - crop.centerY());
-        if(outCrop != null) {
+        if (outCrop != null) {
             outCrop.set(crop);
         }
         return m;
     }
 
     public static Bitmap applyGeometryRepresentations(Collection<FilterRepresentation> res,
-            Bitmap image) {
+                                                      Bitmap image) {
         GeometryHolder holder = unpackGeometry(res);
         Bitmap bmap = image;
         // If there are geometry changes, apply them to the image
@@ -426,7 +376,7 @@ public final class GeometryMathUtils {
     }
 
     public static RectF drawTransformedCropped(GeometryHolder holder, Canvas canvas,
-            Bitmap photo, int viewWidth, int viewHeight) {
+                                               Bitmap photo, int viewWidth, int viewHeight) {
         if (photo == null) {
             return null;
         }
@@ -454,7 +404,7 @@ public final class GeometryMathUtils {
 
     // Gives matrix for rotated, straightened, mirrored bitmap centered at 0,0.
     public static Matrix getFullGeometryMatrix(GeometryHolder holder, int bitmapWidth,
-            int bitmapHeight) {
+                                               int bitmapHeight) {
         float centerX = bitmapWidth / 2f;
         float centerY = bitmapHeight / 2f;
         Matrix m = new Matrix();
@@ -465,7 +415,7 @@ public final class GeometryMathUtils {
     }
 
     public static Matrix getFullGeometryToScreenMatrix(GeometryHolder holder, int bitmapWidth,
-            int bitmapHeight, int viewWidth, int viewHeight) {
+                                                       int bitmapHeight, int viewWidth, int viewHeight) {
         int bh = bitmapHeight;
         int bw = bitmapWidth;
         if (GeometryMathUtils.needsDimensionSwap(holder.rotation)) {
@@ -519,7 +469,7 @@ public final class GeometryMathUtils {
             bh = bitmapWidth;
             bw = bitmapHeight;
         }
-        float scale = GeometryMathUtils.getWatermarkScale(holder,bw, bh, viewWidth, viewHeight, oldw, oldh);
+        float scale = GeometryMathUtils.getWatermarkScale(holder, bw, bh, viewWidth, viewHeight, oldw, oldh);
         Matrix m = new Matrix();
         m.setTranslate(-oldw / 2f, -oldh / 2f);
         m.postScale(scale, scale);
@@ -561,7 +511,7 @@ public final class GeometryMathUtils {
     }
 
     public static Matrix getCropSelectionToScreenMatrix(RectF outCrop, GeometryHolder holder,
-            int bitmapWidth, int bitmapHeight, int viewWidth, int viewHeight) {
+                                                        int bitmapWidth, int bitmapHeight, int viewWidth, int viewHeight) {
         Matrix m = getFullGeometryMatrix(holder, bitmapWidth, bitmapHeight);
         RectF crop = getTrueCropRect(holder, bitmapWidth, bitmapHeight);
         float scale = GeometryMathUtils.scale(crop.width(), crop.height(), viewWidth, viewHeight);
@@ -576,8 +526,8 @@ public final class GeometryMathUtils {
     }
 
     public static Matrix getCropSelectionToScreenMatrix(RectF outCrop,
-            Collection<FilterRepresentation> res, int bitmapWidth, int bitmapHeight, int viewWidth,
-            int viewHeight) {
+                                                        Collection<FilterRepresentation> res, int bitmapWidth, int bitmapHeight, int viewWidth,
+                                                        int viewHeight) {
         GeometryHolder holder = unpackGeometry(res);
         return getCropSelectionToScreenMatrix(outCrop, holder, bitmapWidth, bitmapHeight,
                 viewWidth, viewHeight);
@@ -586,13 +536,13 @@ public final class GeometryMathUtils {
     public static void addOrientationToMatrix(Matrix matrix, int w, int h, int orientation) {
         switch (orientation) {
             case ImageLoader.ORI_ROTATE_90:
-                matrix.preRotate(90, w/2, h/2);
+                matrix.preRotate(90, w / 2, h / 2);
                 break;
             case ImageLoader.ORI_ROTATE_180:
-                matrix.preRotate(180, w/2, h/2);
+                matrix.preRotate(180, w / 2, h / 2);
                 break;
             case ImageLoader.ORI_ROTATE_270:
-                matrix.preRotate(270, w/2, h/2);
+                matrix.preRotate(270, w / 2, h / 2);
                 break;
             case ImageLoader.ORI_FLIP_HOR:
                 matrix.preScale(-1, 1);
@@ -608,6 +558,56 @@ public final class GeometryMathUtils {
                 matrix.preScale(1, -1);
                 matrix.preRotate(270, w / 2f, h / 2f);
                 break;
+        }
+    }
+
+    // Holder class for Geometry data.
+    public static final class GeometryHolder {
+        public Rotation rotation = FilterRotateRepresentation.getNil();
+        public float straighten = FilterStraightenRepresentation.getNil();
+        public RectF crop = FilterCropRepresentation.getNil();
+        public Mirror mirror = FilterMirrorRepresentation.getNil();
+
+        public void set(GeometryHolder h) {
+            rotation = h.rotation;
+            straighten = h.straighten;
+            crop.set(h.crop);
+            mirror = h.mirror;
+        }
+
+        public void wipe() {
+            rotation = FilterRotateRepresentation.getNil();
+            straighten = FilterStraightenRepresentation.getNil();
+            crop = FilterCropRepresentation.getNil();
+            mirror = FilterMirrorRepresentation.getNil();
+        }
+
+        public boolean isNil() {
+            return rotation == FilterRotateRepresentation.getNil() &&
+                    straighten == FilterStraightenRepresentation.getNil() &&
+                    crop.equals(FilterCropRepresentation.getNil()) &&
+                    mirror == FilterMirrorRepresentation.getNil();
+        }
+
+        @Override
+        public boolean equals(Object o) {
+            if (this == o) {
+                return true;
+            }
+            if (!(o instanceof GeometryHolder)) {
+                return false;
+            }
+            GeometryHolder h = (GeometryHolder) o;
+            return rotation == h.rotation && straighten == h.straighten &&
+                    ((crop == null && h.crop == null) || (crop != null && crop.equals(h.crop))) &&
+                    mirror == h.mirror;
+        }
+
+        @Override
+        public String toString() {
+            return getClass().getSimpleName() + "[" + "rotation:" + rotation.value()
+                    + ",straighten:" + straighten + ",crop:" + crop.toString()
+                    + ",mirror:" + mirror.value() + "]";
         }
     }
 }

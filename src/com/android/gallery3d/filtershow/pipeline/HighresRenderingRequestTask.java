@@ -17,6 +17,7 @@
 package com.android.gallery3d.filtershow.pipeline;
 
 import android.graphics.Bitmap;
+
 import com.android.gallery3d.filtershow.filters.FiltersManager;
 
 public class HighresRenderingRequestTask extends ProcessingTask {
@@ -24,25 +25,17 @@ public class HighresRenderingRequestTask extends ProcessingTask {
     private CachingPipeline mHighresPreviewPipeline = null;
     private boolean mPipelineIsOn = false;
 
+    public HighresRenderingRequestTask() {
+        mHighresPreviewPipeline = new CachingPipeline(
+                FiltersManager.getHighresManager(), "Highres");
+    }
+
     public void setHighresPreviewScaleFactor(float highResPreviewScale) {
         mHighresPreviewPipeline.setHighResPreviewScaleFactor(highResPreviewScale);
     }
 
     public void setPreviewScaleFactor(float previewScale) {
         mHighresPreviewPipeline.setPreviewScaleFactor(previewScale);
-    }
-
-    static class Render implements Request {
-        RenderingRequest request;
-    }
-
-    static class RenderResult implements Result {
-        RenderingRequest request;
-    }
-
-    public HighresRenderingRequestTask() {
-        mHighresPreviewPipeline = new CachingPipeline(
-                FiltersManager.getHighresManager(), "Highres");
     }
 
     public void setOriginal(Bitmap bitmap) {
@@ -86,5 +79,15 @@ public class HighresRenderingRequestTask extends ProcessingTask {
     }
 
     @Override
-    public boolean isDelayedTask() { return true; }
+    public boolean isDelayedTask() {
+        return true;
+    }
+
+    static class Render implements Request {
+        RenderingRequest request;
+    }
+
+    static class RenderResult implements Result {
+        RenderingRequest request;
+    }
 }

@@ -19,7 +19,7 @@ package com.android.gallery3d.filtershow.filters;
 import com.android.gallery3d.filtershow.editors.ImageOnlyEditor;
 
 public class FilterFxRepresentation extends FilterRepresentation {
-   private static final String LOGTAG = "FilterFxRepresentation";
+    private static final String LOGTAG = "FilterFxRepresentation";
     // TODO: When implementing serialization, we should find a unique way of
     // specifying bitmaps / names (the resource IDs being random)
     private int mBitmapResource = 0;
@@ -44,7 +44,7 @@ public class FilterFxRepresentation extends FilterRepresentation {
 
     @Override
     public FilterRepresentation copy() {
-        FilterFxRepresentation representation = new FilterFxRepresentation(getName(),0,0);
+        FilterFxRepresentation representation = new FilterFxRepresentation(getName(), 0, 0);
         copyAllParameters(representation);
         return representation;
     }
@@ -73,10 +73,8 @@ public class FilterFxRepresentation extends FilterRepresentation {
         }
         if (representation instanceof FilterFxRepresentation) {
             FilterFxRepresentation fx = (FilterFxRepresentation) representation;
-            if (fx.mNameResource == mNameResource
-                    && fx.mBitmapResource == mBitmapResource) {
-                return true;
-            }
+            return fx.mNameResource == mNameResource
+                    && fx.mBitmapResource == mBitmapResource;
         }
         return false;
     }

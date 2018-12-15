@@ -63,7 +63,7 @@ public class LocalMergeAlbum extends MediaSet implements ContentListener {
     @Override
     public boolean isCameraRoll() {
         if (mSources.length == 0) return false;
-        for(MediaSet set : mSources) {
+        for (MediaSet set : mSources) {
             if (!set.isCameraRoll()) return false;
         }
         return true;
@@ -215,6 +215,11 @@ public class LocalMergeAlbum extends MediaSet implements ContentListener {
         }
     }
 
+    @Override
+    public boolean isLeafAlbum() {
+        return true;
+    }
+
     private static class FetchCache {
         private MediaSet mBaseSet;
         private SoftReference<ArrayList<MediaItem>> mCacheRef;
@@ -253,10 +258,5 @@ public class LocalMergeAlbum extends MediaSet implements ContentListener {
 
             return cache.get(index - mStartPos);
         }
-    }
-
-    @Override
-    public boolean isLeafAlbum() {
-        return true;
     }
 }

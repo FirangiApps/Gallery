@@ -31,28 +31,10 @@ import com.android.gallery3d.util.ThreadPool.Job;
 import com.android.gallery3d.util.ThreadPool.JobContext;
 
 public class DetailsAddressResolver {
-    private AddressResolvingListener mListener;
     private final AbstractGalleryActivity mContext;
-    private Future<Address> mAddressLookupJob;
     private final Handler mHandler;
-
-    private class AddressLookupJob implements Job<Address> {
-        private double[] mLatlng;
-
-        protected AddressLookupJob(double[] latlng) {
-            mLatlng = latlng;
-        }
-
-        @Override
-        public Address run(JobContext jc) {
-            ReverseGeocoder geocoder = new ReverseGeocoder(mContext.getAndroidContext());
-            return geocoder.lookupAddress(mLatlng[0], mLatlng[1], true);
-        }
-    }
-
-    public interface AddressResolvingListener {
-        public void onAddressAvailable(String address);
-    }
+    private AddressResolvingListener mListener;
+    private Future<Address> mAddressLookupJob;
 
     public DetailsAddressResolver(AbstractGalleryActivity context) {
         mContext = context;
@@ -83,16 +65,16 @@ public class DetailsAddressResolver {
     private void updateLocation(Address address) {
         if (address != null) {
             Context context = mContext.getAndroidContext();
-            String parts[] = {
-                address.getAdminArea(),
-                address.getSubAdminArea(),
-                address.getLocality(),
-                address.getSubLocality(),
-                address.getThoroughfare(),
-                address.getSubThoroughfare(),
-                address.getPremises(),
-                address.getPostalCode(),
-                address.getCountryName()
+            String[] parts = {
+                    address.getAdminArea(),
+                    address.getSubAdminArea(),
+                    address.getLocality(),
+                    address.getSubLocality(),
+                    address.getThoroughfare(),
+                    address.getSubThoroughfare(),
+                    address.getPremises(),
+                    address.getPostalCode(),
+                    address.getCountryName()
             };
 
             String addressText = "";
@@ -113,6 +95,24 @@ public class DetailsAddressResolver {
         if (mAddressLookupJob != null) {
             mAddressLookupJob.cancel();
             mAddressLookupJob = null;
+        }
+    }
+
+    public interface AddressResolvingListener {
+        void onAddressAvailable(String address);
+    }
+
+    private class AddressLookupJob implements Job<Address> {
+        private double[] mLatlng;
+
+        protected AddressLookupJob(double[] latlng) {
+            mLatlng = latlng;
+        }
+
+        @Override
+        public Address run(JobContext jc) {
+            ReverseGeocoder geocoder = new ReverseGeocoder(mContext.getAndroidContext());
+            return geocoder.lookupAddress(mLatlng[0], mLatlng[1], true);
         }
     }
 }

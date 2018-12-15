@@ -36,29 +36,30 @@ import android.widget.ImageButton;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 
-import org.codeaurora.gallery.R;
-
 import com.android.gallery3d.filtershow.FilterShowActivity;
 import com.android.gallery3d.filtershow.filters.FilterRepresentation;
 import com.android.gallery3d.filtershow.filters.FilterWatermarkRepresentation;
 import com.android.gallery3d.filtershow.filters.FiltersManager;
 
+import org.codeaurora.gallery.R;
+
 import java.util.ArrayList;
 
 public class CategoryPanelLevelTwo extends CategoryPanel {
 
+    private static final String DEFAULT_NAME = "LEVEL_TWO";
     private View mBottomPanel;
     private ImageButton mExitButton;
     private ImageButton mApplyButton;
     private TextView mEditName;
     private ArrayList<FilterRepresentation> mFiltersRepresentations;
-    private static final String DEFAULT_NAME = "LEVEL_TWO";
 
     public CategoryPanelLevelTwo(int adapter) {
         setAdapter(adapter);
     }
 
-    public CategoryPanelLevelTwo() {}
+    public CategoryPanelLevelTwo() {
+    }
 
     @Override
     public void loadAdapter(int adapter) {
@@ -111,8 +112,8 @@ public class CategoryPanelLevelTwo extends CategoryPanel {
         FiltersManager filtersManager = FiltersManager.getManager();
         mFiltersRepresentations = filtersManager.getWaterMarks();
         mBottomPanel = main.findViewById(R.id.bottom_panel);
-        mExitButton = (ImageButton) main.findViewById(R.id.cancel);
-        mApplyButton = (ImageButton) main.findViewById(R.id.done);
+        mExitButton = main.findViewById(R.id.cancel);
+        mApplyButton = main.findViewById(R.id.done);
         final FilterShowActivity activity = (FilterShowActivity) getActivity();
         mApplyButton.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -131,7 +132,7 @@ public class CategoryPanelLevelTwo extends CategoryPanel {
                 activity.setActionBar();
             }
         });
-        mEditName = (TextView) main.findViewById(R.id.editor_name);
+        mEditName = main.findViewById(R.id.editor_name);
         int adapterId = mCurrentAdapter % FilterWatermarkRepresentation.LOCATION;
         if (adapterId >= 0 && adapterId < mFiltersRepresentations.size()) {
             mEditName.setText(mFiltersRepresentations.get(adapterId).getTextId());
@@ -147,7 +148,7 @@ public class CategoryPanelLevelTwo extends CategoryPanel {
                 mAdapter.setContainer(panel);
             }
         }
-        mAddButton = (IconView) main.findViewById(R.id.addButton);
+        mAddButton = main.findViewById(R.id.addButton);
         if (mAddButton != null) {
             mAddButton.setOnClickListener(this);
             updateAddButtonVisibility();

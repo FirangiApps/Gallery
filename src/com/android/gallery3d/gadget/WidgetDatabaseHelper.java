@@ -33,26 +33,21 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class WidgetDatabaseHelper extends SQLiteOpenHelper {
+    public static final int TYPE_SINGLE_PHOTO = 0;
+    public static final int TYPE_SHUFFLE = 1;
+    public static final int TYPE_ALBUM = 2;
     private static final String TAG = "PhotoDatabaseHelper";
     private static final String DATABASE_NAME = "launcher.db";
-
     // Increment the database version to 5. In version 5, we
     // add a column in widgets table to record relative paths.
     private static final int DATABASE_VERSION = 5;
-
     private static final String TABLE_WIDGETS = "widgets";
-
     private static final String FIELD_APPWIDGET_ID = "appWidgetId";
     private static final String FIELD_IMAGE_URI = "imageUri";
     private static final String FIELD_PHOTO_BLOB = "photoBlob";
     private static final String FIELD_WIDGET_TYPE = "widgetType";
     private static final String FIELD_ALBUM_PATH = "albumPath";
     private static final String FIELD_RELATIVE_PATH = "relativePath";
-
-    public static final int TYPE_SINGLE_PHOTO = 0;
-    public static final int TYPE_SHUFFLE = 1;
-    public static final int TYPE_ALBUM = 2;
-
     private static final String[] PROJECTION = {
             FIELD_WIDGET_TYPE, FIELD_IMAGE_URI, FIELD_PHOTO_BLOB, FIELD_ALBUM_PATH,
             FIELD_APPWIDGET_ID, FIELD_RELATIVE_PATH};
@@ -64,33 +59,6 @@ public class WidgetDatabaseHelper extends SQLiteOpenHelper {
     private static final int INDEX_RELATIVE_PATH = 5;
     private static final String WHERE_APPWIDGET_ID = FIELD_APPWIDGET_ID + " = ?";
     private static final String WHERE_WIDGET_TYPE = FIELD_WIDGET_TYPE + " = ?";
-
-    public static class Entry {
-        public int widgetId;
-        public int type;
-        public String imageUri;
-        public byte imageData[];
-        public String albumPath;
-        public String relativePath;
-
-        private Entry() {}
-
-        private Entry(int id, Cursor cursor) {
-            widgetId = id;
-            type = cursor.getInt(INDEX_WIDGET_TYPE);
-            if (type == TYPE_SINGLE_PHOTO) {
-                imageUri = cursor.getString(INDEX_IMAGE_URI);
-                imageData = cursor.getBlob(INDEX_PHOTO_BLOB);
-            } else if (type == TYPE_ALBUM) {
-                albumPath = cursor.getString(INDEX_ALBUM_PATH);
-                relativePath = cursor.getString(INDEX_RELATIVE_PATH);
-            }
-        }
-
-        private Entry(Cursor cursor) {
-            this(cursor.getInt(INDEX_APPWIDGET_ID), cursor);
-        }
-    }
 
     public WidgetDatabaseHelper(Context context) {
         super(context, DATABASE_NAME, null, DATABASE_VERSION);
@@ -110,7 +78,7 @@ public class WidgetDatabaseHelper extends SQLiteOpenHelper {
     private void saveData(SQLiteDatabase db, int oldVersion, ArrayList<Entry> data) {
         if (oldVersion <= 2) {
             Cursor cursor = db.query("photos",
-                    new String[] {FIELD_APPWIDGET_ID, FIELD_PHOTO_BLOB},
+                    new String[]{FIELD_APPWIDGET_ID, FIELD_PHOTO_BLOB},
                     null, null, null, null, null);
             if (cursor == null) return;
             try {
@@ -126,7 +94,7 @@ public class WidgetDatabaseHelper extends SQLiteOpenHelper {
             }
         } else if (oldVersion == 3) {
             Cursor cursor = db.query("photos",
-                    new String[] {FIELD_APPWIDGET_ID, FIELD_PHOTO_BLOB, FIELD_IMAGE_URI},
+                    new String[]{FIELD_APPWIDGET_ID, FIELD_PHOTO_BLOB, FIELD_IMAGE_URI},
                     null, null, null, null, null);
             if (cursor == null) return;
             try {
@@ -235,7 +203,7 @@ public class WidgetDatabaseHelper extends SQLiteOpenHelper {
         try {
             SQLiteDatabase db = getReadableDatabase();
             cursor = db.query(TABLE_WIDGETS, PROJECTION,
-                    WHERE_APPWIDGET_ID, new String[] {String.valueOf(appWidgetId)},
+                    WHERE_APPWIDGET_ID, new String[]{String.valueOf(appWidgetId)},
                     null, null, null);
             if (cursor == null || !cursor.moveToNext()) {
                 Log.e(TAG, "query fail: empty cursor: " + cursor + " appWidgetId: "
@@ -256,7 +224,7 @@ public class WidgetDatabaseHelper extends SQLiteOpenHelper {
         try {
             SQLiteDatabase db = getReadableDatabase();
             cursor = db.query(TABLE_WIDGETS, PROJECTION,
-                    WHERE_WIDGET_TYPE, new String[] {String.valueOf(type)},
+                    WHERE_WIDGET_TYPE, new String[]{String.valueOf(type)},
                     null, null, null);
             if (cursor == null) {
                 Log.e(TAG, "query fail: null cursor: " + cursor);
@@ -301,9 +269,37 @@ public class WidgetDatabaseHelper extends SQLiteOpenHelper {
         try {
             SQLiteDatabase db = getWritableDatabase();
             db.delete(TABLE_WIDGETS, WHERE_APPWIDGET_ID,
-                    new String[] {String.valueOf(appWidgetId)});
+                    new String[]{String.valueOf(appWidgetId)});
         } catch (SQLiteException e) {
             Log.e(TAG, "Could not delete photo from database", e);
+        }
+    }
+
+    public static class Entry {
+        public int widgetId;
+        public int type;
+        public String imageUri;
+        public byte[] imageData;
+        public String albumPath;
+        public String relativePath;
+
+        private Entry() {
+        }
+
+        private Entry(int id, Cursor cursor) {
+            widgetId = id;
+            type = cursor.getInt(INDEX_WIDGET_TYPE);
+            if (type == TYPE_SINGLE_PHOTO) {
+                imageUri = cursor.getString(INDEX_IMAGE_URI);
+                imageData = cursor.getBlob(INDEX_PHOTO_BLOB);
+            } else if (type == TYPE_ALBUM) {
+                albumPath = cursor.getString(INDEX_ALBUM_PATH);
+                relativePath = cursor.getString(INDEX_RELATIVE_PATH);
+            }
+        }
+
+        private Entry(Cursor cursor) {
+            this(cursor.getInt(INDEX_APPWIDGET_ID), cursor);
         }
     }
 }

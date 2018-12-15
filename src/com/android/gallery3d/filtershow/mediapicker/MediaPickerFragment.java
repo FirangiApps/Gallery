@@ -42,7 +42,6 @@ import android.support.v4.app.Fragment;
 import android.support.v4.app.LoaderManager;
 import android.support.v4.content.CursorLoader;
 import android.support.v4.content.Loader;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -69,14 +68,12 @@ public class MediaPickerFragment extends Fragment implements
     private static final String LOADER_EXTRA_PROJECT = "loader_extra_project";
     private static final String KEY_GRID_STATE = "grid_state";
     private static final String KEY_MEDIA_SELECTED = "media_selected";
-    private HeaderGridView mGridView;
-
+    protected static Context appContext;
     protected ImageLoaderStub mMediaImageLoader;
     protected Context mContext;
-    protected static Context appContext;
     protected FilterShowActivity mActivity;
     protected FilterRepresentation mCntFp, mOldFp;
-
+    private HeaderGridView mGridView;
     private MediaAdapter mMediaAdapter;
 
     private Bundle mSavedInstanceState;
@@ -127,8 +124,8 @@ public class MediaPickerFragment extends Fragment implements
                 R.layout.mediapicker_panel,
                 container,
                 false);
-        mSelDone = (ImageButton) mMediaPicker.findViewById(R.id.btn_yes);
-        mSelCancel = (ImageButton) mMediaPicker.findViewById(R.id.btn_no);
+        mSelDone = mMediaPicker.findViewById(R.id.btn_yes);
+        mSelCancel = mMediaPicker.findViewById(R.id.btn_no);
         mSelDone.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -210,7 +207,7 @@ public class MediaPickerFragment extends Fragment implements
         }
         if (mMediaAdapter == null) {
             mMediaAdapter = new MediaAdapter(mContext, cursor, 0,
-                     mMediaImageLoader);
+                    mMediaImageLoader);
         } else {
             mMediaAdapter.swapCursor(cursor);
         }
@@ -251,7 +248,7 @@ public class MediaPickerFragment extends Fragment implements
                 mActivity.applyCustomFilterRepresentation(mCntFp, mOldFp);
             }
 
-            SelectedImageView selImageView = (SelectedImageView) view
+            SelectedImageView selImageView = view
                     .findViewById(R.id.thumbnail);
             mMediaSelected = uri;
             mMediaAdapter.updateMediaSelected(uri, selImageView);
@@ -284,7 +281,7 @@ public class MediaPickerFragment extends Fragment implements
     }
 
     private void initView(MediaPicker view) {
-        mGridView = (HeaderGridView) view.findViewById(R.id.grid);
+        mGridView = view.findViewById(R.id.grid);
         mGridView.setOnItemClickListener(this);
 
         mGridView.getViewTreeObserver().addOnGlobalLayoutListener(

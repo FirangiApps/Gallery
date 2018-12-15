@@ -19,8 +19,9 @@ package com.android.gallery3d.filtershow.editors;
 import android.content.Context;
 import android.widget.FrameLayout;
 
-import org.codeaurora.gallery.R;
 import com.android.gallery3d.filtershow.imageshow.ImageShow;
+
+import org.codeaurora.gallery.R;
 
 /**
  * The editor with no slider for filters without UI

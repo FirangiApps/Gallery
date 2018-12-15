@@ -28,13 +28,13 @@ import android.view.WindowManager;
 import com.android.gallery3d.app.GalleryContext;
 import com.android.gallery3d.common.Utils;
 import com.android.gallery3d.data.DecodeUtils;
-import com.android.photos.data.GalleryBitmapPool;
 import com.android.gallery3d.glrenderer.GLCanvas;
 import com.android.gallery3d.glrenderer.UploadedTexture;
 import com.android.gallery3d.util.Future;
 import com.android.gallery3d.util.ThreadPool;
 import com.android.gallery3d.util.ThreadPool.CancelListener;
 import com.android.gallery3d.util.ThreadPool.JobContext;
+import com.android.photos.data.GalleryBitmapPool;
 
 import java.util.concurrent.atomic.AtomicBoolean;
 
@@ -44,10 +44,6 @@ public class TileImageView extends GLView {
     @SuppressWarnings("unused")
     private static final String TAG = "TileImageView";
     private static final int UPLOAD_LIMIT = 1;
-
-    // TILE_SIZE must be 2^N
-    private static int sTileSize;
-
     /*
      *  This is the tile state in the CPU side.
      *  Life of a Tile:
@@ -72,11 +68,30 @@ public class TileImageView extends GLView {
     private static final int STATE_DECODE_FAIL = 0x10;
     private static final int STATE_RECYCLING = 0x20;
     private static final int STATE_RECYCLED = 0x40;
-
+    // TILE_SIZE must be 2^N
+    private static int sTileSize;
+    private final RectF mSourceRect = new RectF();
+    private final RectF mTargetRect = new RectF();
+    private final LongSparseArray<Tile> mActiveTiles = new LongSparseArray<Tile>();
+    // The following three queue is guarded by TileImageView.this
+    private final TileQueue mRecycledQueue = new TileQueue();
+    private final TileQueue mUploadQueue = new TileQueue();
+    private final TileQueue mDecodeQueue = new TileQueue();
+    // Temp variables to avoid memory allocation
+    private final Rect mTileRange = new Rect();
+    private final Rect[] mActiveRange = {new Rect(), new Rect()};
+    private final TileUploader mTileUploader = new TileUploader();
+    private final ThreadPool mThreadPool;
+    protected int mLevelCount;  // cache the value of mScaledBitmaps.length
+    // The width and height of the full-sized bitmap
+    protected int mImageWidth = SIZE_UNKNOWN;
+    protected int mImageHeight = SIZE_UNKNOWN;
+    protected int mCenterX;
+    protected int mCenterY;
+    protected float mScale;
+    protected int mRotation;
     private TileSource mModel;
     private ScreenNail mScreenNail;
-    protected int mLevelCount;  // cache the value of mScaledBitmaps.length
-
     // The mLevel variable indicates which level of bitmap we should use.
     // Level 0 means the original full-sized bitmap, and a larger value means
     // a smaller scaled bitmap (The width and height of each scaled bitmap is
@@ -84,70 +99,14 @@ public class TileImageView extends GLView {
     // use the bitmap in mScaledBitmaps[mLevel] for display, otherwise the value
     // is mLevelCount, and that means we use mScreenNail for display.
     private int mLevel = 0;
-
     // The offsets of the (left, top) of the upper-left tile to the (left, top)
     // of the view.
     private int mOffsetX;
     private int mOffsetY;
-
     private boolean mRenderComplete;
-
-    private final RectF mSourceRect = new RectF();
-    private final RectF mTargetRect = new RectF();
-
-    private final LongSparseArray<Tile> mActiveTiles = new LongSparseArray<Tile>();
-
-    // The following three queue is guarded by TileImageView.this
-    private final TileQueue mRecycledQueue = new TileQueue();
-    private final TileQueue mUploadQueue = new TileQueue();
-    private final TileQueue mDecodeQueue = new TileQueue();
-
-    // The width and height of the full-sized bitmap
-    protected int mImageWidth = SIZE_UNKNOWN;
-    protected int mImageHeight = SIZE_UNKNOWN;
-
-    protected int mCenterX;
-    protected int mCenterY;
-    protected float mScale;
-    protected int mRotation;
-
-    // Temp variables to avoid memory allocation
-    private final Rect mTileRange = new Rect();
-    private final Rect mActiveRange[] = {new Rect(), new Rect()};
-
-    private final TileUploader mTileUploader = new TileUploader();
     private boolean mIsTextureFreed;
     private Future<Void> mTileDecoder;
-    private final ThreadPool mThreadPool;
     private boolean mBackgroundTileUploaded;
-
-    public static interface TileSource {
-        public int getLevelCount();
-        public ScreenNail getScreenNail();
-        public int getImageWidth();
-        public int getImageHeight();
-
-        // The tile returned by this method can be specified this way: Assuming
-        // the image size is (width, height), first take the intersection of (0,
-        // 0) - (width, height) and (x, y) - (x + tileSize, y + tileSize). If
-        // in extending the region, we found some part of the region are outside
-        // the image, those pixels are filled with black.
-        //
-        // If level > 0, it does the same operation on a down-scaled version of
-        // the original image (down-scaled by a factor of 2^level), but (x, y)
-        // still refers to the coordinate on the original image.
-        //
-        // The method would be called in another thread.
-        public Bitmap getTile(int level, int x, int y, int tileSize);
-    }
-
-    public static boolean isHighResolution(Context context) {
-        DisplayMetrics metrics = new DisplayMetrics();
-        WindowManager wm = (WindowManager)
-                context.getSystemService(Context.WINDOW_SERVICE);
-        wm.getDefaultDisplay().getMetrics(metrics);
-        return metrics.heightPixels > 2048 ||  metrics.widthPixels > 2048;
-    }
 
     public TileImageView(GalleryContext context) {
         mThreadPool = context.getThreadPool();
@@ -159,6 +118,50 @@ public class TileImageView extends GLView {
             } else {
                 sTileSize = 1024;
             }
+        }
+    }
+
+    public static boolean isHighResolution(Context context) {
+        DisplayMetrics metrics = new DisplayMetrics();
+        WindowManager wm = (WindowManager)
+                context.getSystemService(Context.WINDOW_SERVICE);
+        wm.getDefaultDisplay().getMetrics(metrics);
+        return metrics.heightPixels > 2048 || metrics.widthPixels > 2048;
+    }
+
+    private static long makeTileKey(int x, int y, int level) {
+        long result = x;
+        result = (result << 16) | y;
+        result = (result << 16) | level;
+        return result;
+    }
+
+    static boolean drawTile(
+            Tile tile, GLCanvas canvas, RectF source, RectF target) {
+        while (true) {
+            if (tile.isContentValid()) {
+                canvas.drawTexture(tile, source, target);
+                return true;
+            }
+
+            // Parent can be divided to four quads and tile is one of the four.
+            Tile parent = tile.getParentTile();
+            if (parent == null) return false;
+            if (tile.mX == parent.mX) {
+                source.left /= 2f;
+                source.right /= 2f;
+            } else {
+                source.left = (sTileSize + source.left) / 2f;
+                source.right = (sTileSize + source.right) / 2f;
+            }
+            if (tile.mY == parent.mY) {
+                source.top /= 2f;
+                source.bottom /= 2f;
+            } else {
+                source.top = (sTileSize + source.top) / 2f;
+                source.bottom = (sTileSize + source.bottom) / 2f;
+            }
+            tile = parent;
         }
     }
 
@@ -233,7 +236,7 @@ public class TileImageView extends GLView {
         fromLevel = Math.max(0, Math.min(fromLevel, mLevelCount - 2));
         endLevel = Math.min(fromLevel + 2, mLevelCount);
 
-        Rect range[] = mActiveRange;
+        Rect[] range = mActiveRange;
         for (int i = fromLevel; i < endLevel; ++i) {
             getRange(range[i - fromLevel], centerX, centerY, i, rotation);
         }
@@ -298,7 +301,7 @@ public class TileImageView extends GLView {
     // (cX, cY) is the point on the original bitmap which will be put in the
     // center of the ImageViewer.
     private void getRange(Rect out,
-            int cX, int cY, int level, float scale, int rotation) {
+                          int cX, int cY, int level, float scale, int rotation) {
 
         double radians = Math.toRadians(-rotation);
         double w = getWidth();
@@ -549,45 +552,10 @@ public class TileImageView extends GLView {
         return mActiveTiles.get(makeTileKey(x, y, level));
     }
 
-    private static long makeTileKey(int x, int y, int level) {
-        long result = x;
-        result = (result << 16) | y;
-        result = (result << 16) | level;
-        return result;
-    }
-
-    private class TileUploader implements GLRoot.OnGLIdleListener {
-        AtomicBoolean mActive = new AtomicBoolean(false);
-
-        @Override
-        public boolean onGLIdle(GLCanvas canvas, boolean renderRequested, long dueTime) {
-            long now = System.nanoTime();
-            long uploadTime = 0;
-            Tile tile = null;
-            while (now + uploadTime < dueTime) {
-                synchronized (TileImageView.this) {
-                    tile = mUploadQueue.pop();
-                }
-                if (tile == null) break;
-                if (!tile.isContentValid()) {
-                    boolean hasBeenLoaded = tile.isLoaded();
-                    Utils.assertTrue(tile.mTileState == STATE_DECODED);
-                    tile.updateContent(canvas);
-                    if (!hasBeenLoaded) tile.draw(canvas, 0, 0);
-                }
-                long t1 = System.nanoTime();
-                uploadTime = t1 - now;
-                now = t1;
-            }
-            if (tile == null) mActive.set(false);
-            return tile != null;
-        }
-    }
-
     // Draw the tile to a square at canvas that locates at (x, y) and
     // has a side length of length.
     public void drawTile(GLCanvas canvas,
-            int tx, int ty, int level, float x, float y, float length) {
+                         int tx, int ty, int level, float x, float y, float length) {
         RectF source = mSourceRect;
         RectF target = mTargetRect;
         target.set(x, y, x + length, y + length);
@@ -615,32 +583,75 @@ public class TileImageView extends GLView {
         }
     }
 
-    static boolean drawTile(
-            Tile tile, GLCanvas canvas, RectF source, RectF target) {
-        while (true) {
-            if (tile.isContentValid()) {
-                canvas.drawTexture(tile, source, target);
-                return true;
-            }
+    public interface TileSource {
+        int getLevelCount();
 
-            // Parent can be divided to four quads and tile is one of the four.
-            Tile parent = tile.getParentTile();
-            if (parent == null) return false;
-            if (tile.mX == parent.mX) {
-                source.left /= 2f;
-                source.right /= 2f;
-            } else {
-                source.left = (sTileSize + source.left) / 2f;
-                source.right = (sTileSize + source.right) / 2f;
+        ScreenNail getScreenNail();
+
+        int getImageWidth();
+
+        int getImageHeight();
+
+        // The tile returned by this method can be specified this way: Assuming
+        // the image size is (width, height), first take the intersection of (0,
+        // 0) - (width, height) and (x, y) - (x + tileSize, y + tileSize). If
+        // in extending the region, we found some part of the region are outside
+        // the image, those pixels are filled with black.
+        //
+        // If level > 0, it does the same operation on a down-scaled version of
+        // the original image (down-scaled by a factor of 2^level), but (x, y)
+        // still refers to the coordinate on the original image.
+        //
+        // The method would be called in another thread.
+        Bitmap getTile(int level, int x, int y, int tileSize);
+    }
+
+    private static class TileQueue {
+        private Tile mHead;
+
+        public Tile pop() {
+            Tile tile = mHead;
+            if (tile != null) mHead = tile.mNext;
+            return tile;
+        }
+
+        public boolean push(Tile tile) {
+            boolean wasEmpty = mHead == null;
+            tile.mNext = mHead;
+            mHead = tile;
+            return wasEmpty;
+        }
+
+        public void clean() {
+            mHead = null;
+        }
+    }
+
+    private class TileUploader implements GLRoot.OnGLIdleListener {
+        AtomicBoolean mActive = new AtomicBoolean(false);
+
+        @Override
+        public boolean onGLIdle(GLCanvas canvas, boolean renderRequested, long dueTime) {
+            long now = System.nanoTime();
+            long uploadTime = 0;
+            Tile tile = null;
+            while (now + uploadTime < dueTime) {
+                synchronized (TileImageView.this) {
+                    tile = mUploadQueue.pop();
+                }
+                if (tile == null) break;
+                if (!tile.isContentValid()) {
+                    boolean hasBeenLoaded = tile.isLoaded();
+                    Utils.assertTrue(tile.mTileState == STATE_DECODED);
+                    tile.updateContent(canvas);
+                    if (!hasBeenLoaded) tile.draw(canvas, 0, 0);
+                }
+                long t1 = System.nanoTime();
+                uploadTime = t1 - now;
+                now = t1;
             }
-            if (tile.mY == parent.mY) {
-                source.top /= 2f;
-                source.bottom /= 2f;
-            } else {
-                source.top = (sTileSize + source.top) / 2f;
-                source.bottom = (sTileSize + source.bottom) / 2f;
-            }
-            tile = parent;
+            if (tile == null) mActive.set(false);
+            return tile != null;
         }
     }
 
@@ -727,27 +738,6 @@ public class TileImageView extends GLView {
         }
     }
 
-    private static class TileQueue {
-        private Tile mHead;
-
-        public Tile pop() {
-            Tile tile = mHead;
-            if (tile != null) mHead = tile.mNext;
-            return tile;
-        }
-
-        public boolean push(Tile tile) {
-            boolean wasEmpty = mHead == null;
-            tile.mNext = mHead;
-            mHead = tile;
-            return wasEmpty;
-        }
-
-        public void clean() {
-            mHead = null;
-        }
-    }
-
     private class TileDecoder implements ThreadPool.Job<Void> {
 
         private CancelListener mNotifier = new CancelListener() {
@@ -765,7 +755,7 @@ public class TileImageView extends GLView {
             jc.setCancelListener(mNotifier);
             while (!jc.isCancelled()) {
                 Tile tile = null;
-                synchronized(TileImageView.this) {
+                synchronized (TileImageView.this) {
                     tile = mDecodeQueue.pop();
                     if (tile == null && !jc.isCancelled()) {
                         Utils.waitWithoutInterrupt(TileImageView.this);

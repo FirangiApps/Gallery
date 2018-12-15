@@ -19,7 +19,6 @@ package com.android.gallery3d.ui;
 import com.android.gallery3d.app.AbstractGalleryActivity;
 import com.android.gallery3d.app.AlbumSetDataLoader;
 import com.android.gallery3d.app.TimeLineDataLoader;
-import com.android.gallery3d.data.ContentListener;
 import com.android.gallery3d.data.DataManager;
 import com.android.gallery3d.data.MediaItem;
 import com.android.gallery3d.data.MediaObject;
@@ -30,14 +29,12 @@ import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.Set;
 
-public class SelectionManager implements TimeLineDataLoader.DataListener, AlbumSetDataLoader.DataListener{
-    @SuppressWarnings("unused")
-    private static final String TAG = "SelectionManager";
-
+public class SelectionManager implements TimeLineDataLoader.DataListener, AlbumSetDataLoader.DataListener {
     public static final int ENTER_SELECTION_MODE = 1;
     public static final int LEAVE_SELECTION_MODE = 2;
     public static final int SELECT_ALL_MODE = 3;
-
+    @SuppressWarnings("unused")
+    private static final String TAG = "SelectionManager";
     private Set<Path> mClickedSet;
     private MediaSet mSourceMediaSet;
     private SelectionListener mListener;
@@ -47,11 +44,49 @@ public class SelectionManager implements TimeLineDataLoader.DataListener, AlbumS
     private boolean mInSelectionMode;
     private boolean mAutoLeave = true;
     private int mTotal;
-    /** mTotalSelectable is the count of items
-     * exclude not selectable such as Title item in TimeLine. */
+    /**
+     * mTotalSelectable is the count of items
+     * exclude not selectable such as Title item in TimeLine.
+     */
     private int mTotalSelectable;
     private TimeLineDataLoader mTimeLineDataLoader;
     private AlbumSetDataLoader mAlbumSetDataLoader;
+
+    public SelectionManager(AbstractGalleryActivity activity, boolean isAlbumSet) {
+        mDataManager = activity.getDataManager();
+        mClickedSet = new HashSet<Path>();
+        mIsAlbumSet = isAlbumSet;
+        mTotal = -1;
+        mTotalSelectable = -1;
+    }
+
+    private static boolean expandMediaSet(ArrayList<Path> items, MediaSet set, int maxSelection) {
+        int subCount = set.getSubMediaSetCount();
+        for (int i = 0; i < subCount; i++) {
+            if (!expandMediaSet(items, set.getSubMediaSet(i), maxSelection)) {
+                return false;
+            }
+        }
+        int total = set.getMediaItemCount();
+        int batch = 50;
+        int index = 0;
+
+        while (index < total) {
+            int count = index + batch < total
+                    ? batch
+                    : total - index;
+            ArrayList<MediaItem> list = set.getMediaItem(index, count);
+            if (list != null
+                    && list.size() > (maxSelection - items.size())) {
+                return false;
+            }
+            for (MediaItem item : list) {
+                items.add(item.getPath());
+            }
+            index += batch;
+        }
+        return true;
+    }
 
     @Override
     public void onContentChanged(int index) {
@@ -69,19 +104,6 @@ public class SelectionManager implements TimeLineDataLoader.DataListener, AlbumS
         if (mInverseSelection) {
             selectAll();
         }
-    }
-
-    public interface SelectionListener {
-        public void onSelectionModeChange(int mode);
-        public void onSelectionChange(Path path, boolean selected);
-    }
-
-    public SelectionManager(AbstractGalleryActivity activity, boolean isAlbumSet) {
-        mDataManager = activity.getDataManager();
-        mClickedSet = new HashSet<Path>();
-        mIsAlbumSet = isAlbumSet;
-        mTotal = -1;
-        mTotalSelectable = -1;
     }
 
     // Whether we will leave selection mode automatically once the number of
@@ -213,36 +235,10 @@ public class SelectionManager implements TimeLineDataLoader.DataListener, AlbumS
         int count = getSelectedCount();
         if (count == (mSourceMediaSet.getMediaItemCount() - mSourceMediaSet.getSubMediaSetCount()))
             selectAll();
-        if (mListener != null) mListener.onSelectionChange(paths.get(0), isItemSelected(paths.get(0)));
+        if (mListener != null)
+            mListener.onSelectionChange(paths.get(0), isItemSelected(paths.get(0)));
         if (count == 0 && mAutoLeave)
             leaveSelectionMode();
-    }
-    private static boolean expandMediaSet(ArrayList<Path> items, MediaSet set, int maxSelection) {
-        int subCount = set.getSubMediaSetCount();
-        for (int i = 0; i < subCount; i++) {
-            if (!expandMediaSet(items, set.getSubMediaSet(i), maxSelection)) {
-                return false;
-            }
-        }
-        int total = set.getMediaItemCount();
-        int batch = 50;
-        int index = 0;
-
-        while (index < total) {
-            int count = index + batch < total
-                    ? batch
-                    : total - index;
-            ArrayList<MediaItem> list = set.getMediaItem(index, count);
-            if (list != null
-                    && list.size() > (maxSelection - items.size())) {
-                return false;
-            }
-            for (MediaItem item : list) {
-                items.add(item.getPath());
-            }
-            index += batch;
-        }
-        return true;
     }
 
     public ArrayList<Path> getSelected(boolean expandSet) {
@@ -335,5 +331,11 @@ public class SelectionManager implements TimeLineDataLoader.DataListener, AlbumS
 
     public void setAlbumSetDataLoader(AlbumSetDataLoader loader) {
         mAlbumSetDataLoader = loader;
+    }
+
+    public interface SelectionListener {
+        void onSelectionModeChange(int mode);
+
+        void onSelectionChange(Path path, boolean selected);
     }
 }

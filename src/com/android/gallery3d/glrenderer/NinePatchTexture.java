@@ -74,6 +74,46 @@ public class NinePatchTexture extends ResourceTexture {
         return mChunk;
     }
 
+    private NinePatchInstance findInstance(GLCanvas canvas, int w, int h) {
+        int key = w;
+        key = (key << 16) | h;
+        NinePatchInstance instance = mInstanceCache.get(key);
+
+        if (instance == null) {
+            instance = new NinePatchInstance(this, w, h);
+            NinePatchInstance removed = mInstanceCache.put(key, instance);
+            if (removed != null) {
+                removed.recycle(canvas);
+            }
+        }
+
+        return instance;
+    }
+
+    @Override
+    public void draw(GLCanvas canvas, int x, int y, int w, int h) {
+        if (!isLoaded()) {
+            mInstanceCache.clear();
+        }
+
+        if (w != 0 && h != 0) {
+            findInstance(canvas, w, h).draw(canvas, this, x, y);
+        }
+    }
+
+    @Override
+    public void recycle() {
+        super.recycle();
+        GLCanvas canvas = mCanvasRef;
+        if (canvas == null) return;
+        int n = mInstanceCache.size();
+        for (int i = 0; i < n; i++) {
+            NinePatchInstance instance = mInstanceCache.valueAt(i);
+            instance.recycle(canvas);
+        }
+        mInstanceCache.clear();
+    }
+
     // This is a simple cache for a small number of things. Linear search
     // is used because the cache is small. It also tries to remove less used
     // item when the cache is full by moving the often-used items to the front.
@@ -136,46 +176,6 @@ public class NinePatchTexture extends ResourceTexture {
             return mValue[i];
         }
     }
-
-    private NinePatchInstance findInstance(GLCanvas canvas, int w, int h) {
-        int key = w;
-        key = (key << 16) | h;
-        NinePatchInstance instance = mInstanceCache.get(key);
-
-        if (instance == null) {
-            instance = new NinePatchInstance(this, w, h);
-            NinePatchInstance removed = mInstanceCache.put(key, instance);
-            if (removed != null) {
-                removed.recycle(canvas);
-            }
-        }
-
-        return instance;
-    }
-
-    @Override
-    public void draw(GLCanvas canvas, int x, int y, int w, int h) {
-        if (!isLoaded()) {
-            mInstanceCache.clear();
-        }
-
-        if (w != 0 && h != 0) {
-            findInstance(canvas, w, h).draw(canvas, this, x, y);
-        }
-    }
-
-    @Override
-    public void recycle() {
-        super.recycle();
-        GLCanvas canvas = mCanvasRef;
-        if (canvas == null) return;
-        int n = mInstanceCache.size();
-        for (int i = 0; i < n; i++) {
-            NinePatchInstance instance = mInstanceCache.valueAt(i);
-            instance.recycle(canvas);
-        }
-        mInstanceCache.clear();
-    }
 }
 
 // This keeps data for a specialization of NinePatchTexture with the size
@@ -217,10 +217,10 @@ class NinePatchInstance {
             throw new RuntimeException("unsupported nine patch");
         }
 
-        float divX[] = new float[4];
-        float divY[] = new float[4];
-        float divU[] = new float[4];
-        float divV[] = new float[4];
+        float[] divX = new float[4];
+        float[] divY = new float[4];
+        float[] divU = new float[4];
+        float[] divV = new float[4];
 
         int nx = stretch(divX, divU, chunk.mDivX, tex.getWidth(), width);
         int ny = stretch(divY, divV, chunk.mDivY, tex.getHeight(), height);
@@ -251,17 +251,17 @@ class NinePatchInstance {
      * s: stretchy segment
      * </pre>
      *
-     * @param div the stretch parts defined in nine-patch chunk
+     * @param div    the stretch parts defined in nine-patch chunk
      * @param source the length of the texture
      * @param target the length on the drawing plan
-     * @param u output, the positions of these dividers in the texture
-     *        coordinate
-     * @param x output, the corresponding position of these dividers on the
-     *        drawing plan
+     * @param u      output, the positions of these dividers in the texture
+     *               coordinate
+     * @param x      output, the corresponding position of these dividers on the
+     *               drawing plan
      * @return the number of these dividers.
      */
     private static int stretch(
-            float x[], float u[], int div[], int source, int target) {
+            float[] x, float[] u, int[] div, int source, int target) {
         int textureSize = Utils.nextPowerOf2(source);
         float textureBound = (float) source / textureSize;
 
@@ -293,7 +293,7 @@ class NinePatchInstance {
             lastX = x[i + 1] + partX;
             lastU = div[i + 1];
             x[i + 2] = lastX - 0.5f;
-            u[i + 2] = Math.min((lastU - 0.5f)/ textureSize, textureBound);
+            u[i + 2] = Math.min((lastU - 0.5f) / textureSize, textureBound);
         }
         // the last fixed segment
         x[div.length + 1] = target;
@@ -309,8 +309,12 @@ class NinePatchInstance {
         return last + 1;
     }
 
-    private void prepareVertexData(float x[], float y[], float u[], float v[],
-            int nx, int ny, int[] color) {
+    private static ByteBuffer allocateDirectNativeOrderBuffer(int size) {
+        return ByteBuffer.allocateDirect(size).order(ByteOrder.nativeOrder());
+    }
+
+    private void prepareVertexData(float[] x, float[] y, float[] u, float[] v,
+                                   int nx, int ny, int[] color) {
         /*
          * Given a 3x3 nine-patch image, the vertex order is defined as the
          * following graph:
@@ -331,8 +335,8 @@ class NinePatchInstance {
          * index: 04152637B6A5948C9DAEBF
          */
         int pntCount = 0;
-        float xy[] = new float[VERTEX_BUFFER_SIZE];
-        float uv[] = new float[VERTEX_BUFFER_SIZE];
+        float[] xy = new float[VERTEX_BUFFER_SIZE];
+        float[] uv = new float[VERTEX_BUFFER_SIZE];
         for (int j = 0; j < ny; ++j) {
             for (int i = 0; i < nx; ++i) {
                 int xIndex = (pntCount++) << 1;
@@ -346,7 +350,7 @@ class NinePatchInstance {
 
         int idxCount = 1;
         boolean isForward = false;
-        byte index[] = new byte[INDEX_BUFFER_SIZE];
+        byte[] index = new byte[INDEX_BUFFER_SIZE];
         for (int row = 0; row < ny - 1; row++) {
             --idxCount;
             isForward = !isForward;
@@ -389,10 +393,6 @@ class NinePatchInstance {
         mXyBuffer.put(xy, 0, pntCount * 2).position(0);
         mUvBuffer.put(uv, 0, pntCount * 2).position(0);
         mIndexBuffer.put(index, 0, idxCount).position(0);
-    }
-
-    private static ByteBuffer allocateDirectNativeOrderBuffer(int size) {
-        return ByteBuffer.allocateDirect(size).order(ByteOrder.nativeOrder());
     }
 
     private void prepareBuffers(GLCanvas canvas) {

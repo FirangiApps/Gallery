@@ -25,10 +25,11 @@ import android.view.ViewGroup;
 import android.widget.CursorAdapter;
 import android.widget.ImageView;
 
-import org.codeaurora.gallery.R;
 import com.android.photos.data.PhotoSetLoader;
 import com.android.photos.shims.LoaderCompatShim;
 import com.android.photos.views.GalleryThumbnailView.GalleryThumbnailAdapter;
+
+import org.codeaurora.gallery.R;
 
 
 public class PhotoThumbnailAdapter extends CursorAdapter implements GalleryThumbnailAdapter {
@@ -46,7 +47,7 @@ public class PhotoThumbnailAdapter extends CursorAdapter implements GalleryThumb
 
     @Override
     public void bindView(View view, Context context, Cursor cursor) {
-        ImageView iv = (ImageView) view.findViewById(R.id.thumbnail);
+        ImageView iv = view.findViewById(R.id.thumbnail);
         Drawable recycle = iv.getDrawable();
         Drawable drawable = mDrawableFactory.drawableForItem(cursor, recycle);
         if (recycle != drawable) {

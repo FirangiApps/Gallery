@@ -29,6 +29,10 @@ public class SharedBuffer {
     private volatile boolean mNeedsSwap = false;
     private volatile boolean mNeedsRepaint = true;
 
+    public synchronized Buffer getProducer() {
+        return mProducer;
+    }
+
     public synchronized void setProducer(Bitmap producer) {
         if (mProducer != null
                 && !mProducer.isSameSize(producer)) {
@@ -40,10 +44,6 @@ public class SharedBuffer {
         } else {
             mProducer.useBitmap(producer);
         }
-    }
-
-    public synchronized Buffer getProducer() {
-        return mProducer;
     }
 
     public synchronized Buffer getConsumer() {
@@ -80,17 +80,17 @@ public class SharedBuffer {
     }
 
     public synchronized void reset() {
-        if(mProducer != null) {
+        if (mProducer != null) {
             mProducer.remove();
         }
         mProducer = null;
 
-        if(mConsumer != null) {
+        if (mConsumer != null) {
             mConsumer.remove();
         }
         mConsumer = null;
 
-        if(mIntermediate != null) {
+        if (mIntermediate != null) {
             mIntermediate.remove();
         }
         mIntermediate = null;

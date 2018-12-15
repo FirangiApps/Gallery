@@ -43,43 +43,29 @@ import java.util.ArrayList;
 // lockRendering() if the rendering thread should not run at the same time.
 //
 public class GLView {
-    private static final String TAG = "GLView";
-
     public static final int VISIBLE = 0;
     public static final int INVISIBLE = 1;
-
+    private static final String TAG = "GLView";
     private static final int FLAG_INVISIBLE = 1;
     private static final int FLAG_SET_MEASURED_SIZE = 2;
     private static final int FLAG_LAYOUT_REQUESTED = 4;
-
-    public interface OnClickListener {
-        void onClick(GLView v);
-    }
-
     protected final Rect mBounds = new Rect();
     protected final Rect mPaddings = new Rect();
-
-    private GLRoot mRoot;
     protected GLView mParent;
-    private ArrayList<GLView> mComponents;
-    private GLView mMotionTarget;
-
-    private CanvasAnimation mAnimation;
-
-    private int mViewFlags = 0;
-
     protected int mMeasuredWidth = 0;
     protected int mMeasuredHeight = 0;
-
-    private int mLastWidthSpec = -1;
-    private int mLastHeightSpec = -1;
-
     protected int mScrollY = 0;
     protected int mScrollX = 0;
     protected int mScrollHeight = 0;
     protected int mScrollWidth = 0;
-
-    private float [] mBackgroundColor;
+    private GLRoot mRoot;
+    private ArrayList<GLView> mComponents;
+    private GLView mMotionTarget;
+    private CanvasAnimation mAnimation;
+    private int mViewFlags = 0;
+    private int mLastWidthSpec = -1;
+    private int mLastHeightSpec = -1;
+    private float[] mBackgroundColor;
     private StateTransitionAnimation mTransition;
 
     public void startAnimation(CanvasAnimation animation) {
@@ -93,6 +79,11 @@ public class GLView {
         invalidate();
     }
 
+    // Returns GLView.VISIBLE or GLView.INVISIBLE
+    public int getVisibility() {
+        return (mViewFlags & FLAG_INVISIBLE) == 0 ? VISIBLE : INVISIBLE;
+    }
+
     // Sets the visiblity of this GLView (either GLView.VISIBLE or
     // GLView.INVISIBLE).
     public void setVisibility(int visibility) {
@@ -104,11 +95,6 @@ public class GLView {
         }
         onVisibilityChanged(visibility);
         invalidate();
-    }
-
-    // Returns GLView.VISIBLE or GLView.INVISIBLE
-    public int getVisibility() {
-        return (mViewFlags & FLAG_INVISIBLE) == 0 ? VISIBLE : INVISIBLE;
     }
 
     // This should only be called on the content pane (the topmost GLView).
@@ -246,11 +232,11 @@ public class GLView {
         if (mTransition != null) mTransition.start();
     }
 
-    public float [] getBackgroundColor() {
+    public float[] getBackgroundColor() {
         return mBackgroundColor;
     }
 
-    public void setBackgroundColor(float [] color) {
+    public void setBackgroundColor(float[] color) {
         mBackgroundColor = color;
     }
 
@@ -293,7 +279,7 @@ public class GLView {
     }
 
     protected boolean dispatchTouchEvent(MotionEvent event,
-            int x, int y, GLView component, boolean checkBounds) {
+                                         int x, int y, GLView component, boolean checkBounds) {
         Rect rect = component.mBounds;
         int left = rect.left;
         int top = rect.top;
@@ -461,5 +447,9 @@ public class GLView {
         for (int i = 0, n = getComponentCount(); i < n; ++i) {
             getComponent(i).dumpTree(prefix + "....");
         }
+    }
+
+    public interface OnClickListener {
+        void onClick(GLView v);
     }
 }

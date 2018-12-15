@@ -41,12 +41,7 @@ import android.widget.RelativeLayout;
 import org.codeaurora.gallery.R;
 
 public class ThreeDButton implements OnClickListener {
-    interface Delegate {
-        boolean canDisplay3DButton();
-
-        void on3DButtonClicked();
-    }
-
+    private static final int ANIM_DURATION = 200;
     private Delegate mDelegate;
     private ViewGroup root;
     private ViewGroup mContainer;
@@ -54,8 +49,6 @@ public class ThreeDButton implements OnClickListener {
 
     private Animation mAnimIn = new AlphaAnimation(0f, 1f);
     private Animation mAnimOut = new AlphaAnimation(1f, 0f);
-    private static final int ANIM_DURATION = 200;
-
     public ThreeDButton(Delegate delegate, Context context, RelativeLayout layout) {
         mDelegate = delegate;
         root = layout;
@@ -104,6 +97,12 @@ public class ThreeDButton implements OnClickListener {
 
     public void cleanup() {
         root.removeView(mContainer);
+    }
+
+    interface Delegate {
+        boolean canDisplay3DButton();
+
+        void on3DButtonClicked();
     }
 
 }

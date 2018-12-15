@@ -16,8 +16,9 @@
 
 package com.android.gallery3d.filtershow.filters;
 
-import org.codeaurora.gallery.R;
 import com.android.gallery3d.filtershow.editors.EditorTinyPlanet;
+
+import org.codeaurora.gallery.R;
 
 public class FilterTinyPlanetRepresentation extends FilterBasicRepresentation {
     private static final String SERIALIZATION_NAME = "TINYPLANET";
@@ -58,12 +59,12 @@ public class FilterTinyPlanetRepresentation extends FilterBasicRepresentation {
         setZoom(representation.getZoom());
     }
 
-    public void setAngle(float angle) {
-        mAngle = angle;
-    }
-
     public float getAngle() {
         return mAngle;
+    }
+
+    public void setAngle(float angle) {
+        mAngle = angle;
     }
 
     public int getZoom() {
@@ -83,18 +84,15 @@ public class FilterTinyPlanetRepresentation extends FilterBasicRepresentation {
         if (!super.equals(representation)) {
             return false;
         }
-        if (mAngle == ((FilterTinyPlanetRepresentation) representation).mAngle) {
-            return true;
-        }
-        return false;
+        return mAngle == ((FilterTinyPlanetRepresentation) representation).mAngle;
     }
 
     @Override
     public String[][] serializeRepresentation() {
         String[][] ret = {
-                {SERIAL_NAME  , getName() },
-                {SERIAL_VALUE , Integer.toString(getValue())},
-                {SERIAL_ANGLE , Float.toString(mAngle)}};
+                {SERIAL_NAME, getName()},
+                {SERIAL_VALUE, Integer.toString(getValue())},
+                {SERIAL_ANGLE, Float.toString(mAngle)}};
         return ret;
     }
 

@@ -17,8 +17,6 @@
 package com.android.gallery3d.app;
 
 import android.content.Context;
-import android.content.res.Resources;
-import android.util.TypedValue;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.View.OnClickListener;
@@ -26,7 +24,6 @@ import android.view.ViewGroup;
 import android.view.animation.AlphaAnimation;
 import android.view.animation.Animation;
 import android.widget.RelativeLayout;
-import android.widget.ImageButton;
 
 import org.codeaurora.gallery.R;
 
@@ -34,32 +31,15 @@ import java.util.HashMap;
 import java.util.Map;
 
 public class PhotoPageBottomControls implements OnClickListener {
-    public interface Delegate {
-        public boolean canDisplayBottomControls();
-        public boolean canDisplayBottomControl(int control);
-        public void onBottomControlClicked(int control);
-        public void refreshBottomControlsWhenReady();
-    }
-
+    private static final int CONTAINER_ANIM_DURATION_MS = 200;
+    private static final int CONTROL_ANIM_DURATION_MS = 150;
     private Delegate mDelegate;
     private ViewGroup mParentLayout;
     private ViewGroup mContainer;
-
     private boolean mContainerVisible = false;
     private Map<View, Boolean> mControlsVisible = new HashMap<View, Boolean>();
-
     private Animation mContainerAnimIn = new AlphaAnimation(0f, 1f);
     private Animation mContainerAnimOut = new AlphaAnimation(1f, 0f);
-    private static final int CONTAINER_ANIM_DURATION_MS = 200;
-
-    private static final int CONTROL_ANIM_DURATION_MS = 150;
-
-    private static Animation getControlAnimForVisibility(boolean visible) {
-        Animation anim = visible ? new AlphaAnimation(0f, 1f)
-                : new AlphaAnimation(1f, 0f);
-        anim.setDuration(CONTROL_ANIM_DURATION_MS);
-        return anim;
-    }
 
     public PhotoPageBottomControls(Delegate delegate, Context context, RelativeLayout layout) {
         mDelegate = delegate;
@@ -82,6 +62,13 @@ public class PhotoPageBottomControls implements OnClickListener {
         mContainerAnimOut.setDuration(CONTAINER_ANIM_DURATION_MS);
 
         mDelegate.refreshBottomControlsWhenReady();
+    }
+
+    private static Animation getControlAnimForVisibility(boolean visible) {
+        Animation anim = visible ? new AlphaAnimation(0f, 1f)
+                : new AlphaAnimation(1f, 0f);
+        anim.setDuration(CONTROL_ANIM_DURATION_MS);
+        return anim;
     }
 
     private void hide() {
@@ -139,5 +126,15 @@ public class PhotoPageBottomControls implements OnClickListener {
         if (mContainerVisible && controlVisible != null && controlVisible.booleanValue()) {
             mDelegate.onBottomControlClicked(view.getId());
         }
+    }
+
+    public interface Delegate {
+        boolean canDisplayBottomControls();
+
+        boolean canDisplayBottomControl(int control);
+
+        void onBottomControlClicked(int control);
+
+        void refreshBottomControlsWhenReady();
     }
 }

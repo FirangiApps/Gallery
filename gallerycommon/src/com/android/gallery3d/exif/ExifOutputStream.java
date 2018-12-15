@@ -74,18 +74,63 @@ class ExifOutputStream extends FilterOutputStream {
     private static final short TAG_SIZE = 12;
     private static final short TIFF_HEADER_SIZE = 8;
     private static final int MAX_EXIF_SIZE = 65535;
-
+    private final ExifInterface mInterface;
     private ExifData mExifData;
     private int mState = STATE_SOI;
     private int mByteToSkip;
     private int mByteToCopy;
     private byte[] mSingleByteArray = new byte[1];
     private ByteBuffer mBuffer = ByteBuffer.allocate(4);
-    private final ExifInterface mInterface;
 
     protected ExifOutputStream(OutputStream ou, ExifInterface iRef) {
         super(new BufferedOutputStream(ou, STREAMBUFFER_SIZE));
         mInterface = iRef;
+    }
+
+    static void writeTagValue(ExifTag tag, OrderedDataOutputStream dataOutputStream)
+            throws IOException {
+        switch (tag.getDataType()) {
+            case ExifTag.TYPE_ASCII:
+                byte[] buf = tag.getStringByte();
+                if (buf.length == tag.getComponentCount()) {
+                    buf[buf.length - 1] = 0;
+                    dataOutputStream.write(buf);
+                } else {
+                    dataOutputStream.write(buf);
+                    dataOutputStream.write(0);
+                }
+                break;
+            case ExifTag.TYPE_LONG:
+            case ExifTag.TYPE_UNSIGNED_LONG:
+                for (int i = 0, n = tag.getComponentCount(); i < n; i++) {
+                    dataOutputStream.writeInt((int) tag.getValueAt(i));
+                }
+                break;
+            case ExifTag.TYPE_RATIONAL:
+            case ExifTag.TYPE_UNSIGNED_RATIONAL:
+                for (int i = 0, n = tag.getComponentCount(); i < n; i++) {
+                    dataOutputStream.writeRational(tag.getRational(i));
+                }
+                break;
+            case ExifTag.TYPE_UNDEFINED:
+            case ExifTag.TYPE_UNSIGNED_BYTE:
+                buf = new byte[tag.getComponentCount()];
+                tag.getBytes(buf);
+                dataOutputStream.write(buf);
+                break;
+            case ExifTag.TYPE_UNSIGNED_SHORT:
+                for (int i = 0, n = tag.getComponentCount(); i < n; i++) {
+                    dataOutputStream.writeShort((short) tag.getValueAt(i));
+                }
+                break;
+        }
+    }
+
+    /**
+     * Gets the Exif header to be written into the JPEF file.
+     */
+    protected ExifData getExifData() {
+        return mExifData;
     }
 
     /**
@@ -94,13 +139,6 @@ class ExifOutputStream extends FilterOutputStream {
      */
     protected void setExifData(ExifData exifData) {
         mExifData = exifData;
-    }
-
-    /**
-     * Gets the Exif header to be written into the JPEF file.
-     */
-    protected ExifData getExifData() {
-        return mExifData;
     }
 
     private int requestByteToBuffer(int requestByteCount, byte[] buffer
@@ -246,7 +284,7 @@ class ExifOutputStream extends FilterOutputStream {
         ArrayList<ExifTag> nullTags = new ArrayList<ExifTag>();
         List<ExifTag> listTags = data.getAllTags();
         if (listTags == null) return null;
-        for(ExifTag t : listTags) {
+        for (ExifTag t : listTags) {
             if (t.getValue() == null && !ExifInterface.isOffsetTag(t.getTagId())) {
                 data.removeTag(t.getTagId(), t.getIfd());
                 nullTags.add(t);
@@ -479,44 +517,5 @@ class ExifOutputStream extends FilterOutputStream {
                     offsets);
         }
         return offset;
-    }
-
-    static void writeTagValue(ExifTag tag, OrderedDataOutputStream dataOutputStream)
-            throws IOException {
-        switch (tag.getDataType()) {
-            case ExifTag.TYPE_ASCII:
-                byte buf[] = tag.getStringByte();
-                if (buf.length == tag.getComponentCount()) {
-                    buf[buf.length - 1] = 0;
-                    dataOutputStream.write(buf);
-                } else {
-                    dataOutputStream.write(buf);
-                    dataOutputStream.write(0);
-                }
-                break;
-            case ExifTag.TYPE_LONG:
-            case ExifTag.TYPE_UNSIGNED_LONG:
-                for (int i = 0, n = tag.getComponentCount(); i < n; i++) {
-                    dataOutputStream.writeInt((int) tag.getValueAt(i));
-                }
-                break;
-            case ExifTag.TYPE_RATIONAL:
-            case ExifTag.TYPE_UNSIGNED_RATIONAL:
-                for (int i = 0, n = tag.getComponentCount(); i < n; i++) {
-                    dataOutputStream.writeRational(tag.getRational(i));
-                }
-                break;
-            case ExifTag.TYPE_UNDEFINED:
-            case ExifTag.TYPE_UNSIGNED_BYTE:
-                buf = new byte[tag.getComponentCount()];
-                tag.getBytes(buf);
-                dataOutputStream.write(buf);
-                break;
-            case ExifTag.TYPE_UNSIGNED_SHORT:
-                for (int i = 0, n = tag.getComponentCount(); i < n; i++) {
-                    dataOutputStream.writeShort((short) tag.getValueAt(i));
-                }
-                break;
-        }
     }
 }

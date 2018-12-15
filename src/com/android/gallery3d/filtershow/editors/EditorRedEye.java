@@ -19,10 +19,11 @@ package com.android.gallery3d.filtershow.editors;
 import android.content.Context;
 import android.widget.FrameLayout;
 
-import org.codeaurora.gallery.R;
 import com.android.gallery3d.filtershow.filters.FilterRedEyeRepresentation;
 import com.android.gallery3d.filtershow.filters.FilterRepresentation;
 import com.android.gallery3d.filtershow.imageshow.ImageRedEye;
+
+import org.codeaurora.gallery.R;
 
 /**
  * The editor with no slider for filters without UI
@@ -43,7 +44,7 @@ public class EditorRedEye extends Editor {
     @Override
     public void createEditor(Context context, FrameLayout frameLayout) {
         super.createEditor(context, frameLayout);
-        mView = mImageShow = mImageRedEyes=  new ImageRedEye(context);
+        mView = mImageShow = mImageRedEyes = new ImageRedEye(context);
         mImageRedEyes.setEditor(this);
     }
 

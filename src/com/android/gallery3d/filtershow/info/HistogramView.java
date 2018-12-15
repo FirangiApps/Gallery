@@ -37,38 +37,6 @@ public class HistogramView extends View {
     private int[] blueHistogram = new int[256];
     private Path mHistoPath = new Path();
 
-    class ComputeHistogramTask extends AsyncTask<Bitmap, Void, int[]> {
-        @Override
-        protected int[] doInBackground(Bitmap... params) {
-            int[] histo = new int[256 * 3];
-            Bitmap bitmap = params[0];
-            int w = bitmap.getWidth();
-            int h = bitmap.getHeight();
-            int[] pixels = new int[w * h];
-            bitmap.getPixels(pixels, 0, w, 0, 0, w, h);
-            for (int i = 0; i < w; i++) {
-                for (int j = 0; j < h; j++) {
-                    int index = j * w + i;
-                    int r = Color.red(pixels[index]);
-                    int g = Color.green(pixels[index]);
-                    int b = Color.blue(pixels[index]);
-                    histo[r]++;
-                    histo[256 + g]++;
-                    histo[512 + b]++;
-                }
-            }
-            return histo;
-        }
-
-        @Override
-        protected void onPostExecute(int[] result) {
-            System.arraycopy(result, 0, redHistogram, 0, 256);
-            System.arraycopy(result, 256, greenHistogram, 0, 256);
-            System.arraycopy(result, 512, blueHistogram, 0, 256);
-            invalidate();
-        }
-    }
-
     public HistogramView(Context context, AttributeSet attrs) {
         super(context, attrs);
     }
@@ -141,5 +109,37 @@ public class HistogramView extends View {
         drawHistogram(canvas, redHistogram, Color.RED, PorterDuff.Mode.SCREEN);
         drawHistogram(canvas, greenHistogram, Color.GREEN, PorterDuff.Mode.SCREEN);
         drawHistogram(canvas, blueHistogram, Color.BLUE, PorterDuff.Mode.SCREEN);
+    }
+
+    class ComputeHistogramTask extends AsyncTask<Bitmap, Void, int[]> {
+        @Override
+        protected int[] doInBackground(Bitmap... params) {
+            int[] histo = new int[256 * 3];
+            Bitmap bitmap = params[0];
+            int w = bitmap.getWidth();
+            int h = bitmap.getHeight();
+            int[] pixels = new int[w * h];
+            bitmap.getPixels(pixels, 0, w, 0, 0, w, h);
+            for (int i = 0; i < w; i++) {
+                for (int j = 0; j < h; j++) {
+                    int index = j * w + i;
+                    int r = Color.red(pixels[index]);
+                    int g = Color.green(pixels[index]);
+                    int b = Color.blue(pixels[index]);
+                    histo[r]++;
+                    histo[256 + g]++;
+                    histo[512 + b]++;
+                }
+            }
+            return histo;
+        }
+
+        @Override
+        protected void onPostExecute(int[] result) {
+            System.arraycopy(result, 0, redHistogram, 0, 256);
+            System.arraycopy(result, 256, greenHistogram, 0, 256);
+            System.arraycopy(result, 512, blueHistogram, 0, 256);
+            invalidate();
+        }
     }
 }

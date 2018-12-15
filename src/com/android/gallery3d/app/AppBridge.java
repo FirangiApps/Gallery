@@ -37,8 +37,11 @@ public abstract class AppBridge implements Parcelable {
     //////////////////////////////////////////////////////////////////////////
 
     public abstract boolean isPanorama();
+
     public abstract boolean isStaticCamera();
+
     public abstract ScreenNail attachScreenNail();
+
     public abstract void detachScreenNail();
 
     // Return true if the tap is consumed.
@@ -52,21 +55,25 @@ public abstract class AppBridge implements Parcelable {
     //  These are requests send from app to PhotoPage
     //////////////////////////////////////////////////////////////////////////
 
+    // If server is null, the services are not available.
+    public abstract void setServer(Server server);
+
     public interface Server {
         // Set the camera frame relative to GLRootView.
-        public void setCameraRelativeFrame(Rect frame);
+        void setCameraRelativeFrame(Rect frame);
+
         // Switch to the previous or next picture using the capture animation.
         // The offset is -1 to switch to the previous picture, 1 to switch to
         // the next picture.
-        public boolean switchWithCaptureAnimation(int offset);
-        // Enable or disable the swiping gestures (the default is enabled).
-        public void setSwipingEnabled(boolean enabled);
-        // Notify that the ScreenNail is changed.
-        public void notifyScreenNailChanged();
-        // Add a new media item to the secure album.
-        public void addSecureAlbumItem(boolean isVideo, int id);
-    }
+        boolean switchWithCaptureAnimation(int offset);
 
-    // If server is null, the services are not available.
-    public abstract void setServer(Server server);
+        // Enable or disable the swiping gestures (the default is enabled).
+        void setSwipingEnabled(boolean enabled);
+
+        // Notify that the ScreenNail is changed.
+        void notifyScreenNailChanged();
+
+        // Add a new media item to the secure album.
+        void addSecureAlbumItem(boolean isVideo, int id);
+    }
 }

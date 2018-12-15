@@ -42,6 +42,7 @@ public abstract class AbstractPermissionPreferenceActivity extends PreferenceAct
     private boolean permissionGranted = false;
 
     protected abstract void onGetPermissionsSuccess();
+
     protected abstract void onGetPermissionsFailure();
 
     @Override

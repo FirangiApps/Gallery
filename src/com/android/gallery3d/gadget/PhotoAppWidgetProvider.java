@@ -32,10 +32,11 @@ import android.util.Log;
 import android.view.View;
 import android.widget.RemoteViews;
 
-import org.codeaurora.gallery.R;
 import com.android.gallery3d.common.ApiHelper;
 import com.android.gallery3d.gadget.WidgetDatabaseHelper.Entry;
 import com.android.gallery3d.onetimeinitializer.GalleryWidgetMigrator;
+
+import org.codeaurora.gallery.R;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -62,32 +63,6 @@ public class PhotoAppWidgetProvider extends AppWidgetProvider {
                 return buildFrameWidget(context, id, entry);
         }
         throw new RuntimeException("invalid type - " + entry.type);
-    }
-
-    @Override
-    public void onUpdate(Context context,
-            AppWidgetManager appWidgetManager, int[] appWidgetIds) {
-
-        if (ApiHelper.HAS_REMOTE_VIEWS_SERVICE) {
-            // migrate gallery widgets from pre-JB releases to JB due to bucket ID change
-            GalleryWidgetMigrator.migrateGalleryWidgets(context);
-        }
-
-        WidgetDatabaseHelper helper = new WidgetDatabaseHelper(context);
-        try {
-            for (int id : appWidgetIds) {
-                Entry entry = helper.getEntry(id);
-                if (entry != null) {
-                    RemoteViews views = buildWidget(context, id, entry);
-                    appWidgetManager.updateAppWidget(id, views);
-                } else {
-                    Log.e(TAG, "cannot load widget: " + id);
-                }
-            }
-        } finally {
-            helper.close();
-        }
-        super.onUpdate(context, appWidgetManager, appWidgetIds);
     }
 
     @SuppressWarnings("deprecation")
@@ -143,6 +118,32 @@ public class PhotoAppWidgetProvider extends AppWidgetProvider {
     }
 
     @Override
+    public void onUpdate(Context context,
+                         AppWidgetManager appWidgetManager, int[] appWidgetIds) {
+
+        if (ApiHelper.HAS_REMOTE_VIEWS_SERVICE) {
+            // migrate gallery widgets from pre-JB releases to JB due to bucket ID change
+            GalleryWidgetMigrator.migrateGalleryWidgets(context);
+        }
+
+        WidgetDatabaseHelper helper = new WidgetDatabaseHelper(context);
+        try {
+            for (int id : appWidgetIds) {
+                Entry entry = helper.getEntry(id);
+                if (entry != null) {
+                    RemoteViews views = buildWidget(context, id, entry);
+                    appWidgetManager.updateAppWidget(id, views);
+                } else {
+                    Log.e(TAG, "cannot load widget: " + id);
+                }
+            }
+        } finally {
+            helper.close();
+        }
+        super.onUpdate(context, appWidgetManager, appWidgetIds);
+    }
+
+    @Override
     public void onDeleted(Context context, int[] appWidgetIds) {
         // Clean deleted photos out of our database
         WidgetDatabaseHelper helper = new WidgetDatabaseHelper(context);
@@ -172,19 +173,19 @@ public class PhotoAppWidgetProvider extends AppWidgetProvider {
         private Context mContext;
         private Entry mEntry;
 
-        public void setTag(int tag) {
-            this.mTag = tag;
+        public PhotoUriContentObserver(Context context, Handler handler, Entry entry, int id) {
+            super(handler);
+            mContext = context;
+            mEntry = entry;
+            mId = id;
         }
 
         public int getTag() {
             return mTag;
         }
 
-        public PhotoUriContentObserver(Context context, Handler handler, Entry entry, int id) {
-            super(handler);
-            mContext = context;
-            mEntry = entry;
-            mId = id;
+        public void setTag(int tag) {
+            this.mTag = tag;
         }
 
         public void onChange(boolean selfChange) {

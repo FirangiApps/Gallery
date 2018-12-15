@@ -32,9 +32,8 @@ import java.util.ArrayList;
 
 public class FilterPresetSource {
     private static final String LOGTAG = "FilterStackSource";
-
-    private SQLiteDatabase database = null;
     private final FilterPresetDBHelper dbHelper;
+    private SQLiteDatabase database = null;
     private Context mContext;
 
     public FilterPresetSource(Context context) {
@@ -54,12 +53,6 @@ public class FilterPresetSource {
     public void close() {
         database = null;
         dbHelper.close();
-    }
-
-    public static class SaveOption {
-        public int _id;
-        public String name;
-        public String Uri;
     }
 
     public boolean insertPreset(String presetName, String presetUri) {
@@ -82,8 +75,8 @@ public class FilterPresetSource {
         val.put(FilterPreset.PRESET_ID, presetName);
         database.beginTransaction();
         try {
-            database.update(FilterPreset.TABLE, val,FilterPreset._ID + " = ?",
-                    new String[] { "" + id});
+            database.update(FilterPreset.TABLE, val, FilterPreset._ID + " = ?",
+                    new String[]{"" + id});
             database.setTransactionSuccessful();
         } finally {
             database.endTransaction();
@@ -95,7 +88,7 @@ public class FilterPresetSource {
         database.beginTransaction();
         try {
             ret = (0 != database.delete(FilterPreset.TABLE, FilterPreset._ID + " = ?",
-                    new String[] { "" + id }));
+                    new String[]{"" + id}));
             database.setTransactionSuccessful();
         } finally {
             database.endTransaction();
@@ -109,15 +102,15 @@ public class FilterPresetSource {
         database.beginTransaction();
         try {
             c = database.query(FilterPreset.TABLE,
-                    new String[] { FilterPreset._ID,
+                    new String[]{FilterPreset._ID,
                             FilterPreset.PRESET_ID,
-                            FilterPreset.FILTER_PRESET },
+                            FilterPreset.FILTER_PRESET},
                     null, null, null, null, null, null);
             if (c != null) {
                 boolean loopCheck = c.moveToFirst();
                 while (loopCheck) {
-                    String id = (c.isNull(0)) ?  null : c.getString(0);
-                    String name = (c.isNull(1)) ?  null : c.getString(1);
+                    String id = (c.isNull(0)) ? null : c.getString(0);
+                    String name = (c.isNull(1)) ? null : c.getString(1);
                     String filterUri = (c.isNull(2)) ? null : c.getString(2);
                     SaveOption so = new SaveOption();
                     try {
@@ -158,5 +151,11 @@ public class FilterPresetSource {
             Log.e(LOGTAG, "FileNotFoundException for " + uri, e);
         }
         return ret;
-        }
     }
+
+    public static class SaveOption {
+        public int _id;
+        public String name;
+        public String Uri;
+    }
+}

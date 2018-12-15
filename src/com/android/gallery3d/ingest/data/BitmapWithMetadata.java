@@ -25,11 +25,11 @@ import android.os.Build;
  */
 @TargetApi(Build.VERSION_CODES.HONEYCOMB_MR1)
 public class BitmapWithMetadata {
-  public Bitmap bitmap;
-  public int rotationDegrees;
+    public Bitmap bitmap;
+    public int rotationDegrees;
 
-  public BitmapWithMetadata(Bitmap bitmap, int rotationDegrees) {
-    this.bitmap = bitmap;
-    this.rotationDegrees = rotationDegrees;
-  }
+    public BitmapWithMetadata(Bitmap bitmap, int rotationDegrees) {
+        this.bitmap = bitmap;
+        this.rotationDegrees = rotationDegrees;
+    }
 }

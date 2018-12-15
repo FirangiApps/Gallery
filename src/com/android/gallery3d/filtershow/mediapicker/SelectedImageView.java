@@ -53,6 +53,11 @@ public class SelectedImageView extends ImageView {
         init();
     }
 
+    public SelectedImageView(Context context) {
+        super(context);
+        init();
+    }
+
     private void init() {
         border = new Paint();
         border.setAntiAlias(true);
@@ -61,9 +66,8 @@ public class SelectedImageView extends ImageView {
                 R.dimen.picker_border_size);
     }
 
-    public SelectedImageView(Context context) {
-        super(context);
-        init();
+    public boolean isSelected() {
+        return sel;
     }
 
     public void setSelected(boolean selected) {
@@ -71,10 +75,6 @@ public class SelectedImageView extends ImageView {
             this.sel = selected;
             invalidate();
         }
-    }
-
-    public boolean isSelected() {
-        return sel;
     }
 
     @Override

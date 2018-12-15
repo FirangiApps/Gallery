@@ -29,10 +29,6 @@
 
 package com.android.gallery3d.filtershow.editors;
 
-import java.io.FileNotFoundException;
-import java.io.IOException;
-import java.io.InputStream;
-
 import android.content.Context;
 import android.content.DialogInterface;
 import android.net.Uri;
@@ -46,8 +42,6 @@ import android.view.ViewGroup;
 import android.widget.FrameLayout;
 import android.widget.LinearLayout;
 
-import org.codeaurora.gallery.R;
-
 import com.android.gallery3d.filtershow.FilterShowActivity;
 import com.android.gallery3d.filtershow.filters.FilterRepresentation;
 import com.android.gallery3d.filtershow.filters.FilterTruePortraitFusionRepresentation;
@@ -55,6 +49,12 @@ import com.android.gallery3d.filtershow.imageshow.ImageTruePortraitFusion;
 import com.android.gallery3d.filtershow.imageshow.MasterImage;
 import com.android.gallery3d.filtershow.ui.DoNotShowAgainDialog;
 import com.android.gallery3d.util.GalleryUtils;
+
+import org.codeaurora.gallery.R;
+
+import java.io.FileNotFoundException;
+import java.io.IOException;
+import java.io.InputStream;
 
 public class EditorTruePortraitFusion extends Editor {
     public static final String TAG = "EditorTruePortraitFusion";
@@ -95,7 +95,7 @@ public class EditorTruePortraitFusion extends Editor {
 
     @Override
     public void setEditPanelUI(View editControl) {
-        ViewGroup controlContainer = (ViewGroup)editControl;
+        ViewGroup controlContainer = (ViewGroup) editControl;
         controlContainer.removeAllViews();
 
         LayoutInflater inflater = (LayoutInflater) mContext.getSystemService
@@ -149,7 +149,7 @@ public class EditorTruePortraitFusion extends Editor {
             public void onClick(View view) {
                 FilterRepresentation representation = new FilterRepresentation("");
                 representation.setEditorId(EditorTruePortraitMask.ID);
-                ((FilterShowActivity)mContext).loadEditorPanel(representation);
+                ((FilterShowActivity) mContext).loadEditorPanel(representation);
             }
         });
 
@@ -158,9 +158,9 @@ public class EditorTruePortraitFusion extends Editor {
                 mContext.getString(R.string.pref_trueportrait_fusion_underlay_key), null);
         Uri fusionUri = Uri.EMPTY;
 
-        if(fusionUnderlay != null) {
+        if (fusionUnderlay != null) {
             fusionUri = Uri.parse(fusionUnderlay);
-            if(!uriExists(mContext, fusionUri))
+            if (!uriExists(mContext, fusionUri))
                 fusionUri = Uri.EMPTY;
         }
 
@@ -170,15 +170,15 @@ public class EditorTruePortraitFusion extends Editor {
 
     @Override
     public void resume() {
-        if(mUnderlayUri.equals(Uri.EMPTY) && !pickDialogHasShown) {
+        if (mUnderlayUri.equals(Uri.EMPTY) && !pickDialogHasShown) {
             // No underlay set.
             boolean skipIntro = GalleryUtils.getBooleanPref(mContext,
                     mContext.getString(R.string.pref_trueportrait_fusion_intro_show_key), false);
-            if(!skipIntro) {
-                FragmentManager fm = ((FilterShowActivity)mContext).getSupportFragmentManager();
+            if (!skipIntro) {
+                FragmentManager fm = ((FilterShowActivity) mContext).getSupportFragmentManager();
                 DoNotShowAgainDialog dialog =
                         (DoNotShowAgainDialog) fm.findFragmentByTag("trueportrait_fusion_intro");
-                if(dialog == null) {
+                if (dialog == null) {
                     dialog = new DoNotShowAgainDialog(
                             R.string.fusion_pick_background, R.string.trueportrait_fusion_intro,
                             R.string.pref_trueportrait_fusion_intro_show_key);
@@ -215,14 +215,14 @@ public class EditorTruePortraitFusion extends Editor {
     public void setUnderlayImageUri(Uri uri) {
         mUnderlayUri = uri;
         FilterRepresentation filter = getLocalRepresentation();
-        if(filter instanceof FilterTruePortraitFusionRepresentation) {
+        if (filter instanceof FilterTruePortraitFusionRepresentation) {
             mImageFusion.setUnderlay(uri);
             commitLocalRepresentation();
 
             // save fusion underlay uri
             GalleryUtils.setStringPref(mContext,
                     mContext.getString(R.string.pref_trueportrait_fusion_underlay_key),
-                    (uri != null)?uri.toString():null);
+                    (uri != null) ? uri.toString() : null);
         }
     }
 

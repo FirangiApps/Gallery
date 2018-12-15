@@ -8,7 +8,6 @@ import android.provider.MediaStore;
 import android.provider.OpenableColumns;
 import android.util.Log;
 
-
 import java.io.File;
 
 public class MovieTitleHelper {
@@ -24,8 +23,8 @@ public class MovieTitleHelper {
             final String where = "_data LIKE '%" + data.replaceFirst("file:///", "") + "'";
             cursor = context.getContentResolver().query(
                     MediaStore.Video.Media.EXTERNAL_CONTENT_URI,
-                    new String[] {
-                        OpenableColumns.DISPLAY_NAME
+                    new String[]{
+                            OpenableColumns.DISPLAY_NAME
                     }, where, null, null);
             if (LOG) {
                 Log.v(
@@ -54,8 +53,8 @@ public class MovieTitleHelper {
         Cursor cursor = null;
         try {
             cursor = context.getContentResolver().query(uri,
-                    new String[] {
-                        OpenableColumns.DISPLAY_NAME
+                    new String[]{
+                            OpenableColumns.DISPLAY_NAME
                     }, null, null, null);
             if (cursor != null && cursor.moveToFirst()) {
                 title = cursor.getString(0);
@@ -86,8 +85,8 @@ public class MovieTitleHelper {
         Cursor cursor = null;
         try {
             cursor = context.getContentResolver().query(uri,
-                    new String[] {
-                        "_data"
+                    new String[]{
+                            "_data"
                     }, null, null, null);
             if (cursor != null && cursor.moveToFirst()) {
                 final File file = new File(cursor.getString(0));

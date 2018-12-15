@@ -50,11 +50,8 @@ public class Buffer {
         if (mBitmap == null || bitmap == null) {
             return false;
         }
-        if (mBitmap.getWidth() == bitmap.getWidth()
-                && mBitmap.getHeight() == bitmap.getHeight()) {
-            return true;
-        }
-        return false;
+        return mBitmap.getWidth() == bitmap.getWidth()
+                && mBitmap.getHeight() == bitmap.getHeight();
     }
 
     public synchronized void useBitmap(Bitmap bitmap) {

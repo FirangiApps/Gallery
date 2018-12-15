@@ -32,13 +32,11 @@ package com.android.gallery3d.filtershow.mediapicker;
 import android.annotation.TargetApi;
 import android.content.Context;
 import android.content.res.Configuration;
-import android.content.res.Resources;
 import android.os.Build;
 import android.os.Handler;
 import android.util.AttributeSet;
 import android.view.MotionEvent;
 import android.view.View;
-import android.view.ViewConfiguration;
 import android.view.ViewGroup;
 import android.view.animation.Animation;
 import android.view.animation.Transformation;
@@ -51,19 +49,16 @@ import org.codeaurora.gallery.R;
 
 public class MediaPicker extends ViewGroup {
 
+    static Context mContext;
+    private final Handler mHandler = new Handler();
     private LinearLayout mSelStrip;
     private LinearLayout mSlideStrip;
     private HeaderGridView mGridView;
     private ImageButton mArrow;
-
     private boolean mIsFullScreen, mLayoutChanged;
     private int mCurrentDesiredHeight;
-
-    private final Handler mHandler = new Handler();
     private int mDefaultGridHeight;
     private TouchHandler mTouchHandler;
-
-    static Context mContext;
 
     public MediaPicker(final Context context, final AttributeSet attrs) {
         super(context, attrs);
@@ -75,10 +70,10 @@ public class MediaPicker extends ViewGroup {
     @Override
     protected void onFinishInflate() {
         super.onFinishInflate();
-        mSlideStrip = (LinearLayout) findViewById(R.id.mediapicker_slidestrip);
-        mSelStrip = (LinearLayout) findViewById(R.id.mediapicker_tabstrip);
-        mGridView = (HeaderGridView) findViewById(R.id.grid);
-        mArrow = (ImageButton) findViewById(R.id.arrow);
+        mSlideStrip = findViewById(R.id.mediapicker_slidestrip);
+        mSelStrip = findViewById(R.id.mediapicker_tabstrip);
+        mGridView = findViewById(R.id.grid);
+        mArrow = findViewById(R.id.arrow);
         mTouchHandler = new TouchHandler();
         mArrow.setOnTouchListener(mTouchHandler);
 
@@ -87,7 +82,7 @@ public class MediaPicker extends ViewGroup {
 
             @Override
             public void onLayoutChange(View v, int left, int top, int right, int bottom,
-                    int oldLeft, int oldTop, int oldRight, int oldBottom) {
+                                       int oldLeft, int oldTop, int oldRight, int oldBottom) {
                 final boolean newLandMode = isLandscapeMode();
                 if (mLandMode != newLandMode) {
                     mLandMode = newLandMode;
@@ -164,7 +159,7 @@ public class MediaPicker extends ViewGroup {
             final Animation animation = new Animation() {
                 @Override
                 protected void applyTransformation(final float interpolatedTime,
-                        final Transformation t) {
+                                                   final Transformation t) {
                     mCurrentDesiredHeight = (int) (startHeight + deltaHeight * interpolatedTime);
                     requestLayout();
                 }
@@ -205,11 +200,11 @@ public class MediaPicker extends ViewGroup {
     }
 
     private class TouchHandler implements OnTouchListener {
-        private boolean mMoved = false;
-        private MotionEvent mDownEvent;
         private static final float DIRECTION_RATIO = 1.1f;
         private static final int TOUCH_THRESHOLD = 450;
         private static final int TOUCH_SLOP = 24;
+        private boolean mMoved = false;
+        private MotionEvent mDownEvent;
 
 
         TouchHandler() {
@@ -218,11 +213,8 @@ public class MediaPicker extends ViewGroup {
         boolean checkMoved(final MotionEvent mv) {
             final float dx = mDownEvent.getRawX() - mv.getRawX();
             final float dy = mDownEvent.getRawY() - mv.getRawY();
-            if (Math.abs(dy) > TOUCH_SLOP &&
-                    (Math.abs(dy) / Math.abs(dx)) > DIRECTION_RATIO) {
-                return true;
-            }
-            return false;
+            return Math.abs(dy) > TOUCH_SLOP &&
+                    (Math.abs(dy) / Math.abs(dx)) > DIRECTION_RATIO;
         }
 
         @Override

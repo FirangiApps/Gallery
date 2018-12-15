@@ -19,26 +19,26 @@ package com.android.gallery3d.gadget;
 import android.annotation.TargetApi;
 import android.appwidget.AppWidgetManager;
 import android.content.Intent;
-//import android.drm.DrmHelper;
 import android.graphics.Bitmap;
-import android.net.Uri;
 import android.view.View;
 import android.widget.RemoteViews;
 import android.widget.RemoteViewsService;
 
-import org.codeaurora.gallery.R;
 import com.android.gallery3d.app.GalleryApp;
 import com.android.gallery3d.common.ApiHelper;
 import com.android.gallery3d.data.ContentListener;
 
+import org.codeaurora.gallery.R;
+
+//import android.drm.DrmHelper;
+
 @TargetApi(ApiHelper.VERSION_CODES.HONEYCOMB)
 public class WidgetService extends RemoteViewsService {
 
-    @SuppressWarnings("unused")
-    private static final String TAG = "GalleryAppWidgetService";
-
     public static final String EXTRA_WIDGET_TYPE = "widget-type";
     public static final String EXTRA_ALBUM_PATH = "album-path";
+    @SuppressWarnings("unused")
+    private static final String TAG = "GalleryAppWidgetService";
 
     @Override
     public RemoteViewsFactory onGetViewFactory(Intent intent) {
@@ -78,7 +78,7 @@ public class WidgetService extends RemoteViewsService {
             mSource.setContentListener(this);
             AppWidgetManager.getInstance(mApp.getAndroidContext())
                     .notifyAppWidgetViewDataChanged(
-                    mAppWidgetId, R.id.appwidget_stack_view);
+                            mAppWidgetId, R.id.appwidget_stack_view);
         }
 
         @Override
@@ -121,7 +121,7 @@ public class WidgetService extends RemoteViewsService {
             Bitmap bitmap = null;
             try {
                 bitmap = mSource.getImage(position);
-            } catch (UnsupportedOperationException e){
+            } catch (UnsupportedOperationException e) {
                 // catch exception here to avoid FC
             }
 
@@ -175,7 +175,7 @@ public class WidgetService extends RemoteViewsService {
         public void onContentDirty() {
             AppWidgetManager.getInstance(mApp.getAndroidContext())
                     .notifyAppWidgetViewDataChanged(
-                    mAppWidgetId, R.id.appwidget_stack_view);
+                            mAppWidgetId, R.id.appwidget_stack_view);
         }
     }
 }

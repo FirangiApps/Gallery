@@ -31,15 +31,6 @@ public class IdentityCache<K, V> {
     public IdentityCache() {
     }
 
-    private static class Entry<K, V> extends WeakReference<V> {
-        K mKey;
-
-        public Entry(K key, V value, ReferenceQueue<V> queue) {
-            super(value, queue);
-            mKey = key;
-        }
-    }
-
     private void cleanUpWeakMap() {
         Entry<K, V> entry = (Entry<K, V>) mQueue.poll();
         while (entry != null) {
@@ -61,6 +52,13 @@ public class IdentityCache<K, V> {
         return entry == null ? null : entry.get();
     }
 
+    // This is for debugging only
+    public synchronized ArrayList<K> keys() {
+        Set<K> set = mWeakMap.keySet();
+        ArrayList<K> result = new ArrayList<K>(set);
+        return result;
+    }
+
     // This is currently unused.
     /*
     public synchronized void clear() {
@@ -69,10 +67,12 @@ public class IdentityCache<K, V> {
     }
     */
 
-    // This is for debugging only
-    public synchronized ArrayList<K> keys() {
-        Set<K> set = mWeakMap.keySet();
-        ArrayList<K> result = new ArrayList<K>(set);
-        return result;
+    private static class Entry<K, V> extends WeakReference<V> {
+        K mKey;
+
+        public Entry(K key, V value, ReferenceQueue<V> queue) {
+            super(value, queue);
+            mKey = key;
+        }
     }
 }

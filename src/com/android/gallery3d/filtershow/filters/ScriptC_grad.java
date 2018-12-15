@@ -21,31 +21,36 @@
 
 package com.android.gallery3d.filtershow.filters;
 
-import android.renderscript.*;
 import android.content.res.Resources;
+import android.renderscript.Allocation;
+import android.renderscript.Element;
+import android.renderscript.FieldPacker;
+import android.renderscript.RSRuntimeException;
+import android.renderscript.RenderScript;
+import android.renderscript.Script;
+import android.renderscript.ScriptC;
+import android.renderscript.Type;
 
 /**
  * @hide
  */
 public class ScriptC_grad extends ScriptC {
     private static final String __rs_resource_name = "grad";
-    // Constructor
-    public  ScriptC_grad(RenderScript rs) {
-        this(rs,
-             rs.getApplicationContext().getResources(),
-             rs.getApplicationContext().getResources().getIdentifier(
-                 __rs_resource_name, "raw",
-                 rs.getApplicationContext().getPackageName()));
-    }
-
-    public  ScriptC_grad(RenderScript rs, Resources resources, int id) {
-        super(rs, resources, id);
-        __U32 = Element.U32(rs);
-        __I32 = Element.I32(rs);
-        __BOOLEAN = Element.BOOLEAN(rs);
-        __U8_4 = Element.U8_4(rs);
-    }
-
+    private final static int mExportVarIdx_inputWidth = 0;
+    private final static int mExportVarIdx_inputHeight = 1;
+    private final static int mExportVarIdx_mNumberOfLines = 2;
+    private final static int mExportVarIdx_mask = 3;
+    private final static int mExportVarIdx_xPos1 = 4;
+    private final static int mExportVarIdx_yPos1 = 5;
+    private final static int mExportVarIdx_xPos2 = 6;
+    private final static int mExportVarIdx_yPos2 = 7;
+    private final static int mExportVarIdx_size = 8;
+    private final static int mExportVarIdx_brightness = 9;
+    private final static int mExportVarIdx_contrast = 10;
+    private final static int mExportVarIdx_saturation = 11;
+    //private final static int mExportForEachIdx_root = 0;
+    private final static int mExportForEachIdx_selectiveAdjust = 1;
+    private final static int mExportFuncIdx_setupGradParams = 0;
     private Element __BOOLEAN;
     private Element __I32;
     private Element __U32;
@@ -53,10 +58,42 @@ public class ScriptC_grad extends ScriptC {
     private FieldPacker __rs_fp_BOOLEAN;
     private FieldPacker __rs_fp_I32;
     private FieldPacker __rs_fp_U32;
-    private final static int mExportVarIdx_inputWidth = 0;
     private long mExportVar_inputWidth;
+    private long mExportVar_inputHeight;
+    private int mExportVar_mNumberOfLines;
+    private boolean[] mExportVar_mask;
+    private int[] mExportVar_xPos1;
+    private int[] mExportVar_yPos1;
+    private int[] mExportVar_xPos2;
+    private int[] mExportVar_yPos2;
+    private int[] mExportVar_size;
+    private int[] mExportVar_brightness;
+    private int[] mExportVar_contrast;
+    private int[] mExportVar_saturation;
+
+    // Constructor
+    public ScriptC_grad(RenderScript rs) {
+        this(rs,
+                rs.getApplicationContext().getResources(),
+                rs.getApplicationContext().getResources().getIdentifier(
+                        __rs_resource_name, "raw",
+                        rs.getApplicationContext().getPackageName()));
+    }
+
+    public ScriptC_grad(RenderScript rs, Resources resources, int id) {
+        super(rs, resources, id);
+        __U32 = Element.U32(rs);
+        __I32 = Element.I32(rs);
+        __BOOLEAN = Element.BOOLEAN(rs);
+        __U8_4 = Element.U8_4(rs);
+    }
+
+    public long get_inputWidth() {
+        return mExportVar_inputWidth;
+    }
+
     public synchronized void set_inputWidth(long v) {
-        if (__rs_fp_U32!= null) {
+        if (__rs_fp_U32 != null) {
             __rs_fp_U32.reset();
         } else {
             __rs_fp_U32 = new FieldPacker(4);
@@ -66,18 +103,16 @@ public class ScriptC_grad extends ScriptC {
         mExportVar_inputWidth = v;
     }
 
-    public long get_inputWidth() {
-        return mExportVar_inputWidth;
-    }
-
     public Script.FieldID getFieldID_inputWidth() {
         return createFieldID(mExportVarIdx_inputWidth, null);
     }
 
-    private final static int mExportVarIdx_inputHeight = 1;
-    private long mExportVar_inputHeight;
+    public long get_inputHeight() {
+        return mExportVar_inputHeight;
+    }
+
     public synchronized void set_inputHeight(long v) {
-        if (__rs_fp_U32!= null) {
+        if (__rs_fp_U32 != null) {
             __rs_fp_U32.reset();
         } else {
             __rs_fp_U32 = new FieldPacker(4);
@@ -87,31 +122,27 @@ public class ScriptC_grad extends ScriptC {
         mExportVar_inputHeight = v;
     }
 
-    public long get_inputHeight() {
-        return mExportVar_inputHeight;
-    }
-
     public Script.FieldID getFieldID_inputHeight() {
         return createFieldID(mExportVarIdx_inputHeight, null);
-    }
-
-    private final static int mExportVarIdx_mNumberOfLines = 2;
-    private int mExportVar_mNumberOfLines;
-    public synchronized void set_mNumberOfLines(int v) {
-        setVar(mExportVarIdx_mNumberOfLines, v);
-        mExportVar_mNumberOfLines = v;
     }
 
     public int get_mNumberOfLines() {
         return mExportVar_mNumberOfLines;
     }
 
+    public synchronized void set_mNumberOfLines(int v) {
+        setVar(mExportVarIdx_mNumberOfLines, v);
+        mExportVar_mNumberOfLines = v;
+    }
+
     public Script.FieldID getFieldID_mNumberOfLines() {
         return createFieldID(mExportVarIdx_mNumberOfLines, null);
     }
 
-    private final static int mExportVarIdx_mask = 3;
-    private boolean[] mExportVar_mask;
+    public boolean[] get_mask() {
+        return mExportVar_mask;
+    }
+
     public synchronized void set_mask(boolean[] v) {
         mExportVar_mask = v;
         FieldPacker fp = new FieldPacker(16);
@@ -119,21 +150,19 @@ public class ScriptC_grad extends ScriptC {
             fp.addBoolean(v[ct1]);
         }
 
-        int []__dimArr = new int[1];
+        int[] __dimArr = new int[1];
         __dimArr[0] = 16;
         setVar(mExportVarIdx_mask, fp, __BOOLEAN, __dimArr);
-    }
-
-    public boolean[] get_mask() {
-        return mExportVar_mask;
     }
 
     public Script.FieldID getFieldID_mask() {
         return createFieldID(mExportVarIdx_mask, null);
     }
 
-    private final static int mExportVarIdx_xPos1 = 4;
-    private int[] mExportVar_xPos1;
+    public int[] get_xPos1() {
+        return mExportVar_xPos1;
+    }
+
     public synchronized void set_xPos1(int[] v) {
         mExportVar_xPos1 = v;
         FieldPacker fp = new FieldPacker(64);
@@ -141,21 +170,19 @@ public class ScriptC_grad extends ScriptC {
             fp.addI32(v[ct1]);
         }
 
-        int []__dimArr = new int[1];
+        int[] __dimArr = new int[1];
         __dimArr[0] = 16;
         setVar(mExportVarIdx_xPos1, fp, __I32, __dimArr);
-    }
-
-    public int[] get_xPos1() {
-        return mExportVar_xPos1;
     }
 
     public Script.FieldID getFieldID_xPos1() {
         return createFieldID(mExportVarIdx_xPos1, null);
     }
 
-    private final static int mExportVarIdx_yPos1 = 5;
-    private int[] mExportVar_yPos1;
+    public int[] get_yPos1() {
+        return mExportVar_yPos1;
+    }
+
     public synchronized void set_yPos1(int[] v) {
         mExportVar_yPos1 = v;
         FieldPacker fp = new FieldPacker(64);
@@ -163,21 +190,19 @@ public class ScriptC_grad extends ScriptC {
             fp.addI32(v[ct1]);
         }
 
-        int []__dimArr = new int[1];
+        int[] __dimArr = new int[1];
         __dimArr[0] = 16;
         setVar(mExportVarIdx_yPos1, fp, __I32, __dimArr);
-    }
-
-    public int[] get_yPos1() {
-        return mExportVar_yPos1;
     }
 
     public Script.FieldID getFieldID_yPos1() {
         return createFieldID(mExportVarIdx_yPos1, null);
     }
 
-    private final static int mExportVarIdx_xPos2 = 6;
-    private int[] mExportVar_xPos2;
+    public int[] get_xPos2() {
+        return mExportVar_xPos2;
+    }
+
     public synchronized void set_xPos2(int[] v) {
         mExportVar_xPos2 = v;
         FieldPacker fp = new FieldPacker(64);
@@ -185,21 +210,19 @@ public class ScriptC_grad extends ScriptC {
             fp.addI32(v[ct1]);
         }
 
-        int []__dimArr = new int[1];
+        int[] __dimArr = new int[1];
         __dimArr[0] = 16;
         setVar(mExportVarIdx_xPos2, fp, __I32, __dimArr);
-    }
-
-    public int[] get_xPos2() {
-        return mExportVar_xPos2;
     }
 
     public Script.FieldID getFieldID_xPos2() {
         return createFieldID(mExportVarIdx_xPos2, null);
     }
 
-    private final static int mExportVarIdx_yPos2 = 7;
-    private int[] mExportVar_yPos2;
+    public int[] get_yPos2() {
+        return mExportVar_yPos2;
+    }
+
     public synchronized void set_yPos2(int[] v) {
         mExportVar_yPos2 = v;
         FieldPacker fp = new FieldPacker(64);
@@ -207,21 +230,19 @@ public class ScriptC_grad extends ScriptC {
             fp.addI32(v[ct1]);
         }
 
-        int []__dimArr = new int[1];
+        int[] __dimArr = new int[1];
         __dimArr[0] = 16;
         setVar(mExportVarIdx_yPos2, fp, __I32, __dimArr);
-    }
-
-    public int[] get_yPos2() {
-        return mExportVar_yPos2;
     }
 
     public Script.FieldID getFieldID_yPos2() {
         return createFieldID(mExportVarIdx_yPos2, null);
     }
 
-    private final static int mExportVarIdx_size = 8;
-    private int[] mExportVar_size;
+    public int[] get_size() {
+        return mExportVar_size;
+    }
+
     public synchronized void set_size(int[] v) {
         mExportVar_size = v;
         FieldPacker fp = new FieldPacker(64);
@@ -229,21 +250,19 @@ public class ScriptC_grad extends ScriptC {
             fp.addI32(v[ct1]);
         }
 
-        int []__dimArr = new int[1];
+        int[] __dimArr = new int[1];
         __dimArr[0] = 16;
         setVar(mExportVarIdx_size, fp, __I32, __dimArr);
-    }
-
-    public int[] get_size() {
-        return mExportVar_size;
     }
 
     public Script.FieldID getFieldID_size() {
         return createFieldID(mExportVarIdx_size, null);
     }
 
-    private final static int mExportVarIdx_brightness = 9;
-    private int[] mExportVar_brightness;
+    public int[] get_brightness() {
+        return mExportVar_brightness;
+    }
+
     public synchronized void set_brightness(int[] v) {
         mExportVar_brightness = v;
         FieldPacker fp = new FieldPacker(64);
@@ -251,21 +270,19 @@ public class ScriptC_grad extends ScriptC {
             fp.addI32(v[ct1]);
         }
 
-        int []__dimArr = new int[1];
+        int[] __dimArr = new int[1];
         __dimArr[0] = 16;
         setVar(mExportVarIdx_brightness, fp, __I32, __dimArr);
-    }
-
-    public int[] get_brightness() {
-        return mExportVar_brightness;
     }
 
     public Script.FieldID getFieldID_brightness() {
         return createFieldID(mExportVarIdx_brightness, null);
     }
 
-    private final static int mExportVarIdx_contrast = 10;
-    private int[] mExportVar_contrast;
+    public int[] get_contrast() {
+        return mExportVar_contrast;
+    }
+
     public synchronized void set_contrast(int[] v) {
         mExportVar_contrast = v;
         FieldPacker fp = new FieldPacker(64);
@@ -273,21 +290,19 @@ public class ScriptC_grad extends ScriptC {
             fp.addI32(v[ct1]);
         }
 
-        int []__dimArr = new int[1];
+        int[] __dimArr = new int[1];
         __dimArr[0] = 16;
         setVar(mExportVarIdx_contrast, fp, __I32, __dimArr);
-    }
-
-    public int[] get_contrast() {
-        return mExportVar_contrast;
     }
 
     public Script.FieldID getFieldID_contrast() {
         return createFieldID(mExportVarIdx_contrast, null);
     }
 
-    private final static int mExportVarIdx_saturation = 11;
-    private int[] mExportVar_saturation;
+    public int[] get_saturation() {
+        return mExportVar_saturation;
+    }
+
     public synchronized void set_saturation(int[] v) {
         mExportVar_saturation = v;
         FieldPacker fp = new FieldPacker(64);
@@ -295,21 +310,15 @@ public class ScriptC_grad extends ScriptC {
             fp.addI32(v[ct1]);
         }
 
-        int []__dimArr = new int[1];
+        int[] __dimArr = new int[1];
         __dimArr[0] = 16;
         setVar(mExportVarIdx_saturation, fp, __I32, __dimArr);
-    }
-
-    public int[] get_saturation() {
-        return mExportVar_saturation;
     }
 
     public Script.FieldID getFieldID_saturation() {
         return createFieldID(mExportVarIdx_saturation, null);
     }
 
-    //private final static int mExportForEachIdx_root = 0;
-    private final static int mExportForEachIdx_selectiveAdjust = 1;
     public Script.KernelID getKernelID_selectiveAdjust() {
         return createKernelID(mExportForEachIdx_selectiveAdjust, 59, null, null);
     }
@@ -331,18 +340,17 @@ public class ScriptC_grad extends ScriptC {
         t0 = ain.getType();
         t1 = aout.getType();
         if ((t0.getCount() != t1.getCount()) ||
-            (t0.getX() != t1.getX()) ||
-            (t0.getY() != t1.getY()) ||
-            (t0.getZ() != t1.getZ()) ||
-            (t0.hasFaces()   != t1.hasFaces()) ||
-            (t0.hasMipmaps() != t1.hasMipmaps())) {
+                (t0.getX() != t1.getX()) ||
+                (t0.getY() != t1.getY()) ||
+                (t0.getZ() != t1.getZ()) ||
+                (t0.hasFaces() != t1.hasFaces()) ||
+                (t0.hasMipmaps() != t1.hasMipmaps())) {
             throw new RSRuntimeException("Dimension mismatch between parameters ain and aout!");
         }
 
         forEach(mExportForEachIdx_selectiveAdjust, ain, aout, null, sc);
     }
 
-    private final static int mExportFuncIdx_setupGradParams = 0;
     public void invoke_setupGradParams() {
         invoke(mExportFuncIdx_setupGradParams);
     }

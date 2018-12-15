@@ -17,7 +17,6 @@
 package com.android.gallery3d.data;
 
 import android.content.ContentResolver;
-//import android.drm.DrmHelper;
 import android.graphics.Bitmap;
 import android.graphics.Bitmap.Config;
 import android.graphics.BitmapFactory.Options;
@@ -38,6 +37,8 @@ import java.io.FileNotFoundException;
 import java.io.InputStream;
 import java.net.URI;
 import java.net.URL;
+
+//import android.drm.DrmHelper;
 
 public class UriImage extends MediaItem {
     private static final String TAG = "UriImage";
@@ -171,59 +172,6 @@ public class UriImage extends MediaItem {
         }
     }
 
-    private class RegionDecoderJob implements Job<BitmapRegionDecoder> {
-        @Override
-        public BitmapRegionDecoder run(JobContext jc) {
-//            if (DrmHelper.isDrmFile(getFilePath())) {
-//                BitmapRegionDecoder decoder = DrmHelper
-//                        .createBitmapRegionDecoder(getFilePath(), false);
-//                mWidth = decoder.getWidth();
-//                mHeight = decoder.getHeight();
-//                return decoder;
-//            }
-
-            if (!prepareInputFile(jc)) return null;
-            BitmapRegionDecoder decoder = DecodeUtils.createBitmapRegionDecoder(
-                    jc, mFileDescriptor.getFileDescriptor(), false);
-            mWidth = decoder.getWidth();
-            mHeight = decoder.getHeight();
-            return decoder;
-        }
-    }
-
-    private class BitmapJob implements Job<Bitmap> {
-        private int mType;
-
-        protected BitmapJob(int type) {
-            mType = type;
-        }
-
-        @Override
-        public Bitmap run(JobContext jc) {
-//            if (DrmHelper.isDrmFile(getFilePath())) {
-//                return DecodeUtils.ensureGLCompatibleBitmap(DrmHelper.getBitmap(getFilePath()));
-//            }
-
-            if (!prepareInputFile(jc)) return null;
-            int targetSize = MediaItem.getTargetSize(mType);
-            Options options = new Options();
-            options.inPreferredConfig = Config.ARGB_8888;
-            Bitmap bitmap = DecodeUtils.decodeThumbnail(jc,
-                    mFileDescriptor.getFileDescriptor(), options, targetSize, mType);
-
-            if (jc.isCancelled() || bitmap == null) {
-                return null;
-            }
-
-            if (mType == MediaItem.TYPE_MICROTHUMBNAIL) {
-                bitmap = BitmapUtils.resizeAndCropCenter(bitmap, targetSize, true);
-            } else {
-                bitmap = BitmapUtils.resizeDownBySideLength(bitmap, targetSize, true);
-            }
-            return bitmap;
-        }
-    }
-
     @Override
     public int getSupportedOperations() {
         int supported = 0;
@@ -233,11 +181,11 @@ public class UriImage extends MediaItem {
 //                supported |= SUPPORT_SHARE;
 //            }
 //        } else {
-            supported = SUPPORT_PRINT | SUPPORT_SETAS;
-            if (isSharable()) supported |= SUPPORT_SHARE;
-            if (BitmapUtils.isSupportedByRegionDecoder(mContentType)) {
-                supported |= SUPPORT_EDIT | SUPPORT_FULL_IMAGE;
-            }
+        supported = SUPPORT_PRINT | SUPPORT_SETAS;
+        if (isSharable()) supported |= SUPPORT_SHARE;
+        if (BitmapUtils.isSupportedByRegionDecoder(mContentType)) {
+            supported |= SUPPORT_EDIT | SUPPORT_FULL_IMAGE;
+        }
 //        }
         return supported;
     }
@@ -321,6 +269,59 @@ public class UriImage extends MediaItem {
     @Override
     public int getRotation() {
         return mRotation;
+    }
+
+    private class RegionDecoderJob implements Job<BitmapRegionDecoder> {
+        @Override
+        public BitmapRegionDecoder run(JobContext jc) {
+//            if (DrmHelper.isDrmFile(getFilePath())) {
+//                BitmapRegionDecoder decoder = DrmHelper
+//                        .createBitmapRegionDecoder(getFilePath(), false);
+//                mWidth = decoder.getWidth();
+//                mHeight = decoder.getHeight();
+//                return decoder;
+//            }
+
+            if (!prepareInputFile(jc)) return null;
+            BitmapRegionDecoder decoder = DecodeUtils.createBitmapRegionDecoder(
+                    jc, mFileDescriptor.getFileDescriptor(), false);
+            mWidth = decoder.getWidth();
+            mHeight = decoder.getHeight();
+            return decoder;
+        }
+    }
+
+    private class BitmapJob implements Job<Bitmap> {
+        private int mType;
+
+        protected BitmapJob(int type) {
+            mType = type;
+        }
+
+        @Override
+        public Bitmap run(JobContext jc) {
+//            if (DrmHelper.isDrmFile(getFilePath())) {
+//                return DecodeUtils.ensureGLCompatibleBitmap(DrmHelper.getBitmap(getFilePath()));
+//            }
+
+            if (!prepareInputFile(jc)) return null;
+            int targetSize = MediaItem.getTargetSize(mType);
+            Options options = new Options();
+            options.inPreferredConfig = Config.ARGB_8888;
+            Bitmap bitmap = DecodeUtils.decodeThumbnail(jc,
+                    mFileDescriptor.getFileDescriptor(), options, targetSize, mType);
+
+            if (jc.isCancelled() || bitmap == null) {
+                return null;
+            }
+
+            if (mType == MediaItem.TYPE_MICROTHUMBNAIL) {
+                bitmap = BitmapUtils.resizeAndCropCenter(bitmap, targetSize, true);
+            } else {
+                bitmap = BitmapUtils.resizeDownBySideLength(bitmap, targetSize, true);
+            }
+            return bitmap;
+        }
     }
 
 //    @Override

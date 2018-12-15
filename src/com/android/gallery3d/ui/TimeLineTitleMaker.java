@@ -33,15 +33,15 @@ import android.view.View;
 import com.android.gallery3d.util.ThreadPool;
 import com.android.gallery3d.util.ThreadPool.JobContext;
 import com.android.photos.data.GalleryBitmapPool;
+
 import org.codeaurora.gallery.R;
 
 import java.util.Locale;
 
 public class TimeLineTitleMaker {
 
-    private final String TAG = "TimelineTitleMaker";
     private static final int BORDER_SIZE = 0;
-
+    private final String TAG = "TimelineTitleMaker";
     private final TimeLineSlotRenderer.LabelSpec mSpec;
     private final TextPaint mTitlePaint;
     private final TextPaint mCountPaint;
@@ -54,7 +54,7 @@ public class TimeLineTitleMaker {
         mContext = context;
         mSpec = spec;
         mTimeLineSlotView = slotView;
-        mTitlePaint = getTextPaint(spec.timeLineTitleFontSize, spec.timeLineTitleTextColor , true);
+        mTitlePaint = getTextPaint(spec.timeLineTitleFontSize, spec.timeLineTitleTextColor, true);
         mCountPaint = getTextPaint(spec.timeLineTitleFontSize, spec.timeLineNumberTextColor, true);
         TIMELINETITLE_START_X = context.getResources().getDimensionPixelSize(
                 R.dimen.timeline_title_margin);
@@ -73,14 +73,14 @@ public class TimeLineTitleMaker {
         return paint;
     }
 
-    public ThreadPool.Job<Bitmap> requestTimeLineTitle( String title,
-            int photoCount, int videoCount) {
-        return new TimeLineTitle(title,photoCount, videoCount, mContext );
-    }
-
     static void drawText(Canvas canvas,
                          int x, int y, String text, int lengthLimit, TextPaint p) {
         canvas.drawText(text, x, y - p.getFontMetricsInt().ascent, p);
+    }
+
+    public ThreadPool.Job<Bitmap> requestTimeLineTitle(String title,
+                                                       int photoCount, int videoCount) {
+        return new TimeLineTitle(title, photoCount, videoCount, mContext);
     }
 
     private class TimeLineTitle implements ThreadPool.Job<Bitmap> {
@@ -88,6 +88,7 @@ public class TimeLineTitleMaker {
         private int mVideoCount;
         private int mImageCount;
         private Context mContext;
+
         public TimeLineTitle(String title, int imageCount, int videoCount, Context context) {
             mTitle = title;
             mImageCount = imageCount;
@@ -102,7 +103,7 @@ public class TimeLineTitleMaker {
 
             Bitmap bitmap;
             int width = mTimeLineSlotView.getTitleWidth();
-            int height= spec.timeLineTitleHeight;
+            int height = spec.timeLineTitleHeight;
             synchronized (this) {
                 bitmap = GalleryBitmapPool.getInstance().get(width, height);
             }
@@ -124,14 +125,14 @@ public class TimeLineTitleMaker {
 
 
             StringBuilder sb = new StringBuilder();
-            if(mImageCount != 0) {
+            if (mImageCount != 0) {
                 sb.append(mContext.getResources().getQuantityString(R.plurals.number_of_photos, mImageCount, mImageCount));
-                if(mVideoCount!=0) {
-                    sb.append("  " +mContext.getResources().getQuantityString(
-                             R.plurals.number_of_videos, mVideoCount, mVideoCount));
+                if (mVideoCount != 0) {
+                    sb.append("  " + mContext.getResources().getQuantityString(
+                            R.plurals.number_of_videos, mVideoCount, mVideoCount));
                 }
             } else {
-                if(mVideoCount != 0) {
+                if (mVideoCount != 0) {
                     sb.append(mContext.getResources().getQuantityString(
                             R.plurals.number_of_videos, mVideoCount, mVideoCount));
                 }
@@ -146,17 +147,17 @@ public class TimeLineTitleMaker {
             if (mTitle != null) {
                 mTitle = mTitle.toUpperCase();
                 x = TIMELINETITLE_START_X;
-                y = (height - spec.timeLineTitleFontSize)/2;
+                y = (height - spec.timeLineTitleFontSize) / 2;
                 // re-calculate x for RTL
                 if (View.LAYOUT_DIRECTION_RTL == TextUtils
                         .getLayoutDirectionFromLocale(Locale.getDefault())) {
                     Rect titleBounds = new Rect();
                     mTitlePaint.getTextBounds(
-                        mTitle, 0, mTitle.length(), titleBounds);
+                            mTitle, 0, mTitle.length(), titleBounds);
                     int w = titleBounds.width();
                     x = width - mTitle.length() - w;
                 }
-                drawText(canvas, x, y, mTitle, width-x, mTitlePaint);
+                drawText(canvas, x, y, mTitle, width - x, mTitlePaint);
             }
 
             if (countString != null) {
@@ -165,7 +166,7 @@ public class TimeLineTitleMaker {
                 mCountPaint.getTextBounds(
                         countString, 0, countString.length(), mediaCountBounds);
                 int w = mediaCountBounds.width();
-                y = (height - spec.timeLineTitleFontSize)/2;
+                y = (height - spec.timeLineTitleFontSize) / 2;
                 x = width - TIMELINETITLE_START_X - w;
                 // re-calculate x for RTL
                 if (View.LAYOUT_DIRECTION_RTL == TextUtils
