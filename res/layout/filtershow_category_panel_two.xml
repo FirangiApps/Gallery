@@ -28,12 +28,13 @@
   IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 -->
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+              xmlns:custom="http://schemas.android.com/apk/res-auto"
               android:theme="@android:style/Theme.DeviceDefault"
               android:layout_width="match_parent"
               android:layout_height="match_parent"
               android:background="@android:color/transparent"
               android:orientation="vertical">
-    <LinearLayout xmlns:custom="http://schemas.android.com/apk/res/org.codeaurora.gallery"
+    <LinearLayout
                   android:orientation="horizontal"
                   android:layout_width="match_parent"
                   android:layout_height="wrap_content"

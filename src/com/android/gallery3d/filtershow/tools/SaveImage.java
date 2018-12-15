@@ -63,7 +63,7 @@ import com.android.gallery3d.filtershow.pipeline.CachingPipeline;
 import com.android.gallery3d.filtershow.pipeline.ImagePreset;
 import com.android.gallery3d.filtershow.pipeline.ProcessingService;
 import com.android.gallery3d.util.XmpUtilHelper;
-import androidx.heifwriter.HeifWriter;
+//import androidx.heifwriter.HeifWriter;
 
 /**
  * Handles saving edited photo
@@ -308,7 +308,7 @@ public class SaveImage {
                                       int compressQuality) {
         boolean ret = false;
         String path = file.getAbsolutePath();
-        if (image != null) {
+        /*if (image != null) {
             try {
                 HeifWriter.Builder builder =
                         new HeifWriter.Builder(path,image.getWidth(), image.getHeight(),
@@ -328,7 +328,7 @@ public class SaveImage {
             } catch (Exception e) {
                 e.printStackTrace();
             }
-        }
+        }*/
         return ret;
     }
 
