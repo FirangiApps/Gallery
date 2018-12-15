@@ -1,5 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?>
-<!-- Copyright (C) 2011 The Android Open Source Project
+<?xml version="1.0" encoding="utf-8"?><!-- Copyright (C) 2011 The Android Open Source Project
 
      Licensed under the Apache License, Version 2.0 (the "License");
      you may not use this file except in compliance with the License.
@@ -14,48 +13,59 @@
      limitations under the License.
 -->
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-        android:orientation="vertical"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content">
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:orientation="vertical">
+
     <RelativeLayout
-            android:layout_width="fill_parent"
-            android:layout_height="40dp">
-        <TextView android:id="@+id/status"
+        android:layout_width="fill_parent"
+        android:layout_height="40dp">
+
+        <TextView
+            android:id="@+id/status"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_centerVertical="true"
-            android:layout_centerHorizontal="true" />
-        <ProgressBar android:id="@+id/progress"
+            android:layout_centerHorizontal="true"
+            android:layout_centerVertical="true" />
+
+        <ProgressBar
+            android:id="@+id/progress"
             style="?android:attr/progressBarStyleHorizontal"
-            android:max="100"
-            android:progress="30"
-            android:secondaryProgress="65"
-            android:layout_marginTop="2dp"
-            android:layout_marginBottom="2dp"
             android:layout_width="130dp"
             android:layout_height="4dp"
             android:layout_below="@id/status"
-            android:layout_centerHorizontal="true"/>
+            android:layout_centerHorizontal="true"
+            android:layout_marginTop="2dp"
+            android:layout_marginBottom="2dp"
+            android:max="100"
+            android:progress="30"
+            android:secondaryProgress="65" />
     </RelativeLayout>
-    <RelativeLayout android:layout_width="fill_parent"
-                android:layout_height="@dimen/manage_cache_bottom_height"
-                android:paddingStart="16dp"
-                android:paddingEnd="16dp"
-                android:background="#1f1f1f">
-        <TextView android:layout_width="wrap_content"
+
+    <RelativeLayout
+        android:layout_width="fill_parent"
+        android:layout_height="@dimen/manage_cache_bottom_height"
+        android:background="#1f1f1f"
+        android:paddingStart="16dp"
+        android:paddingEnd="16dp">
+
+        <TextView
+            android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="@string/make_available_offline"
-            android:textSize="14sp"
             android:layout_alignParentStart="true"
             android:layout_centerVertical="true"
-            android:gravity="center_vertical"
             android:drawableStart="@drawable/ic_menu_make_offline"
-            android:drawablePadding="3dp"/>
-        <Button android:id="@+id/done"
+            android:drawablePadding="3dp"
+            android:gravity="center_vertical"
+            android:text="@string/make_available_offline"
+            android:textSize="14sp" />
+
+        <Button
+            android:id="@+id/done"
             android:layout_width="74dp"
             android:layout_height="match_parent"
+            android:layout_alignParentEnd="true"
             android:text="@string/done"
-            android:textSize="14sp"
-            android:layout_alignParentEnd="true"/>
+            android:textSize="14sp" />
     </RelativeLayout>
 </LinearLayout>

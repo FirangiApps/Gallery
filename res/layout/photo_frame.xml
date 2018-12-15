@@ -1,5 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?>
-<!-- Copyright (C) 2009 The Android Open Source Project
+<?xml version="1.0" encoding="utf-8"?><!-- Copyright (C) 2009 The Android Open Source Project
 
      Licensed under the Apache License, Version 2.0 (the "License");
      you may not use this file except in compliance with the License.
@@ -15,12 +14,12 @@
 -->
 
 <FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:paddingTop="4dp"
-        android:paddingBottom="23dp"
-        android:paddingStart="12dp"
-        android:paddingEnd="12dp">
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:paddingStart="12dp"
+    android:paddingTop="4dp"
+    android:paddingEnd="12dp"
+    android:paddingBottom="23dp">
 
     <RelativeLayout
         android:id="@+id/appwidget_empty_photo"
@@ -43,12 +42,14 @@
                 android:textColor="@android:color/black" />
         </FrameLayout>
     </RelativeLayout>
-    <ImageView android:id="@+id/photo"
-            android:layout_gravity="center"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:adjustViewBounds="true"
-            android:scaleType="fitCenter"
-            android:cropToPadding="true"
-            android:background="@drawable/border_photo_frame_widget"/>
+
+    <ImageView
+        android:id="@+id/photo"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center"
+        android:adjustViewBounds="true"
+        android:background="@drawable/border_photo_frame_widget"
+        android:cropToPadding="true"
+        android:scaleType="fitCenter" />
 </FrameLayout>

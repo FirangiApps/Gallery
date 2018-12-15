@@ -1,5 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?>
-<!--
+<?xml version="1.0" encoding="utf-8"?><!--
  * Copyright (C) 2008 The Android Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -23,7 +22,7 @@
         <item>@string/pref_video_quality_entry_480p</item>
         <item>@string/pref_video_quality_entry_high</item>
         <item>@string/pref_video_quality_entry_low</item>
-   </string-array>
+    </string-array>
 
     <string-array name="pref_video_quality_entryvalues" translatable="false">
         <!-- The integer value of CamcorderProfile.QUALITY_1080P -->
@@ -34,7 +33,7 @@
         <item>4</item>
         <!-- The integer value of CamcorderProfile.QUALITY_HIGH -->
         <item>1</item>
-         <!-- The integer value of CamcorderProfile.QUALITY_LOW -->
+        <!-- The integer value of CamcorderProfile.QUALITY_LOW -->
         <item>0</item>
     </string-array>
 

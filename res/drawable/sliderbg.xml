@@ -28,12 +28,12 @@
 -->
 
 <vector xmlns:android="http://schemas.android.com/apk/res/android"
-        android:width="216dp"
-        android:height="4dp"
-        android:viewportWidth="216.0"
-        android:viewportHeight="4.0">
+    android:width="216dp"
+    android:height="4dp"
+    android:viewportWidth="216.0"
+    android:viewportHeight="4.0">
     <path
-        android:pathData="M0,1h216v2h-216z"
         android:fillAlpha="0.2"
-        android:fillColor="#99FFFFFF"/>
+        android:fillColor="#99FFFFFF"
+        android:pathData="M0,1h216v2h-216z" />
 </vector>

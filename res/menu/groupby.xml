@@ -1,5 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?>
-<!-- Copyright (C) 2010 Google Inc.
+<?xml version="1.0" encoding="utf-8"?><!-- Copyright (C) 2010 Google Inc.
 
      Licensed under the Apache License, Version 2.0 (the "License");
      you may not use this file except in compliance with the License.
@@ -14,16 +13,22 @@
      limitations under the License.
 -->
 <menu xmlns:android="http://schemas.android.com/apk/res/android">
-    <item android:id="@+id/action_cluster_album"
-            android:title="@string/group_by_album" />
-    <item android:id="@+id/action_cluster_time"
-            android:title="@string/group_by_time" />
-    <item android:id="@+id/action_cluster_location"
-            android:title="@string/group_by_location" />
-    <item android:id="@+id/action_cluster_tags"
-            android:title="@string/group_by_tags" />
-    <item android:id="@+id/action_cluster_size"
-            android:title="@string/group_by_size" />
-    <item android:id="@+id/action_cluster_faces"
-            android:title="@string/group_by_faces" />
+    <item
+        android:id="@+id/action_cluster_album"
+        android:title="@string/group_by_album" />
+    <item
+        android:id="@+id/action_cluster_time"
+        android:title="@string/group_by_time" />
+    <item
+        android:id="@+id/action_cluster_location"
+        android:title="@string/group_by_location" />
+    <item
+        android:id="@+id/action_cluster_tags"
+        android:title="@string/group_by_tags" />
+    <item
+        android:id="@+id/action_cluster_size"
+        android:title="@string/group_by_size" />
+    <item
+        android:id="@+id/action_cluster_faces"
+        android:title="@string/group_by_faces" />
 </menu>

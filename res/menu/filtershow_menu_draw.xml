@@ -1,5 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?>
-<!--
+<?xml version="1.0" encoding="utf-8"?><!--
      Copyright (C) 2013 The Android Open Source Project
 
      Licensed under the Apache License, Version 2.0 (the "License");
@@ -19,17 +18,17 @@
 
     <group android:id="@+id/curves_popupmenu">
         <item
-                android:id="@+id/draw_menu_style"
-                android:title="@string/draw_style"/>
+            android:id="@+id/draw_menu_style"
+            android:title="@string/draw_style" />
         <item
-                android:id="@+id/draw_menu_size"
-                android:title="@string/draw_size"/>
+            android:id="@+id/draw_menu_size"
+            android:title="@string/draw_size" />
         <item
-                android:id="@+id/draw_menu_color"
-                android:title="@string/draw_color"/>
+            android:id="@+id/draw_menu_color"
+            android:title="@string/draw_color" />
         <item
-                android:id="@+id/draw_menu_clear"
-                android:title="@string/draw_clear"/>
+            android:id="@+id/draw_menu_clear"
+            android:title="@string/draw_clear" />
     </group>
 
 </menu>

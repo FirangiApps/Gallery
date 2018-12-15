@@ -1,5 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?>
-<!--
+<?xml version="1.0" encoding="utf-8"?><!--
      Copyright (C) 2013 The Android Open Source Project
 
      Licensed under the Apache License, Version 2.0 (the "License");
@@ -17,7 +16,7 @@
 
 <FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
-    android:layout_height="match_parent" >
+    android:layout_height="match_parent">
 
     <com.android.camera.ui.FilmStripView
         android:id="@+id/filmstrip_view"
@@ -31,48 +30,48 @@
         android:layout_gravity="bottom|center_horizontal"
         android:background="@drawable/transparent_button_background"
         android:clickable="true"
-        android:paddingBottom="5dp"
         android:paddingStart="5dp"
-        android:paddingEnd="5dp"
         android:paddingTop="5dp"
-        android:visibility="gone"
-        android:src="@drawable/ic_view_photosphere" />
+        android:paddingEnd="5dp"
+        android:paddingBottom="5dp"
+        android:src="@drawable/ic_view_photosphere"
+        android:visibility="gone" />
 
     <LinearLayout
         android:id="@+id/pano_stitching_progress_panel"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_gravity="bottom|center_horizontal"
-        android:paddingBottom="52dp"
+        android:orientation="vertical"
         android:paddingStart="5dp"
-        android:paddingEnd="5dp"
         android:paddingTop="5dp"
-        android:visibility="gone"
-        android:orientation="vertical">
+        android:paddingEnd="5dp"
+        android:paddingBottom="52dp"
+        android:visibility="gone">
 
         <TextView
             android:id="@+id/pano_stitching_progress_text"
-            android:text="@string/pano_progress_text"
-            android:textColor="#ffffffff"
-            android:textSize="14dp"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentEnd="true"
+            android:layout_gravity="end"
+            android:paddingBottom="8dp"
             android:shadowColor="#ff000000"
             android:shadowDx="0"
             android:shadowDy="0"
             android:shadowRadius="2"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_alignParentEnd="true"
-            android:paddingBottom="8dp"
-            android:visibility="visible"
-            android:layout_gravity="end"/>
+            android:text="@string/pano_progress_text"
+            android:textColor="#ffffffff"
+            android:textSize="14dp"
+            android:visibility="visible" />
 
         <ProgressBar
             android:id="@+id/pano_stitching_progress_bar"
             style="@android:style/Widget.Holo.Light.ProgressBar.Horizontal"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:visibility="visible"
-            android:layout_gravity="bottom|center_horizontal" />
+            android:layout_gravity="bottom|center_horizontal"
+            android:visibility="visible" />
     </LinearLayout>
 
 </FrameLayout>

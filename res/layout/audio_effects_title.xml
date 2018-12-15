@@ -1,5 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?>
-<!--
+<?xml version="1.0" encoding="utf-8"?><!--
 Copyright (c) 2014, 2016, The Linux Foundation. All rights reserved.
 
 Redistribution and use in source and binary forms, with or without
@@ -29,20 +28,19 @@ IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 -->
 
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:custom="http://schemas.android.com/apk/res/com.android.gallery3d"
     android:layout_width="wrap_content"
     android:layout_height="wrap_content"
-    android:orientation="horizontal"
-    android:gravity="left|center_vertical">
+    android:gravity="left|center_vertical"
+    android:orientation="horizontal">
 
     <TextView
-        android:text="@string/audio_effects_dialog_title"
-        android:gravity="left|center_vertical"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginStart="24dp"
         android:layout_marginTop="10dp"
         android:layout_marginBottom="10dp"
+        android:gravity="left|center_vertical"
+        android:text="@string/audio_effects_dialog_title"
         android:textColor="@android:color/black"
         android:textSize="20dp" />
 
@@ -53,10 +51,10 @@ IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
     <ToggleButton
         android:id="@+id/audio_effects_switch"
-        android:textOn=""
-        android:textOff=""
+        android:layout_width="72dp"
+        android:layout_height="34dp"
         android:background="@null"
         android:gravity="center_vertical|right"
-        android:layout_width="72dp"
-        android:layout_height="34dp"/>
+        android:textOff=""
+        android:textOn="" />
 </LinearLayout>

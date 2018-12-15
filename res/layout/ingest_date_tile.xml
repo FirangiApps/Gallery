@@ -1,5 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?>
-<!-- Copyright (C) 2013 The Android Open Source Project
+<?xml version="1.0" encoding="utf-8"?><!-- Copyright (C) 2013 The Android Open Source Project
 
      Licensed under the Apache License, Version 2.0 (the "License");
      you may not use this file except in compliance with the License.
@@ -16,49 +15,53 @@
 <com.android.gallery3d.ingest.ui.DateTileView xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="@android:color/black" >
+    android:background="@android:color/black">
+
     <GridLayout
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_gravity="center" >
+        android:layout_gravity="center">
+
         <TextView
             android:id="@+id/date_tile_month"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_column="0"
             android:layout_row="0"
+            android:layout_column="0"
             android:layout_gravity="bottom|end"
             android:layout_marginTop="7sp"
-            android:includeFontPadding="false"
-            android:textSize="16sp"
-            android:textAllCaps="true"
             android:fontFamily="sans-serif"
-            android:textColor="@color/ingest_date_tile_text" />
+            android:includeFontPadding="false"
+            android:textAllCaps="true"
+            android:textColor="@color/ingest_date_tile_text"
+            android:textSize="16sp" />
+
         <TextView
             android:id="@+id/date_tile_year"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_column="0"
             android:layout_row="1"
+            android:layout_column="0"
             android:layout_gravity="top|end"
-            android:includeFontPadding="false"
-            android:textSize="13sp"
             android:fontFamily="sans-serif-light"
-            android:textColor="@color/ingest_date_tile_text" />
+            android:includeFontPadding="false"
+            android:textColor="@color/ingest_date_tile_text"
+            android:textSize="13sp" />
+
         <TextView
             android:id="@+id/date_tile_day"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_column="1"
             android:layout_row="0"
             android:layout_rowSpan="2"
+            android:layout_column="1"
             android:layout_gravity="top|start"
             android:layout_marginStart="5sp"
             android:layout_marginLeft="5sp"
-            android:includeFontPadding="false"
-            android:textSize="44sp"
-            android:textStyle="bold"
             android:fontFamily="sans-serif"
-            android:textColor="@color/ingest_date_tile_text" />
+            android:includeFontPadding="false"
+            android:textColor="@color/ingest_date_tile_text"
+            android:textSize="44sp"
+            android:textStyle="bold" />
     </GridLayout>
 </com.android.gallery3d.ingest.ui.DateTileView>

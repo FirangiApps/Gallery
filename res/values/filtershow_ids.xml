@@ -1,5 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?>
-<!--
+<?xml version="1.0" encoding="utf-8"?><!--
 /*
 * Copyright (C) 2013 The Android Open Source Project
 *
@@ -18,47 +17,47 @@
 -->
 <resources>
     <!-- Buttons ids for the filters -->
-    <item type="id" name="tinyplanetButton" />
-    <item type="id" name="vignetteButton" />
-    <item type="id" name="vibranceButton" />
-    <item type="id" name="contrastButton" />
-    <item type="id" name="saturationButton" />
-    <item type="id" name="bwfilterButton" />
-    <item type="id" name="wbalanceButton" />
-    <item type="id" name="hueButton" />
-    <item type="id" name="exposureButton" />
-    <item type="id" name="shadowRecoveryButton" />
-    <item type="id" name="highlightRecoveryButton" />
-    <item type="id" name="sharpenButton" />
-    <item type="id" name="curvesButtonRGB" />
-    <item type="id" name="negativeButton" />
-    <item type="id" name="edgeButton" />
-    <item type="id" name="kmeansButton" />
-    <item type="id" name="downsampleButton" />
-    <item type="id" name="drawOnImageButton" />
-    <item type="id" name="imageCurves" />
-    <item type="id" name="imageZoom" />
-    <item type="id" name="editorDraw" />
-    <item type="id" name="editorColorBorder" />
-    <item type="id" name="editorRedEye" />
-    <item type="id" name="imageOnlyEditor" />
-    <item type="id" name="vignetteEditor" />
-    <item type="id" name="editorCrop" />
-    <item type="id" name="editorFlip" />
-    <item type="id" name="editorRotate" />
-    <item type="id" name="editorStraighten" />
-    <item type="id" name="editorParametric" />
-    <item type="id" name="editorGrad" />
-    <item type="id" name="editorChanSat" />
-    <item type="id" name="editorMakeup" />
-    <item type="id" name="editorDualCam" />
-    <item type="id" name="editorDualCamSketch" />
-    <item type="id" name="editorDualCamFusion" />
-    <item type="id" name="trueScannerEditor" />
-    <item type="id" name="hazeBusterEditor" />
-    <item type="id" name="seeStraightEditor" />
-    <item type="id" name="editorTruePortraitBasic" />
-    <item type="id" name="editorTruePortraitImageOnly" />
-    <item type="id" name="editorTruePortraitMask" />
-    <item type="id" name="editorTruePortraitFusion" />
+    <item name="tinyplanetButton" type="id" />
+    <item name="vignetteButton" type="id" />
+    <item name="vibranceButton" type="id" />
+    <item name="contrastButton" type="id" />
+    <item name="saturationButton" type="id" />
+    <item name="bwfilterButton" type="id" />
+    <item name="wbalanceButton" type="id" />
+    <item name="hueButton" type="id" />
+    <item name="exposureButton" type="id" />
+    <item name="shadowRecoveryButton" type="id" />
+    <item name="highlightRecoveryButton" type="id" />
+    <item name="sharpenButton" type="id" />
+    <item name="curvesButtonRGB" type="id" />
+    <item name="negativeButton" type="id" />
+    <item name="edgeButton" type="id" />
+    <item name="kmeansButton" type="id" />
+    <item name="downsampleButton" type="id" />
+    <item name="drawOnImageButton" type="id" />
+    <item name="imageCurves" type="id" />
+    <item name="imageZoom" type="id" />
+    <item name="editorDraw" type="id" />
+    <item name="editorColorBorder" type="id" />
+    <item name="editorRedEye" type="id" />
+    <item name="imageOnlyEditor" type="id" />
+    <item name="vignetteEditor" type="id" />
+    <item name="editorCrop" type="id" />
+    <item name="editorFlip" type="id" />
+    <item name="editorRotate" type="id" />
+    <item name="editorStraighten" type="id" />
+    <item name="editorParametric" type="id" />
+    <item name="editorGrad" type="id" />
+    <item name="editorChanSat" type="id" />
+    <item name="editorMakeup" type="id" />
+    <item name="editorDualCam" type="id" />
+    <item name="editorDualCamSketch" type="id" />
+    <item name="editorDualCamFusion" type="id" />
+    <item name="trueScannerEditor" type="id" />
+    <item name="hazeBusterEditor" type="id" />
+    <item name="seeStraightEditor" type="id" />
+    <item name="editorTruePortraitBasic" type="id" />
+    <item name="editorTruePortraitImageOnly" type="id" />
+    <item name="editorTruePortraitMask" type="id" />
+    <item name="editorTruePortraitFusion" type="id" />
 </resources>

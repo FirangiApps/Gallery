@@ -1,5 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?>
-<!--
+<?xml version="1.0" encoding="utf-8"?><!--
   Copyright (c) 2016, The Linux Foundation. All rights reserved.
 
   Redistribution and use in source and binary forms, with or without
@@ -34,15 +33,15 @@
     android:viewportHeight="27">
 
     <path
-        android:strokeColor="#4592F9"
-        android:strokeWidth="2.13350288"
         android:pathData="M14.9362,15.8471 L14.9362,11.5098
 C16.5957,10.3574,18.5791,8.83929,18.5791,6.57669
 C18.5791,3.01208,15.8574,2,12.5,2 C9.14256,2,6.42093,3.01208,6.42093,6.57669
 C6.42093,8.83929,8.40383,10.3574,10.0633,11.5098 L10.0633,15.8471 L2,17.49 L2,25
-L11.3331,25 L13.6669,25 L23,25 L23,17.49 L14.9362,15.8471 L14.9362,15.8471 Z" />
+L11.3331,25 L13.6669,25 L23,25 L23,17.49 L14.9362,15.8471 L14.9362,15.8471 Z"
+        android:strokeWidth="2.13350288"
+        android:strokeColor="#4592F9" />
     <path
-        android:strokeColor="#4592F9"
+        android:pathData="M3,21 L23,21"
         android:strokeWidth="0.9482235"
-        android:pathData="M3,21 L23,21" />
+        android:strokeColor="#4592F9" />
 </vector>

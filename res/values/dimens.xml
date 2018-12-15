@@ -1,5 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?>
-<!-- Copyright (c) 2013, The Android Open Source Project
+<?xml version="1.0" encoding="utf-8"?><!-- Copyright (c) 2013, The Android Open Source Project
 
      Licensed under the Apache License, Version 2.0 (the "License");
      you may not use this file except in compliance with the License.
@@ -131,7 +130,7 @@
     <dimen name="albumset_count_right_margin">18dp</dimen>
     <dimen name="albumset_icon_size">25dp</dimen>
 
-      <!-- configuration for albumset page in Landscape-->
+    <!-- configuration for albumset page in Landscape-->
     <dimen name="albumset_slot_gap_land">4dp</dimen>
     <dimen name="albumset_padding_top_land">4dp</dimen>
     <dimen name="albumset_padding_bottom_land">4dp</dimen>
@@ -150,7 +149,7 @@
     <dimen name="album_padding_left">3dp</dimen>
     <dimen name="album_padding_right">3dp</dimen>
 
-      <!-- configuration for album page in Landscape-->
+    <!-- configuration for album page in Landscape-->
     <dimen name="album_slot_gap_land">3dp</dimen>
     <dimen name="album_padding_top_land">3dp</dimen>
     <dimen name="album_padding_bottom_land">3dp</dimen>
@@ -209,7 +208,7 @@
     <dimen name="albumlist_title_margin">16dp</dimen>
     <dimen name="albumlist_title_font_size">16sp</dimen>
     <dimen name="albumlist_label_background_height">40dp</dimen>
-    <dimen name= "edit_main_font">13sp</dimen>
+    <dimen name="edit_main_font">13sp</dimen>
     <dimen name="dialog_text_size">14sp</dimen>
 
     <dimen name="timeline_port_slot_gap">3dp</dimen>

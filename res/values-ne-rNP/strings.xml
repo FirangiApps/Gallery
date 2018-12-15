@@ -1,5 +1,4 @@
-<?xml version="1.0" encoding="UTF-8"?>
-<!--  Copyright (C) 2007 The Android Open Source Project
+<?xml version="1.0" encoding="UTF-8"?><!--  Copyright (C) 2007 The Android Open Source Project
 
      Licensed under the Apache License, Version 2.0 (the "License");
      you may not use this file except in compliance with the License.
@@ -14,8 +13,7 @@
      limitations under the License.
  -->
 
-<resources xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
+<resources xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
     <string name="app_name" msgid="1928079047368929634">"ग्यालेरी"</string>
     <string name="gadget_title" msgid="259405922673466798">"तस्बिर - फ्रेम"</string>
     <string name="details_ms" msgid="940634969189855292">"%1$02d:%2$02d"</string>
@@ -50,10 +48,10 @@
     <string name="wallpaper" msgid="140165383777262070">"वालपेपर जडान गरिँदै..."</string>
     <string name="camera_setas_wallpaper" msgid="797463183863414289">"वालपेपर"</string>
     <string name="delete" msgid="2839695998251824487">"मेट्नुहोस्"</string>
-  <plurals name="delete_selection">
-    <item quantity="one" msgid="6453379735401083732">"चयन गरिएकालाई हटाउने हो?"</item>
-    <item quantity="other" msgid="5874316486520635333">"छानिएका आइटमहरू हटाउने हो ?"</item>
-  </plurals>
+    <plurals name="delete_selection">
+        <item msgid="6453379735401083732" quantity="one">"चयन गरिएकालाई हटाउने हो?"</item>
+        <item msgid="5874316486520635333" quantity="other">"छानिएका आइटमहरू हटाउने हो ?"</item>
+    </plurals>
     <string name="confirm" msgid="8646870096527848520">"निश्चित गर्नुहोस्"</string>
     <string name="cancel" msgid="3637516880917356226">"रद्द गर्नुहोस्"</string>
     <string name="share" msgid="3619042788254195341">"साझेदारी गर्नुहोस्"</string>
@@ -150,10 +148,10 @@
     <string name="ffx_x_process" msgid="4779398678661811765">"x प्रक्रिया"</string>
     <string name="ffx_washout" msgid="4594160692176642735">"लाट्टे"</string>
     <string name="ffx_washout_color" msgid="8034075742195795219">"लिथो"</string>
-  <plurals name="make_albums_available_offline">
-    <item quantity="one" msgid="2171596356101611086">"एल्बम बनाउनलाई अफलाइन उपलब्ध छ।"</item>
-    <item quantity="other" msgid="4948604338155959389">"एल्बमहरू अफलाइन उपलब्ध गराइँदैं"</item>
-  </plurals>
+    <plurals name="make_albums_available_offline">
+        <item msgid="2171596356101611086" quantity="one">"एल्बम बनाउनलाई अफलाइन उपलब्ध छ।"</item>
+        <item msgid="4948604338155959389" quantity="other">"एल्बमहरू अफलाइन उपलब्ध गराइँदैं"</item>
+    </plurals>
     <string name="try_to_set_local_album_available_offline" msgid="2184754031896160755">"यो वस्तु स्थानिय रूपमा भन्डारण गरिएको छ र अफलाइन उपलब्ध छ।"</string>
     <string name="set_label_all_albums" msgid="4581863582996336783">"सबै एल्बमहरू"</string>
     <string name="set_label_local_albums" msgid="6698133661656266702">"स्थानीय एल्बमहरू"</string>
@@ -201,11 +199,11 @@
     <string name="pano_progress_text" msgid="1586851614586678464">"दृश्य प्रतिपादन"</string>
     <string name="save" msgid="613976532235060516">"बचत गर्नुहोस्"</string>
     <string name="ingest_scanning" msgid="1062957108473988971">"सामग्री स्क्यान हुदै..."</string>
-  <plurals name="ingest_number_of_items_scanned">
-    <item quantity="zero" msgid="2623289390474007396">"%1$d वस्तुहरू स्कयान गरिएका"</item>
-    <item quantity="one" msgid="4340019444460561648">"%1$d वस्तु स्कयान गरिएको"</item>
-    <item quantity="other" msgid="3138021473860555499">"%1$d आइटमहरू स्क्यान गरियो"</item>
-  </plurals>
+    <plurals name="ingest_number_of_items_scanned">
+        <item msgid="2623289390474007396" quantity="zero">"%1$d वस्तुहरू स्कयान गरिएका"</item>
+        <item msgid="4340019444460561648" quantity="one">"%1$d वस्तु स्कयान गरिएको"</item>
+        <item msgid="3138021473860555499" quantity="other">"%1$d आइटमहरू स्क्यान गरियो"</item>
+    </plurals>
     <string name="ingest_sorting" msgid="1028652103472581918">"क्रमबद्ध गर्दै..."</string>
     <string name="ingest_scanning_done" msgid="8911916277034483430">"स्क्यान गरियो"</string>
     <string name="ingest_importing" msgid="7456633398378527611">"आयात गर्दै..."</string>
@@ -216,7 +214,7 @@
     <string name="camera_disabled" msgid="8923911090533439312">"सुरक्षा नीतिका कारण क्यामरा निष्क्रिय गरिएको छ।"</string>
     <string name="camera_label" msgid="6346560772074764302">"क्यामेरा"</string>
     <string name="wait" msgid="8600187532323801552">"कृपया प्रतीक्षा गर्नुहोस्..."</string>
-     <string name="review_cancel" msgid="8188009385853399254">"रद्द गर्नुहोस्"</string>
+    <string name="review_cancel" msgid="8188009385853399254">"रद्द गर्नुहोस्"</string>
     <string name="review_ok" msgid="1156261588693116433">"भयो"</string>
     <string name="time_lapse_title" msgid="4360632427760662691">"समय गल्ती रिकर्डिङ"</string>
     <string name="pref_camera_id_title" msgid="4040791582294635851">"क्यामेरा चयन गर्नुहोस्"</string>
@@ -225,10 +223,10 @@
     <string name="pref_camera_recordlocation_title" msgid="371208839215448917">"भन्डार स्थान"</string>
     <string name="pref_camera_location_label" msgid="2254270920298609161">"स्थान:"</string>
     <string name="pref_camera_timer_title" msgid="3105232208281893389">"उल्टा गन्ने घडी"</string>
-  <plurals name="pref_camera_timer_entry">
-    <item quantity="one" msgid="1654523400981245448">"१ सेकेन्ड"</item>
-    <item quantity="other" msgid="6455381617076792481">"%d सेकन्ड"</item>
-  </plurals>
+    <plurals name="pref_camera_timer_entry">
+        <item msgid="1654523400981245448" quantity="one">"१ सेकेन्ड"</item>
+        <item msgid="6455381617076792481" quantity="other">"%d सेकन्ड"</item>
+    </plurals>
     <!-- no translation found for pref_camera_timer_sound_default (7066624532144402253) -->
     <skip />
     <string name="pref_camera_timer_sound_title" msgid="2469008631966169105">"उल्टा गर्ने क्रममा बिप"</string>
@@ -421,8 +419,8 @@
     <string name="tab_albums" msgid="8079449907770685691">"एल्बमहरू"</string>
     <string name="camera_menu_more_label" msgid="6868642182125198710">"अरू विकल्पहरू"</string>
     <string name="camera_menu_settings_label" msgid="875454962069404723">"सेटिङहरू"</string>
-  <plurals name="number_of_photos">
-    <item quantity="one" msgid="6949174783125614798">"%1$d तस्बिर"</item>
-    <item quantity="other" msgid="3813306834113858135">"%1$d तस्बिरहरू"</item>
-  </plurals>
+    <plurals name="number_of_photos">
+        <item msgid="6949174783125614798" quantity="one">"%1$d तस्बिर"</item>
+        <item msgid="3813306834113858135" quantity="other">"%1$d तस्बिरहरू"</item>
+    </plurals>
 </resources>

@@ -1,7 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:id="@+id/photopage_bottom_controls"
-    android:theme="@android:style/Theme.DeviceDefault"
     android:layout_width="match_parent"
     android:layout_height="56dp"
     android:layout_alignParentBottom="true"
@@ -9,7 +8,8 @@
     android:background="@color/photo_page_bottom_panel"
     android:gravity="bottom"
     android:orientation="horizontal"
-    android:visibility="gone" >
+    android:theme="@android:style/Theme.DeviceDefault"
+    android:visibility="gone">
 
     <ImageButton
         android:id="@+id/photopage_bottom_control_edit"

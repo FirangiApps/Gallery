@@ -1,5 +1,4 @@
-<?xml version="1.0" encoding="UTF-8"?>
-<!--  Copyright (C) 2007 The Android Open Source Project
+<?xml version="1.0" encoding="UTF-8"?><!--  Copyright (C) 2007 The Android Open Source Project
 
      Licensed under the Apache License, Version 2.0 (the "License");
      you may not use this file except in compliance with the License.
@@ -14,8 +13,7 @@
      limitations under the License.
  -->
 
-<resources xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
+<resources xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
     <string name="app_name" msgid="1928079047368929634">"Matunzio"</string>
     <string name="gadget_title" msgid="259405922673466798">"Fremu ya picha"</string>
     <string name="details_ms" msgid="940634969189855292">"%1$02d:%2$02d"</string>
@@ -50,10 +48,10 @@
     <string name="wallpaper" msgid="140165383777262070">"Inaweka karatasi ya ukuta..."</string>
     <string name="camera_setas_wallpaper" msgid="797463183863414289">"Mandhari"</string>
     <string name="delete" msgid="2839695998251824487">"Futa"</string>
-  <plurals name="delete_selection">
-    <item quantity="one" msgid="6453379735401083732">"Kipengee kilichoteuliwa kifutwe?"</item>
-    <item quantity="other" msgid="5874316486520635333">"Vipengee vilivyoteuliwa vifutwe?"</item>
-  </plurals>
+    <plurals name="delete_selection">
+        <item msgid="6453379735401083732" quantity="one">"Kipengee kilichoteuliwa kifutwe?"</item>
+        <item msgid="5874316486520635333" quantity="other">"Vipengee vilivyoteuliwa vifutwe?"</item>
+    </plurals>
     <string name="confirm" msgid="8646870096527848520">"Thibitisha"</string>
     <string name="cancel" msgid="3637516880917356226">"Ghairi"</string>
     <string name="share" msgid="3619042788254195341">"Shiriki"</string>
@@ -158,10 +156,10 @@
     <string name="ffx_x_process" msgid="4779398678661811765">"Mchakato X"</string>
     <string name="ffx_washout" msgid="4594160692176642735">"Lati"</string>
     <string name="ffx_washout_color" msgid="8034075742195795219">"Litho"</string>
-  <plurals name="make_albums_available_offline">
-    <item quantity="one" msgid="2171596356101611086">"Albamu inafanywa ipatikane nje ya mtandao"</item>
-    <item quantity="other" msgid="4948604338155959389">"Albamu zinafanywa zipatikane nje ya mtandao"</item>
-  </plurals>
+    <plurals name="make_albums_available_offline">
+        <item msgid="2171596356101611086" quantity="one">"Albamu inafanywa ipatikane nje ya mtandao"</item>
+        <item msgid="4948604338155959389" quantity="other">"Albamu zinafanywa zipatikane nje ya mtandao"</item>
+    </plurals>
     <string name="try_to_set_local_album_available_offline" msgid="2184754031896160755">"Imehifadhiwa kwenye kifaa hiki na inapatikana nje ya mtandao."</string>
     <string name="set_label_all_albums" msgid="4581863582996336783">"Albamu zote"</string>
     <string name="set_label_local_albums" msgid="6698133661656266702">"Albamu za kawaida"</string>
@@ -209,11 +207,11 @@
     <string name="pano_progress_text" msgid="1586851614586678464">"Inaonyesha panorama"</string>
     <string name="save" msgid="613976532235060516">"Hifadhi"</string>
     <string name="ingest_scanning" msgid="1062957108473988971">"Maudhui yanachanganuliwa..."</string>
-  <plurals name="ingest_number_of_items_scanned">
-    <item quantity="zero" msgid="2623289390474007396">"%1$d vipengee vimechanganuliwa"</item>
-    <item quantity="one" msgid="4340019444460561648">"%1$d kipengee kimechanganuliwa"</item>
-    <item quantity="other" msgid="3138021473860555499">"%1$d vipengee vimechanganuliwa"</item>
-  </plurals>
+    <plurals name="ingest_number_of_items_scanned">
+        <item msgid="2623289390474007396" quantity="zero">"%1$d vipengee vimechanganuliwa"</item>
+        <item msgid="4340019444460561648" quantity="one">"%1$d kipengee kimechanganuliwa"</item>
+        <item msgid="3138021473860555499" quantity="other">"%1$d vipengee vimechanganuliwa"</item>
+    </plurals>
     <string name="ingest_sorting" msgid="1028652103472581918">"Inapanga..."</string>
     <string name="ingest_scanning_done" msgid="8911916277034483430">"Uchanganuzi umefanyika"</string>
     <string name="ingest_importing" msgid="7456633398378527611">"Inaingiza..."</string>
@@ -233,10 +231,10 @@
     <string name="pref_camera_recordlocation_title" msgid="371208839215448917">"Rekodi mahali"</string>
     <string name="pref_camera_location_label" msgid="2254270920298609161">"MAHALI"</string>
     <string name="pref_camera_timer_title" msgid="3105232208281893389">"Kipima muda"</string>
-  <plurals name="pref_camera_timer_entry">
-    <item quantity="one" msgid="1654523400981245448">"Sekunde 1"</item>
-    <item quantity="other" msgid="6455381617076792481">"Sekunde %d"</item>
-  </plurals>
+    <plurals name="pref_camera_timer_entry">
+        <item msgid="1654523400981245448" quantity="one">"Sekunde 1"</item>
+        <item msgid="6455381617076792481" quantity="other">"Sekunde %d"</item>
+    </plurals>
     <!-- no translation found for pref_camera_timer_sound_default (7066624532144402253) -->
     <skip />
     <string name="pref_camera_timer_sound_title" msgid="2469008631966169105">"Toa mlio inapohesabu"</string>
@@ -429,8 +427,8 @@
     <string name="tab_albums" msgid="8079449907770685691">"Albamu"</string>
     <string name="camera_menu_more_label" msgid="6868642182125198710">"CHAGUO ZAIDI"</string>
     <string name="camera_menu_settings_label" msgid="875454962069404723">"MIPANGILIO"</string>
-  <plurals name="number_of_photos">
-    <item quantity="one" msgid="6949174783125614798">"Picha %1$d"</item>
-    <item quantity="other" msgid="3813306834113858135">"Picha %1$d"</item>
-  </plurals>
+    <plurals name="number_of_photos">
+        <item msgid="6949174783125614798" quantity="one">"Picha %1$d"</item>
+        <item msgid="3813306834113858135" quantity="other">"Picha %1$d"</item>
+    </plurals>
 </resources>

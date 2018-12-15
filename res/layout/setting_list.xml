@@ -1,5 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?>
-    <!--
+<?xml version="1.0" encoding="utf-8"?><!--
         /* * Copyright (C) 2008 Esmertec AG. * Copyright (C) 2008 The Android
         Open Source Project * * Licensed under the Apache License, Version 2.0
         (the "License"); * you may not use this file except in compliance with
@@ -12,15 +11,24 @@
         License. */
     -->
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    android:orientation="vertical" android:layout_width="match_parent"
-    android:layout_height="match_parent">
-    <ListView android:id="@android:id/list" android:layout_width="match_parent"
-        android:layout_height="0px" android:layout_weight="1"
-        android:paddingStart="16dip" android:paddingEnd="16dip"
-        android:paddingTop="0dp" android:paddingBottom="0dp"
-        android:clipToPadding="false" android:scrollbarStyle="outsideOverlay"
-        android:drawSelectorOnTop="false" android:cacheColorHint="@android:color/transparent"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical">
+
+    <ListView
+        android:id="@android:id/list"
+        android:layout_width="match_parent"
+        android:layout_height="0px"
+        android:layout_weight="1"
+        android:cacheColorHint="@android:color/transparent"
+        android:clipToPadding="false"
+        android:drawSelectorOnTop="false"
         android:listPreferredItemHeight="48dp"
-        android:scrollbarAlwaysDrawVerticalTrack="true" />
+        android:paddingStart="16dip"
+        android:paddingTop="0dp"
+        android:paddingEnd="16dip"
+        android:paddingBottom="0dp"
+        android:scrollbarAlwaysDrawVerticalTrack="true"
+        android:scrollbarStyle="outsideOverlay" />
 </LinearLayout>
 

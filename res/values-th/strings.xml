@@ -1,5 +1,4 @@
-<?xml version="1.0" encoding="UTF-8"?>
-<!--  Copyright (C) 2007 The Android Open Source Project
+<?xml version="1.0" encoding="UTF-8"?><!--  Copyright (C) 2007 The Android Open Source Project
 
      Licensed under the Apache License, Version 2.0 (the "License");
      you may not use this file except in compliance with the License.
@@ -14,8 +13,7 @@
      limitations under the License.
  -->
 
-<resources xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
+<resources xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
     <string name="app_name" msgid="1928079047368929634">"แกลเลอรี"</string>
     <string name="gadget_title" msgid="259405922673466798">"กรอบภาพ"</string>
     <string name="details_ms" msgid="940634969189855292">"%1$02d:%2$02d"</string>
@@ -50,10 +48,10 @@
     <string name="wallpaper" msgid="140165383777262070">"กำลังตั้งค่าวอลเปเปอร์..."</string>
     <string name="camera_setas_wallpaper" msgid="797463183863414289">"วอลเปเปอร์"</string>
     <string name="delete" msgid="2839695998251824487">"ลบ"</string>
-  <plurals name="delete_selection">
-    <item quantity="one" msgid="6453379735401083732">"ลบรายการที่เลือกหรือไม่"</item>
-    <item quantity="other" msgid="5874316486520635333">"ลบรายการที่เลือกหรือไม่"</item>
-  </plurals>
+    <plurals name="delete_selection">
+        <item msgid="6453379735401083732" quantity="one">"ลบรายการที่เลือกหรือไม่"</item>
+        <item msgid="5874316486520635333" quantity="other">"ลบรายการที่เลือกหรือไม่"</item>
+    </plurals>
     <string name="confirm" msgid="8646870096527848520">"ยืนยัน"</string>
     <string name="cancel" msgid="3637516880917356226">"ยกเลิก"</string>
     <string name="share" msgid="3619042788254195341">"แบ่งปัน"</string>
@@ -68,21 +66,21 @@
     <string name="details_title" msgid="2611396603977441273">"%1$d จาก %2$d รายการ:"</string>
     <string name="close" msgid="5585646033158453043">"ปิด"</string>
     <string name="switch_to_camera" msgid="7280111806675169992">"สลับเป็นกล้องถ่ายรูป"</string>
-  <plurals name="number_of_items_selected">
-    <item quantity="zero" msgid="2142579311530586258">"เลือกไว้ %1$d"</item>
-    <item quantity="one" msgid="2478365152745637768">"เลือกไว้ %1$d"</item>
-    <item quantity="other" msgid="754722656147810487">"เลือกไว้ %1$d"</item>
-  </plurals>
-  <plurals name="number_of_albums_selected">
-    <item quantity="zero" msgid="749292746814788132">"เลือกไว้ %1$d"</item>
-    <item quantity="one" msgid="6184377003099987825">"เลือกไว้ %1$d"</item>
-    <item quantity="other" msgid="53105607141906130">"เลือกไว้ %1$d"</item>
-  </plurals>
-  <plurals name="number_of_groups_selected">
-    <item quantity="zero" msgid="3466388370310869238">"เลือกไว้ %1$d"</item>
-    <item quantity="one" msgid="5030162638216034260">"เลือกไว้ %1$d"</item>
-    <item quantity="other" msgid="3512041363942842738">"เลือกไว้ %1$d"</item>
-  </plurals>
+    <plurals name="number_of_items_selected">
+        <item msgid="2142579311530586258" quantity="zero">"เลือกไว้ %1$d"</item>
+        <item msgid="2478365152745637768" quantity="one">"เลือกไว้ %1$d"</item>
+        <item msgid="754722656147810487" quantity="other">"เลือกไว้ %1$d"</item>
+    </plurals>
+    <plurals name="number_of_albums_selected">
+        <item msgid="749292746814788132" quantity="zero">"เลือกไว้ %1$d"</item>
+        <item msgid="6184377003099987825" quantity="one">"เลือกไว้ %1$d"</item>
+        <item msgid="53105607141906130" quantity="other">"เลือกไว้ %1$d"</item>
+    </plurals>
+    <plurals name="number_of_groups_selected">
+        <item msgid="3466388370310869238" quantity="zero">"เลือกไว้ %1$d"</item>
+        <item msgid="5030162638216034260" quantity="one">"เลือกไว้ %1$d"</item>
+        <item msgid="3512041363942842738" quantity="other">"เลือกไว้ %1$d"</item>
+    </plurals>
     <string name="show_on_map" msgid="6157544221201750980">"แสดงบนแผนที่"</string>
     <string name="rotate_left" msgid="5888273317282539839">"หมุนไปทางซ้าย"</string>
     <string name="rotate_right" msgid="6776325835923384839">"หมุนไปทางขวา"</string>
@@ -155,10 +153,10 @@
     <string name="ffx_x_process" msgid="4779398678661811765">"ครอสโพรเซส"</string>
     <string name="ffx_washout" msgid="4594160692176642735">"ลาเต้"</string>
     <string name="ffx_washout_color" msgid="8034075742195795219">"หิน"</string>
-  <plurals name="make_albums_available_offline">
-    <item quantity="one" msgid="2171596356101611086">"กำลังทำให้ใช้งานอัลบั้มแบบออฟไลน์ได้"</item>
-    <item quantity="other" msgid="4948604338155959389">"กำลังทำให้ใช้งานอัลบั้มแบบออฟไลน์ได้"</item>
-  </plurals>
+    <plurals name="make_albums_available_offline">
+        <item msgid="2171596356101611086" quantity="one">"กำลังทำให้ใช้งานอัลบั้มแบบออฟไลน์ได้"</item>
+        <item msgid="4948604338155959389" quantity="other">"กำลังทำให้ใช้งานอัลบั้มแบบออฟไลน์ได้"</item>
+    </plurals>
     <string name="try_to_set_local_album_available_offline" msgid="2184754031896160755">"รายการนี้จัดเก็บภายในเครื่องและสามารถใช้งานแบบออฟไลน์"</string>
     <string name="set_label_all_albums" msgid="4581863582996336783">"อัลบั้มทั้งหมด"</string>
     <string name="set_label_local_albums" msgid="6698133661656266702">"อัลบั้มในเครื่อง"</string>
@@ -206,11 +204,11 @@
     <string name="pano_progress_text" msgid="1586851614586678464">"กำลังแสดงภาพพาโนรามา"</string>
     <string name="save" msgid="613976532235060516">"บันทึก"</string>
     <string name="ingest_scanning" msgid="1062957108473988971">"กำลังสแกนเนื้อหา..."</string>
-  <plurals name="ingest_number_of_items_scanned">
-    <item quantity="zero" msgid="2623289390474007396">"สแกน %1$d รายการแล้ว"</item>
-    <item quantity="one" msgid="4340019444460561648">"สแกน %1$d รายการแล้ว"</item>
-    <item quantity="other" msgid="3138021473860555499">"สแกน %1$d รายการแล้ว"</item>
-  </plurals>
+    <plurals name="ingest_number_of_items_scanned">
+        <item msgid="2623289390474007396" quantity="zero">"สแกน %1$d รายการแล้ว"</item>
+        <item msgid="4340019444460561648" quantity="one">"สแกน %1$d รายการแล้ว"</item>
+        <item msgid="3138021473860555499" quantity="other">"สแกน %1$d รายการแล้ว"</item>
+    </plurals>
     <string name="ingest_sorting" msgid="1028652103472581918">"กำลังจัดเรียง..."</string>
     <string name="ingest_scanning_done" msgid="8911916277034483430">"สแกนเสร็จแล้ว"</string>
     <string name="ingest_importing" msgid="7456633398378527611">"กำลังนำเข้า..."</string>
@@ -221,7 +219,7 @@
     <string name="camera_disabled" msgid="8923911090533439312">"กล้องถ่ายรูปถูกปิดใช้งานเนื่องจากนโยบายด้านความปลอดภัย"</string>
     <string name="camera_label" msgid="6346560772074764302">"กล้อง"</string>
     <string name="wait" msgid="8600187532323801552">"โปรดรอสักครู่..."</string>
-     <string name="review_cancel" msgid="8188009385853399254">"ยกเลิก"</string>
+    <string name="review_cancel" msgid="8188009385853399254">"ยกเลิก"</string>
     <string name="review_ok" msgid="1156261588693116433">"เสร็จสิ้น"</string>
     <string name="time_lapse_title" msgid="4360632427760662691">"การบันทึกเป็นช่วงเวลา"</string>
     <string name="pref_camera_id_title" msgid="4040791582294635851">"เลือกกล้องถ่ายรูป"</string>
@@ -230,10 +228,10 @@
     <string name="pref_camera_recordlocation_title" msgid="371208839215448917">"ตำแหน่งจัดเก็บ"</string>
     <string name="pref_camera_location_label" msgid="2254270920298609161">"ตำแหน่ง"</string>
     <string name="pref_camera_timer_title" msgid="3105232208281893389">"ตัวจับเวลาถอยหลัง"</string>
-  <plurals name="pref_camera_timer_entry">
-    <item quantity="one" msgid="1654523400981245448">"1 วินาที"</item>
-    <item quantity="other" msgid="6455381617076792481">"%d วินาที"</item>
-  </plurals>
+    <plurals name="pref_camera_timer_entry">
+        <item msgid="1654523400981245448" quantity="one">"1 วินาที"</item>
+        <item msgid="6455381617076792481" quantity="other">"%d วินาที"</item>
+    </plurals>
     <!-- no translation found for pref_camera_timer_sound_default (7066624532144402253) -->
     <skip />
     <string name="pref_camera_timer_sound_title" msgid="2469008631966169105">"บี๊ปตอนนับถอยหลัง"</string>
@@ -422,8 +420,8 @@
     <string name="tab_albums" msgid="8079449907770685691">"อัลบั้ม"</string>
     <string name="camera_menu_more_label" msgid="6868642182125198710">"ตัวเลือกเพิ่มเติม"</string>
     <string name="camera_menu_settings_label" msgid="875454962069404723">"การตั้งค่า"</string>
-  <plurals name="number_of_photos">
-    <item quantity="one" msgid="6949174783125614798">"%1$d ภาพ"</item>
-    <item quantity="other" msgid="3813306834113858135">"%1$d ภาพ"</item>
-  </plurals>
+    <plurals name="number_of_photos">
+        <item msgid="6949174783125614798" quantity="one">"%1$d ภาพ"</item>
+        <item msgid="3813306834113858135" quantity="other">"%1$d ภาพ"</item>
+    </plurals>
 </resources>

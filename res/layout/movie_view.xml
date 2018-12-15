@@ -1,5 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?>
-<!-- Copyright (C) 2007 The Android Open Source Project
+<?xml version="1.0" encoding="utf-8"?><!-- Copyright (C) 2007 The Android Open Source Project
 
      Licensed under the Apache License, Version 2.0 (the "License");
      you may not use this file except in compliance with the License.
@@ -15,21 +14,22 @@
 -->
 
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
-        android:id="@+id/movie_view_root"
-        android:background="@android:color/black"
-        android:layout_width="match_parent"
-        android:layout_height="match_parent">
+    android:id="@+id/movie_view_root"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@android:color/black">
 
-    <org.codeaurora.gallery3d.video.CodeauroraVideoView android:id="@+id/surface_view"
-            android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:layout_centerInParent="true" />
+    <org.codeaurora.gallery3d.video.CodeauroraVideoView
+        android:id="@+id/surface_view"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_centerInParent="true" />
 
     <View
         android:id="@+id/surface_view_cover"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:background="@android:color/black"/>
+        android:background="@android:color/black" />
 
     <ImageView
         android:id="@+id/img_live"
@@ -37,5 +37,5 @@
         android:layout_height="wrap_content"
         android:layout_alignParentTop="true"
         android:layout_alignParentRight="true"
-        android:src="@drawable/ic_media_live"/>
+        android:src="@drawable/ic_media_live" />
 </RelativeLayout>

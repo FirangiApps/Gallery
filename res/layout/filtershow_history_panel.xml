@@ -1,5 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?>
-<!--
+<?xml version="1.0" encoding="utf-8"?><!--
      Copyright (C) 2013 The Android Open Source Project
 
      Licensed under the Apache License, Version 2.0 (the "License");
@@ -15,50 +14,49 @@
      limitations under the License.
 -->
 
-<LinearLayout
-        xmlns:android="http://schemas.android.com/apk/res/android"
-        android:id="@+id/historyPanel"
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:orientation="vertical"
-        android:layout_weight="1"
-        android:visibility="gone" >
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/historyPanel"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:layout_weight="1"
+    android:orientation="vertical"
+    android:visibility="gone">
 
     <TextView
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:background="@android:color/transparent"
-            android:gravity="center"
-            android:padding="2dip"
-            android:text="@string/history"
-            android:textColor="@android:color/white"
-            android:textSize="24sp"
-            android:textStyle="bold" />
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:background="@android:color/transparent"
+        android:gravity="center"
+        android:padding="2dip"
+        android:text="@string/history"
+        android:textColor="@android:color/white"
+        android:textSize="24sp"
+        android:textStyle="bold" />
 
     <ListView
-            android:id="@+id/operationsList"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_weight="1"
-            android:padding="10dip"
-            android:divider="@android:color/transparent"
-            android:dividerHeight="10dip" />
+        android:id="@+id/operationsList"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_weight="1"
+        android:divider="@android:color/transparent"
+        android:dividerHeight="10dip"
+        android:padding="10dip" />
 
     <LinearLayout
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:orientation="horizontal" >
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal">
 
         <Button
-                android:id="@+id/resetOperationsButton"
-                style="@style/FilterShowHistoryButton"
-                android:gravity="center"
-                android:text="@string/reset" />
+            android:id="@+id/resetOperationsButton"
+            style="@style/FilterShowHistoryButton"
+            android:gravity="center"
+            android:text="@string/reset" />
 
         <Button
-                android:id="@+id/saveOperationsButton"
-                style="@style/FilterShowHistoryButton"
-                android:text="@string/save"
-                android:visibility="gone" />
+            android:id="@+id/saveOperationsButton"
+            style="@style/FilterShowHistoryButton"
+            android:text="@string/save"
+            android:visibility="gone" />
     </LinearLayout>
 </LinearLayout>

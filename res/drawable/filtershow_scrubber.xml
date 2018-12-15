@@ -1,5 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?>
-<!--
+<?xml version="1.0" encoding="utf-8"?><!--
      Copyright (C) 2013 The Android Open Source Project
 
      Licensed under the Apache License, Version 2.0 (the "License");
@@ -15,8 +14,8 @@
      limitations under the License.
 -->
 <selector xmlns:android="http://schemas.android.com/apk/res/android">
-    <item android:state_enabled="false" android:drawable="@drawable/filtershow_scrubber_control_disabled" />
-    <item android:state_pressed="true" android:drawable="@drawable/filtershow_scrubber_control_pressed" />
-    <item android:state_selected="true" android:drawable="@drawable/filtershow_scrubber_control_focused" />
+    <item android:drawable="@drawable/filtershow_scrubber_control_disabled" android:state_enabled="false" />
+    <item android:drawable="@drawable/filtershow_scrubber_control_pressed" android:state_pressed="true" />
+    <item android:drawable="@drawable/filtershow_scrubber_control_focused" android:state_selected="true" />
     <item android:drawable="@drawable/filtershow_scrubber_control_normal" />
 </selector>

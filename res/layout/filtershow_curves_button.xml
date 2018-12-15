@@ -1,5 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?>
-<!--
+<?xml version="1.0" encoding="utf-8"?><!--
      Copyright (C) 2013 The Android Open Source Project
 
      Licensed under the Apache License, Version 2.0 (the "License");
@@ -15,13 +14,12 @@
      limitations under the License.
 -->
 
-<com.android.gallery3d.filtershow.ui.FramedTextButton
-    xmlns:android="http://schemas.android.com/apk/res/android"
+<com.android.gallery3d.filtershow.ui.FramedTextButton xmlns:android="http://schemas.android.com/apk/res/android"
     android:id="@+id/curvesUtilityButton"
     android:layout_width="84dip"
     android:layout_height="84dip"
     android:layout_gravity="center_vertical|left"
     android:background="@drawable/filtershow_button_background"
     android:scaleType="centerInside"
-    android:visibility="gone"
-    android:text="@string/curves_channel_rgb" />
+    android:text="@string/curves_channel_rgb"
+    android:visibility="gone" />

@@ -1,5 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?>
-<!--
+<?xml version="1.0" encoding="utf-8"?><!--
     Copyright (c) 2016, The Linux Foundation. All rights reserved.
 
     Redistribution and use in source and binary forms, with or without
@@ -29,32 +28,32 @@
 -->
 
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    android:orientation="vertical"
     android:layout_width="253dp"
     android:layout_height="425dp"
-    android:background="#EFEFEF">
+    android:background="#EFEFEF"
+    android:orientation="vertical">
 
     <LinearLayout
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
+        android:orientation="horizontal"
         android:paddingStart="26dp"
-        android:paddingTop="22dp"
-        android:orientation="horizontal">
+        android:paddingTop="22dp">
 
         <ImageView
             android:id="@+id/icon_tools"
             android:layout_width="21dp"
             android:layout_height="20dp"
-            android:src="@drawable/icon_tools"/>
+            android:src="@drawable/icon_tools" />
 
         <TextView
             android:id="@+id/dialog_title"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginStart="11dp"
+            android:text="@string/filtershow_dialog_title"
             android:textColor="#000000"
-            android:textSize="16sp"
-            android:text="@string/filtershow_dialog_title"/>
+            android:textSize="16sp" />
     </LinearLayout>
 
     <TextView
@@ -62,20 +61,20 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginStart="21dp"
-        android:layout_marginEnd="33dp"
         android:layout_marginTop="22dp"
-        android:textSize="13sp"
+        android:layout_marginEnd="33dp"
+        android:text="@string/filtershow_dialog_content"
         android:textColor="#000000"
-        android:text="@string/filtershow_dialog_content"/>
+        android:textSize="13sp" />
 
     <LinearLayout
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:orientation="horizontal"
-        android:gravity="center_horizontal"
-        android:layout_marginTop="64dp"
         android:layout_marginStart="21dp"
-        android:layout_marginEnd="21dp">
+        android:layout_marginTop="64dp"
+        android:layout_marginEnd="21dp"
+        android:gravity="center_horizontal"
+        android:orientation="horizontal">
 
         <LinearLayout
             android:layout_width="wrap_content"
@@ -95,9 +94,9 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_gravity="center"
+                android:text="@string/filtershow_dialog_original_photo"
                 android:textColor="#000000"
-                android:textSize="9sp"
-                android:text="@string/filtershow_dialog_original_photo" />
+                android:textSize="9sp" />
         </LinearLayout>
 
         <LinearLayout
@@ -118,9 +117,9 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_gravity="center"
+                android:text="@string/filtershow_dialog_apply_photo"
                 android:textColor="#000000"
-                android:textSize="9sp"
-                android:text="@string/filtershow_dialog_apply_photo"/>
+                android:textSize="9sp" />
         </LinearLayout>
     </LinearLayout>
 
@@ -130,8 +129,8 @@
         android:layout_height="wrap_content"
         android:layout_marginStart="25dp"
         android:layout_marginTop="60dp"
-        android:textSize="13sp"
-        android:text="@string/filtershow_dialog_checkbox" />
+        android:text="@string/filtershow_dialog_checkbox"
+        android:textSize="13sp" />
 
     <View
         android:layout_width="match_parent"
@@ -140,27 +139,27 @@
         android:background="#D8D8D8" />
 
     <LinearLayout
-        android:orientation="horizontal"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_marginStart="110dp"
-        android:layout_marginEnd="14dp">
+        android:layout_marginEnd="14dp"
+        android:orientation="horizontal">
 
         <Button
             android:id="@+id/cancel"
+            style="?android:attr/buttonBarButtonStyle"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="@string/cancel"
-            android:textSize="13dp"
-            style="?android:attr/buttonBarButtonStyle" />
+            android:textSize="13dp" />
 
         <Button
             android:id="@+id/ok"
+            style="?android:attr/buttonBarButtonStyle"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="@string/ok_continue"
-            android:textSize="13dp"
-            style="?android:attr/buttonBarButtonStyle" />
+            android:textSize="13dp" />
     </LinearLayout>
 
 </LinearLayout>

@@ -1,5 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?>
-<!-- Copyright (C) 2012 The Android Open Source Project
+<?xml version="1.0" encoding="utf-8"?><!-- Copyright (C) 2012 The Android Open Source Project
 
      Licensed under the Apache License, Version 2.0 (the "License");
      you may not use this file except in compliance with the License.
@@ -291,7 +290,7 @@
     <string name="color_border_corner_size">Corner Size</string>
     <!--  Label for selecting the border color [CHAR LIMIT=14] -->
     <string name="color_border_color">Color</string>
-     <!--  Label for the removing borders [CHAR LIMIT=14] -->
+    <!--  Label for the removing borders [CHAR LIMIT=14] -->
     <string name="color_border_clear">Clear</string>
 
     <!--  Label for the select the color [CHAR LIMIT=35] -->

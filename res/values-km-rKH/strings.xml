@@ -1,5 +1,4 @@
-<?xml version="1.0" encoding="UTF-8"?>
-<!--  Copyright (C) 2007 The Android Open Source Project
+<?xml version="1.0" encoding="UTF-8"?><!--  Copyright (C) 2007 The Android Open Source Project
 
      Licensed under the Apache License, Version 2.0 (the "License");
      you may not use this file except in compliance with the License.
@@ -14,8 +13,7 @@
      limitations under the License.
  -->
 
-<resources xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
+<resources xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
     <string name="app_name" msgid="1928079047368929634">"វិចិត្រ​សាល"</string>
     <string name="gadget_title" msgid="259405922673466798">"ស៊ុម​រូបភាព"</string>
     <string name="details_ms" msgid="940634969189855292">"%1$02d:%2$02d"</string>
@@ -50,10 +48,10 @@
     <string name="wallpaper" msgid="140165383777262070">"កំពុង​កំណត់​ផ្ទាំង​រូបភាព..."</string>
     <string name="camera_setas_wallpaper" msgid="797463183863414289">"ផ្ទាំង​រូបភាព"</string>
     <string name="delete" msgid="2839695998251824487">"លុប"</string>
-  <plurals name="delete_selection">
-    <item quantity="one" msgid="6453379735401083732">"លុប​ធាតុ​ដែល​បាន​ជ្រើស​?"</item>
-    <item quantity="other" msgid="5874316486520635333">"លុប​ធាតុ​ដែល​បាន​ជ្រើស​​​?"</item>
-  </plurals>
+    <plurals name="delete_selection">
+        <item msgid="6453379735401083732" quantity="one">"លុប​ធាតុ​ដែល​បាន​ជ្រើស​?"</item>
+        <item msgid="5874316486520635333" quantity="other">"លុប​ធាតុ​ដែល​បាន​ជ្រើស​​​?"</item>
+    </plurals>
     <string name="confirm" msgid="8646870096527848520">"បញ្ជាក់"</string>
     <string name="cancel" msgid="3637516880917356226">"បោះ​បង់"</string>
     <string name="share" msgid="3619042788254195341">"ចែក​រំលែក"</string>
@@ -68,21 +66,21 @@
     <string name="details_title" msgid="2611396603977441273">"ធាតុ %1$d នៃ %2$d ៖"</string>
     <string name="close" msgid="5585646033158453043">"បិទ"</string>
     <string name="switch_to_camera" msgid="7280111806675169992">"ប្ដូរ​ទៅ​ម៉ាស៊ីន​ថត"</string>
-  <plurals name="number_of_items_selected">
-    <item quantity="zero" msgid="2142579311530586258">"បាន​ជ្រើស %1$d"</item>
-    <item quantity="one" msgid="2478365152745637768">"បាន​ជ្រើស %1$d"</item>
-    <item quantity="other" msgid="754722656147810487">"បាន​ជ្រើស %1$d"</item>
-  </plurals>
-  <plurals name="number_of_albums_selected">
-    <item quantity="zero" msgid="749292746814788132">"បាន​ជ្រើស %1$d"</item>
-    <item quantity="one" msgid="6184377003099987825">"បាន​ជ្រើស %1$d"</item>
-    <item quantity="other" msgid="53105607141906130">"បាន​ជ្រើស %1$d"</item>
-  </plurals>
-  <plurals name="number_of_groups_selected">
-    <item quantity="zero" msgid="3466388370310869238">"បាន​ជ្រើស %1$d"</item>
-    <item quantity="one" msgid="5030162638216034260">"បាន​ជ្រើស %1$d"</item>
-    <item quantity="other" msgid="3512041363942842738">"បាន​ជ្រើស %1$d"</item>
-  </plurals>
+    <plurals name="number_of_items_selected">
+        <item msgid="2142579311530586258" quantity="zero">"បាន​ជ្រើស %1$d"</item>
+        <item msgid="2478365152745637768" quantity="one">"បាន​ជ្រើស %1$d"</item>
+        <item msgid="754722656147810487" quantity="other">"បាន​ជ្រើស %1$d"</item>
+    </plurals>
+    <plurals name="number_of_albums_selected">
+        <item msgid="749292746814788132" quantity="zero">"បាន​ជ្រើស %1$d"</item>
+        <item msgid="6184377003099987825" quantity="one">"បាន​ជ្រើស %1$d"</item>
+        <item msgid="53105607141906130" quantity="other">"បាន​ជ្រើស %1$d"</item>
+    </plurals>
+    <plurals name="number_of_groups_selected">
+        <item msgid="3466388370310869238" quantity="zero">"បាន​ជ្រើស %1$d"</item>
+        <item msgid="5030162638216034260" quantity="one">"បាន​ជ្រើស %1$d"</item>
+        <item msgid="3512041363942842738" quantity="other">"បាន​ជ្រើស %1$d"</item>
+    </plurals>
     <string name="show_on_map" msgid="6157544221201750980">"បង្ហាញ​​លើ​ផែនទី"</string>
     <string name="rotate_left" msgid="5888273317282539839">"បង្វិល​ឆ្វេង"</string>
     <string name="rotate_right" msgid="6776325835923384839">"បង្វិល​ស្ដាំ"</string>
@@ -155,10 +153,10 @@
     <string name="ffx_x_process" msgid="4779398678661811765">"ដំណើរការ X"</string>
     <string name="ffx_washout" msgid="4594160692176642735">"កាហ្វេ"</string>
     <string name="ffx_washout_color" msgid="8034075742195795219">"ត្នោត​ស្រាល"</string>
-  <plurals name="make_albums_available_offline">
-    <item quantity="one" msgid="2171596356101611086">"ធ្វើ​ឲ្យ​អាល់ប៊ុម​អាច​ប្រើ​បាន​ក្រៅ​បណ្ដាញ។"</item>
-    <item quantity="other" msgid="4948604338155959389">"ធ្វើ​ឲ្យ​អាល់ប៊ុម​អាច​ប្រើ​បាន​ក្រៅ​បណ្ដាញ"</item>
-  </plurals>
+    <plurals name="make_albums_available_offline">
+        <item msgid="2171596356101611086" quantity="one">"ធ្វើ​ឲ្យ​អាល់ប៊ុម​អាច​ប្រើ​បាន​ក្រៅ​បណ្ដាញ។"</item>
+        <item msgid="4948604338155959389" quantity="other">"ធ្វើ​ឲ្យ​អាល់ប៊ុម​អាច​ប្រើ​បាន​ក្រៅ​បណ្ដាញ"</item>
+    </plurals>
     <string name="try_to_set_local_album_available_offline" msgid="2184754031896160755">"បាន​រក្សាទុក​ធាតុ​នេះ​ក្នុង​មូលដ្ឋាន​ និង​អាច​​ប្រើ​ក្រៅ​បណ្ដាញ​បាន។"</string>
     <string name="set_label_all_albums" msgid="4581863582996336783">"អាល់ប៊ុម​ទាំងអស់"</string>
     <string name="set_label_local_albums" msgid="6698133661656266702">"អាល់ប៊ុម​មូលដ្ឋាន"</string>
@@ -206,11 +204,11 @@
     <string name="pano_progress_text" msgid="1586851614586678464">"បង្ហាញ​ទេសភាព"</string>
     <string name="save" msgid="613976532235060516">"រក្សាទុក"</string>
     <string name="ingest_scanning" msgid="1062957108473988971">"កំពុង​វិភាគ​រក​មាតិកា..."</string>
-  <plurals name="ingest_number_of_items_scanned">
-    <item quantity="zero" msgid="2623289390474007396">"បាន​វិភាគ​រក​ធាតុ %1$d"</item>
-    <item quantity="one" msgid="4340019444460561648">"បាន​វិភាគ​រក​ធាតុ %1$d"</item>
-    <item quantity="other" msgid="3138021473860555499">"បាន​វិភាគ​រក​ធាតុ %1$d"</item>
-  </plurals>
+    <plurals name="ingest_number_of_items_scanned">
+        <item msgid="2623289390474007396" quantity="zero">"បាន​វិភាគ​រក​ធាតុ %1$d"</item>
+        <item msgid="4340019444460561648" quantity="one">"បាន​វិភាគ​រក​ធាតុ %1$d"</item>
+        <item msgid="3138021473860555499" quantity="other">"បាន​វិភាគ​រក​ធាតុ %1$d"</item>
+    </plurals>
     <string name="ingest_sorting" msgid="1028652103472581918">"កំពុង​តម្រៀប..."</string>
     <string name="ingest_scanning_done" msgid="8911916277034483430">"ការ​វិភាគ​រក​រួចរាល់"</string>
     <string name="ingest_importing" msgid="7456633398378527611">"កំពុង​នាំចូល..."</string>
@@ -230,10 +228,10 @@
     <string name="pref_camera_recordlocation_title" msgid="371208839215448917">"ទីតាំង​រក្សាទុក"</string>
     <string name="pref_camera_location_label" msgid="2254270920298609161">"ទី​តាំង"</string>
     <string name="pref_camera_timer_title" msgid="3105232208281893389">"កម្មវិធី​កំណត់​ពេលវេលា​រាប់​ថយក្រោយ"</string>
-  <plurals name="pref_camera_timer_entry">
-    <item quantity="one" msgid="1654523400981245448">"១ វិនាទី"</item>
-    <item quantity="other" msgid="6455381617076792481">"%d វិនាទី"</item>
-  </plurals>
+    <plurals name="pref_camera_timer_entry">
+        <item msgid="1654523400981245448" quantity="one">"១ វិនាទី"</item>
+        <item msgid="6455381617076792481" quantity="other">"%d វិនាទី"</item>
+    </plurals>
     <!-- no translation found for pref_camera_timer_sound_default (7066624532144402253) -->
     <skip />
     <string name="pref_camera_timer_sound_title" msgid="2469008631966169105">"សំឡេង​ប៊ីប​​អំឡុង​ពេល​រាប់"</string>
@@ -424,8 +422,8 @@
     <string name="tab_albums" msgid="8079449907770685691">"អាល់ប៊ុម"</string>
     <string name="camera_menu_more_label" msgid="6868642182125198710">"ជម្រើស​ច្រើន​ទៀត"</string>
     <string name="camera_menu_settings_label" msgid="875454962069404723">"ការ​កំណត់"</string>
-  <plurals name="number_of_photos">
-    <item quantity="one" msgid="6949174783125614798">"រូបថត %1$d"</item>
-    <item quantity="other" msgid="3813306834113858135">"រូបថត %1$d"</item>
-  </plurals>
+    <plurals name="number_of_photos">
+        <item msgid="6949174783125614798" quantity="one">"រូបថត %1$d"</item>
+        <item msgid="3813306834113858135" quantity="other">"រូបថត %1$d"</item>
+    </plurals>
 </resources>

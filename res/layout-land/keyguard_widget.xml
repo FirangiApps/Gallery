@@ -1,5 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?>
-<!-- Copyright (C) 2012 The Android Open Source Project
+<?xml version="1.0" encoding="utf-8"?><!-- Copyright (C) 2012 The Android Open Source Project
 
      Licensed under the Apache License, Version 2.0 (the "License");
      you may not use this file except in compliance with the License.
@@ -13,32 +12,31 @@
      See the License for the specific language governing permissions and
      limitations under the License.
 -->
-<RelativeLayout
-    xmlns:android="http://schemas.android.com/apk/res/android"
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:id="@+id/camera_controls"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="@color/default_background" >
+    android:background="@color/default_background">
 
     <ImageView
         android:id="@+id/shutter_button"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_centerVertical="true"
         android:layout_alignParentEnd="true"
+        android:layout_centerVertical="true"
         android:layout_marginEnd="@dimen/shutter_offset"
         android:contentDescription="@string/accessibility_shutter_button"
         android:scaleType="center"
         android:src="@drawable/btn_new_shutter" />
 
     <include
+        layout="@layout/menu_indicators_keyguard"
         android:layout_width="64dip"
         android:layout_height="64dip"
         android:layout_above="@id/shutter_button"
         android:layout_alignParentEnd="true"
-        android:layout_marginEnd="6dip"
         android:layout_marginTop="-5dip"
-        layout="@layout/menu_indicators_keyguard" />
+        android:layout_marginEnd="6dip" />
 
     <ImageView
         android:id="@+id/camera_switcher"

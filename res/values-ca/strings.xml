@@ -1,5 +1,4 @@
-<?xml version="1.0" encoding="UTF-8"?>
-<!--  Copyright (C) 2007 The Android Open Source Project
+<?xml version="1.0" encoding="UTF-8"?><!--  Copyright (C) 2007 The Android Open Source Project
 
      Licensed under the Apache License, Version 2.0 (the "License");
      you may not use this file except in compliance with the License.
@@ -14,8 +13,7 @@
      limitations under the License.
  -->
 
-<resources xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
+<resources xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
     <string name="app_name" msgid="1928079047368929634">"Galeria"</string>
     <string name="gadget_title" msgid="259405922673466798">"Marc de la imatge"</string>
     <string name="details_ms" msgid="940634969189855292">"%1$02d:%2$02d"</string>
@@ -50,10 +48,10 @@
     <string name="wallpaper" msgid="140165383777262070">"S\'està establint el fons de pantalla..."</string>
     <string name="camera_setas_wallpaper" msgid="797463183863414289">"Fons de pantalla"</string>
     <string name="delete" msgid="2839695998251824487">"Suprimeix"</string>
-  <plurals name="delete_selection">
-    <item quantity="one" msgid="6453379735401083732">"Suprimir l\'element seleccionat?"</item>
-    <item quantity="other" msgid="5874316486520635333">"Suprimir elements seleccionats?"</item>
-  </plurals>
+    <plurals name="delete_selection">
+        <item msgid="6453379735401083732" quantity="one">"Suprimir l\'element seleccionat?"</item>
+        <item msgid="5874316486520635333" quantity="other">"Suprimir elements seleccionats?"</item>
+    </plurals>
     <string name="confirm" msgid="8646870096527848520">"Confirma"</string>
     <string name="cancel" msgid="3637516880917356226">"Cancel·la"</string>
     <string name="share" msgid="3619042788254195341">"Comparteix"</string>
@@ -68,21 +66,21 @@
     <string name="details_title" msgid="2611396603977441273">"%1$d de %2$d elements:"</string>
     <string name="close" msgid="5585646033158453043">"Tanca"</string>
     <string name="switch_to_camera" msgid="7280111806675169992">"Canvia a la càmera"</string>
-  <plurals name="number_of_items_selected">
-    <item quantity="zero" msgid="2142579311530586258">"%1$d seleccionats"</item>
-    <item quantity="one" msgid="2478365152745637768">"%1$d seleccionat"</item>
-    <item quantity="other" msgid="754722656147810487">"%1$d seleccionats"</item>
-  </plurals>
-  <plurals name="number_of_albums_selected">
-    <item quantity="zero" msgid="749292746814788132">"%1$d seleccionats"</item>
-    <item quantity="one" msgid="6184377003099987825">"%1$d seleccionat"</item>
-    <item quantity="other" msgid="53105607141906130">"%1$d seleccionats"</item>
-  </plurals>
-  <plurals name="number_of_groups_selected">
-    <item quantity="zero" msgid="3466388370310869238">"%1$d seleccionats"</item>
-    <item quantity="one" msgid="5030162638216034260">"%1$d seleccionat"</item>
-    <item quantity="other" msgid="3512041363942842738">"%1$d seleccionats"</item>
-  </plurals>
+    <plurals name="number_of_items_selected">
+        <item msgid="2142579311530586258" quantity="zero">"%1$d seleccionats"</item>
+        <item msgid="2478365152745637768" quantity="one">"%1$d seleccionat"</item>
+        <item msgid="754722656147810487" quantity="other">"%1$d seleccionats"</item>
+    </plurals>
+    <plurals name="number_of_albums_selected">
+        <item msgid="749292746814788132" quantity="zero">"%1$d seleccionats"</item>
+        <item msgid="6184377003099987825" quantity="one">"%1$d seleccionat"</item>
+        <item msgid="53105607141906130" quantity="other">"%1$d seleccionats"</item>
+    </plurals>
+    <plurals name="number_of_groups_selected">
+        <item msgid="3466388370310869238" quantity="zero">"%1$d seleccionats"</item>
+        <item msgid="5030162638216034260" quantity="one">"%1$d seleccionat"</item>
+        <item msgid="3512041363942842738" quantity="other">"%1$d seleccionats"</item>
+    </plurals>
     <string name="show_on_map" msgid="6157544221201750980">"Mostra al mapa"</string>
     <string name="rotate_left" msgid="5888273317282539839">"Gira a l\'esquerra"</string>
     <string name="rotate_right" msgid="6776325835923384839">"Gira a la dreta"</string>
@@ -155,10 +153,10 @@
     <string name="ffx_x_process" msgid="4779398678661811765">"Procés X"</string>
     <string name="ffx_washout" msgid="4594160692176642735">"Latte"</string>
     <string name="ffx_washout_color" msgid="8034075742195795219">"Litografia"</string>
-  <plurals name="make_albums_available_offline">
-    <item quantity="one" msgid="2171596356101611086">"Fent que l\'àlbum estigui disponible fora de línia."</item>
-    <item quantity="other" msgid="4948604338155959389">"Fent que àlbums estiguin disponibles fora de línia"</item>
-  </plurals>
+    <plurals name="make_albums_available_offline">
+        <item msgid="2171596356101611086" quantity="one">"Fent que l\'àlbum estigui disponible fora de línia."</item>
+        <item msgid="4948604338155959389" quantity="other">"Fent que àlbums estiguin disponibles fora de línia"</item>
+    </plurals>
     <string name="try_to_set_local_album_available_offline" msgid="2184754031896160755">"L\'element s\'ha emmagatzemat localment i està disponible fora de línia."</string>
     <string name="set_label_all_albums" msgid="4581863582996336783">"Tots els àlbums"</string>
     <string name="set_label_local_albums" msgid="6698133661656266702">"Àlbums locals"</string>
@@ -231,10 +229,10 @@
     <string name="pref_camera_recordlocation_title" msgid="371208839215448917">"Emmagatzema la ubicació"</string>
     <string name="pref_camera_location_label" msgid="2254270920298609161">"UBICACIÓ"</string>
     <string name="pref_camera_timer_title" msgid="3105232208281893389">"Temporitzador de compte enrere"</string>
-  <plurals name="pref_camera_timer_entry">
-    <item quantity="one" msgid="1654523400981245448">"1 segon"</item>
-    <item quantity="other" msgid="6455381617076792481">"%d segons"</item>
-  </plurals>
+    <plurals name="pref_camera_timer_entry">
+        <item msgid="1654523400981245448" quantity="one">"1 segon"</item>
+        <item msgid="6455381617076792481" quantity="other">"%d segons"</item>
+    </plurals>
     <!-- no translation found for pref_camera_timer_sound_default (7066624532144402253) -->
     <skip />
     <string name="pref_camera_timer_sound_title" msgid="2469008631966169105">"Sona en compte enr."</string>
@@ -427,8 +425,8 @@
     <string name="tab_albums" msgid="8079449907770685691">"Àlbums"</string>
     <string name="camera_menu_more_label" msgid="6868642182125198710">"MÉS OPCIONS"</string>
     <string name="camera_menu_settings_label" msgid="875454962069404723">"CONFIGURACIÓ"</string>
-  <plurals name="number_of_photos">
-    <item quantity="one" msgid="6949174783125614798">"%1$d foto"</item>
-    <item quantity="other" msgid="3813306834113858135">"%1$d fotos"</item>
-  </plurals>
+    <plurals name="number_of_photos">
+        <item msgid="6949174783125614798" quantity="one">"%1$d foto"</item>
+        <item msgid="3813306834113858135" quantity="other">"%1$d fotos"</item>
+    </plurals>
 </resources>

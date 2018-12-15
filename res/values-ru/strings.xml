@@ -1,5 +1,4 @@
-<?xml version="1.0" encoding="UTF-8"?>
-<!--  Copyright (C) 2007 The Android Open Source Project
+<?xml version="1.0" encoding="UTF-8"?><!--  Copyright (C) 2007 The Android Open Source Project
 
      Licensed under the Apache License, Version 2.0 (the "License");
      you may not use this file except in compliance with the License.
@@ -14,8 +13,7 @@
      limitations under the License.
  -->
 
-<resources xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
+<resources xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
     <string name="app_name" msgid="1928079047368929634">"Галерея"</string>
     <string name="gadget_title" msgid="259405922673466798">"Рамка фотографии"</string>
     <string name="details_ms" msgid="940634969189855292">"%1$02d:%2$02d"</string>
@@ -50,10 +48,10 @@
     <string name="wallpaper" msgid="140165383777262070">"Установка обоев..."</string>
     <string name="camera_setas_wallpaper" msgid="797463183863414289">"Обои"</string>
     <string name="delete" msgid="2839695998251824487">"Удалить"</string>
-  <plurals name="delete_selection">
-    <item quantity="one" msgid="6453379735401083732">"Удалить выбранный файл?"</item>
-    <item quantity="other" msgid="5874316486520635333">"Удалить выбранные файлы?"</item>
-  </plurals>
+    <plurals name="delete_selection">
+        <item msgid="6453379735401083732" quantity="one">"Удалить выбранный файл?"</item>
+        <item msgid="5874316486520635333" quantity="other">"Удалить выбранные файлы?"</item>
+    </plurals>
     <string name="confirm" msgid="8646870096527848520">"Подтвердить"</string>
     <string name="cancel" msgid="3637516880917356226">"Отмена"</string>
     <string name="share" msgid="3619042788254195341">"Отправить"</string>
@@ -68,21 +66,21 @@
     <string name="details_title" msgid="2611396603977441273">"Элементов %1$d из %2$d:"</string>
     <string name="close" msgid="5585646033158453043">"Закрыть"</string>
     <string name="switch_to_camera" msgid="7280111806675169992">"Режим \"Фото\""</string>
-  <plurals name="number_of_items_selected">
-    <item quantity="zero" msgid="2142579311530586258">"%1$d"</item>
-    <item quantity="one" msgid="2478365152745637768">"%1$d"</item>
-    <item quantity="other" msgid="754722656147810487">"%1$d"</item>
-  </plurals>
-  <plurals name="number_of_albums_selected">
-    <item quantity="zero" msgid="749292746814788132">"%1$d"</item>
-    <item quantity="one" msgid="6184377003099987825">"%1$d"</item>
-    <item quantity="other" msgid="53105607141906130">"%1$d"</item>
-  </plurals>
-  <plurals name="number_of_groups_selected">
-    <item quantity="zero" msgid="3466388370310869238">"%1$d"</item>
-    <item quantity="one" msgid="5030162638216034260">"%1$d"</item>
-    <item quantity="other" msgid="3512041363942842738">"%1$d"</item>
-  </plurals>
+    <plurals name="number_of_items_selected">
+        <item msgid="2142579311530586258" quantity="zero">"%1$d"</item>
+        <item msgid="2478365152745637768" quantity="one">"%1$d"</item>
+        <item msgid="754722656147810487" quantity="other">"%1$d"</item>
+    </plurals>
+    <plurals name="number_of_albums_selected">
+        <item msgid="749292746814788132" quantity="zero">"%1$d"</item>
+        <item msgid="6184377003099987825" quantity="one">"%1$d"</item>
+        <item msgid="53105607141906130" quantity="other">"%1$d"</item>
+    </plurals>
+    <plurals name="number_of_groups_selected">
+        <item msgid="3466388370310869238" quantity="zero">"%1$d"</item>
+        <item msgid="5030162638216034260" quantity="one">"%1$d"</item>
+        <item msgid="3512041363942842738" quantity="other">"%1$d"</item>
+    </plurals>
     <string name="show_on_map" msgid="6157544221201750980">"Показать на карте"</string>
     <string name="rotate_left" msgid="5888273317282539839">"Повернуть влево"</string>
     <string name="rotate_right" msgid="6776325835923384839">"Повернуть вправо"</string>
@@ -155,10 +153,10 @@
     <string name="ffx_x_process" msgid="4779398678661811765">"X-процесс"</string>
     <string name="ffx_washout" msgid="4594160692176642735">"Латте"</string>
     <string name="ffx_washout_color" msgid="8034075742195795219">"Литография"</string>
-  <plurals name="make_albums_available_offline">
-    <item quantity="one" msgid="2171596356101611086">"Загрузка альбома для офлайн-доступа"</item>
-    <item quantity="other" msgid="4948604338155959389">"Загрузка альбомов для офлайн-доступа."</item>
-  </plurals>
+    <plurals name="make_albums_available_offline">
+        <item msgid="2171596356101611086" quantity="one">"Загрузка альбома для офлайн-доступа"</item>
+        <item msgid="4948604338155959389" quantity="other">"Загрузка альбомов для офлайн-доступа."</item>
+    </plurals>
     <string name="try_to_set_local_album_available_offline" msgid="2184754031896160755">"Это содержание хранится на устройстве и доступно в автономном режиме."</string>
     <string name="set_label_all_albums" msgid="4581863582996336783">"Все альбомы"</string>
     <string name="set_label_local_albums" msgid="6698133661656266702">"Офлайн-альбомы"</string>
@@ -206,11 +204,11 @@
     <string name="pano_progress_text" msgid="1586851614586678464">"Создание панорамы…"</string>
     <string name="save" msgid="613976532235060516">"Сохранить"</string>
     <string name="ingest_scanning" msgid="1062957108473988971">"Сканирование…"</string>
-  <plurals name="ingest_number_of_items_scanned">
-    <item quantity="zero" msgid="2623289390474007396">"Отсканировано: %1$d"</item>
-    <item quantity="one" msgid="4340019444460561648">"Отсканировано: %1$d"</item>
-    <item quantity="other" msgid="3138021473860555499">"Отсканировано: %1$d"</item>
-  </plurals>
+    <plurals name="ingest_number_of_items_scanned">
+        <item msgid="2623289390474007396" quantity="zero">"Отсканировано: %1$d"</item>
+        <item msgid="4340019444460561648" quantity="one">"Отсканировано: %1$d"</item>
+        <item msgid="3138021473860555499" quantity="other">"Отсканировано: %1$d"</item>
+    </plurals>
     <string name="ingest_sorting" msgid="1028652103472581918">"Сортировка…"</string>
     <string name="ingest_scanning_done" msgid="8911916277034483430">"Сканирование завершено"</string>
     <string name="ingest_importing" msgid="7456633398378527611">"Импорт…"</string>
@@ -221,7 +219,7 @@
     <string name="camera_disabled" msgid="8923911090533439312">"Камера отключена в соответствии с политикой безопасности."</string>
     <string name="camera_label" msgid="6346560772074764302">"Камера"</string>
     <string name="wait" msgid="8600187532323801552">"Подождите..."</string>
-     <string name="review_cancel" msgid="8188009385853399254">"ОТМЕНА"</string>
+    <string name="review_cancel" msgid="8188009385853399254">"ОТМЕНА"</string>
     <string name="review_ok" msgid="1156261588693116433">"ГОТОВО"</string>
     <string name="time_lapse_title" msgid="4360632427760662691">"Режим замедленной съемки"</string>
     <string name="pref_camera_id_title" msgid="4040791582294635851">"Выбор камеры"</string>
@@ -230,10 +228,10 @@
     <string name="pref_camera_recordlocation_title" msgid="371208839215448917">"Геотеги"</string>
     <string name="pref_camera_location_label" msgid="2254270920298609161">"МЕСТОПОЛОЖЕНИЕ"</string>
     <string name="pref_camera_timer_title" msgid="3105232208281893389">"Автоспуск"</string>
-  <plurals name="pref_camera_timer_entry">
-    <item quantity="one" msgid="1654523400981245448">"1 сек."</item>
-    <item quantity="other" msgid="6455381617076792481">"%d сек."</item>
-  </plurals>
+    <plurals name="pref_camera_timer_entry">
+        <item msgid="1654523400981245448" quantity="one">"1 сек."</item>
+        <item msgid="6455381617076792481" quantity="other">"%d сек."</item>
+    </plurals>
     <!-- no translation found for pref_camera_timer_sound_default (7066624532144402253) -->
     <skip />
     <string name="pref_camera_timer_sound_title" msgid="2469008631966169105">"Звук таймера"</string>
@@ -424,8 +422,8 @@
     <string name="tab_albums" msgid="8079449907770685691">"Альбомы"</string>
     <string name="camera_menu_more_label" msgid="6868642182125198710">"ЕЩЁ"</string>
     <string name="camera_menu_settings_label" msgid="875454962069404723">"НАСТРОЙКИ"</string>
-  <plurals name="number_of_photos">
-    <item quantity="one" msgid="6949174783125614798">"%1$d фото"</item>
-    <item quantity="other" msgid="3813306834113858135">"%1$d фото"</item>
-  </plurals>
+    <plurals name="number_of_photos">
+        <item msgid="6949174783125614798" quantity="one">"%1$d фото"</item>
+        <item msgid="3813306834113858135" quantity="other">"%1$d фото"</item>
+    </plurals>
 </resources>

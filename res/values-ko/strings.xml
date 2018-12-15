@@ -1,5 +1,4 @@
-<?xml version="1.0" encoding="UTF-8"?>
-<!--  Copyright (C) 2007 The Android Open Source Project
+<?xml version="1.0" encoding="UTF-8"?><!--  Copyright (C) 2007 The Android Open Source Project
 
      Licensed under the Apache License, Version 2.0 (the "License");
      you may not use this file except in compliance with the License.
@@ -14,8 +13,7 @@
      limitations under the License.
  -->
 
-<resources xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
+<resources xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
     <string name="app_name" msgid="1928079047368929634">"갤러리"</string>
     <string name="gadget_title" msgid="259405922673466798">"사진 액자"</string>
     <string name="details_ms" msgid="940634969189855292">"%1$02d:%2$02d"</string>
@@ -50,10 +48,10 @@
     <string name="wallpaper" msgid="140165383777262070">"배경화면을 설정하는 중..."</string>
     <string name="camera_setas_wallpaper" msgid="797463183863414289">"배경화면"</string>
     <string name="delete" msgid="2839695998251824487">"삭제"</string>
-  <plurals name="delete_selection">
-    <item quantity="one" msgid="6453379735401083732">"선택한 항목을 삭제할까요?"</item>
-    <item quantity="other" msgid="5874316486520635333">"선택한 항목을 삭제할까요?"</item>
-  </plurals>
+    <plurals name="delete_selection">
+        <item msgid="6453379735401083732" quantity="one">"선택한 항목을 삭제할까요?"</item>
+        <item msgid="5874316486520635333" quantity="other">"선택한 항목을 삭제할까요?"</item>
+    </plurals>
     <string name="confirm" msgid="8646870096527848520">"확인"</string>
     <string name="cancel" msgid="3637516880917356226">"취소"</string>
     <string name="share" msgid="3619042788254195341">"공유"</string>
@@ -68,21 +66,21 @@
     <string name="details_title" msgid="2611396603977441273">"%2$d개 중 %1$d번째 항목:"</string>
     <string name="close" msgid="5585646033158453043">"닫기"</string>
     <string name="switch_to_camera" msgid="7280111806675169992">"카메라로 전환"</string>
-  <plurals name="number_of_items_selected">
-    <item quantity="zero" msgid="2142579311530586258">"%1$d개 선택됨"</item>
-    <item quantity="one" msgid="2478365152745637768">"%1$d개 선택됨"</item>
-    <item quantity="other" msgid="754722656147810487">"%1$d개 선택됨"</item>
-  </plurals>
-  <plurals name="number_of_albums_selected">
-    <item quantity="zero" msgid="749292746814788132">"%1$d개 선택됨"</item>
-    <item quantity="one" msgid="6184377003099987825">"%1$d개 선택됨"</item>
-    <item quantity="other" msgid="53105607141906130">"%1$d개 선택됨"</item>
-  </plurals>
-  <plurals name="number_of_groups_selected">
-    <item quantity="zero" msgid="3466388370310869238">"%1$d개 선택됨"</item>
-    <item quantity="one" msgid="5030162638216034260">"%1$d개 선택됨"</item>
-    <item quantity="other" msgid="3512041363942842738">"%1$d개 선택됨"</item>
-  </plurals>
+    <plurals name="number_of_items_selected">
+        <item msgid="2142579311530586258" quantity="zero">"%1$d개 선택됨"</item>
+        <item msgid="2478365152745637768" quantity="one">"%1$d개 선택됨"</item>
+        <item msgid="754722656147810487" quantity="other">"%1$d개 선택됨"</item>
+    </plurals>
+    <plurals name="number_of_albums_selected">
+        <item msgid="749292746814788132" quantity="zero">"%1$d개 선택됨"</item>
+        <item msgid="6184377003099987825" quantity="one">"%1$d개 선택됨"</item>
+        <item msgid="53105607141906130" quantity="other">"%1$d개 선택됨"</item>
+    </plurals>
+    <plurals name="number_of_groups_selected">
+        <item msgid="3466388370310869238" quantity="zero">"%1$d개 선택됨"</item>
+        <item msgid="5030162638216034260" quantity="one">"%1$d개 선택됨"</item>
+        <item msgid="3512041363942842738" quantity="other">"%1$d개 선택됨"</item>
+    </plurals>
     <string name="show_on_map" msgid="6157544221201750980">"지도에 표시"</string>
     <string name="rotate_left" msgid="5888273317282539839">"왼쪽으로 회전"</string>
     <string name="rotate_right" msgid="6776325835923384839">"오른쪽으로 회전"</string>
@@ -155,10 +153,10 @@
     <string name="ffx_x_process" msgid="4779398678661811765">"X 처리"</string>
     <string name="ffx_washout" msgid="4594160692176642735">"라테"</string>
     <string name="ffx_washout_color" msgid="8034075742195795219">"리소"</string>
-  <plurals name="make_albums_available_offline">
-    <item quantity="one" msgid="2171596356101611086">"오프라인에서 앨범을 사용하도록 설정합니다."</item>
-    <item quantity="other" msgid="4948604338155959389">"오프라인에서 앨범을 사용하도록 설정합니다."</item>
-  </plurals>
+    <plurals name="make_albums_available_offline">
+        <item msgid="2171596356101611086" quantity="one">"오프라인에서 앨범을 사용하도록 설정합니다."</item>
+        <item msgid="4948604338155959389" quantity="other">"오프라인에서 앨범을 사용하도록 설정합니다."</item>
+    </plurals>
     <string name="try_to_set_local_album_available_offline" msgid="2184754031896160755">"이 항목은 로컬에 저장되어 있으며 오프라인에서 사용할 수 있습니다."</string>
     <string name="set_label_all_albums" msgid="4581863582996336783">"모든 앨범"</string>
     <string name="set_label_local_albums" msgid="6698133661656266702">"로컬 앨범"</string>
@@ -206,11 +204,11 @@
     <string name="pano_progress_text" msgid="1586851614586678464">"파노라마 렌더링"</string>
     <string name="save" msgid="613976532235060516">"저장"</string>
     <string name="ingest_scanning" msgid="1062957108473988971">"콘텐츠를 스캔하는 중..."</string>
-  <plurals name="ingest_number_of_items_scanned">
-    <item quantity="zero" msgid="2623289390474007396">"%1$d개 항목을 스캔함"</item>
-    <item quantity="one" msgid="4340019444460561648">"%1$d개 항목을 스캔함"</item>
-    <item quantity="other" msgid="3138021473860555499">"%1$d개 항목을 스캔함"</item>
-  </plurals>
+    <plurals name="ingest_number_of_items_scanned">
+        <item msgid="2623289390474007396" quantity="zero">"%1$d개 항목을 스캔함"</item>
+        <item msgid="4340019444460561648" quantity="one">"%1$d개 항목을 스캔함"</item>
+        <item msgid="3138021473860555499" quantity="other">"%1$d개 항목을 스캔함"</item>
+    </plurals>
     <string name="ingest_sorting" msgid="1028652103472581918">"정렬 중..."</string>
     <string name="ingest_scanning_done" msgid="8911916277034483430">"스캔 완료"</string>
     <string name="ingest_importing" msgid="7456633398378527611">"가져오는 중..."</string>
@@ -230,10 +228,10 @@
     <string name="pref_camera_recordlocation_title" msgid="371208839215448917">"위치 저장"</string>
     <string name="pref_camera_location_label" msgid="2254270920298609161">"위치"</string>
     <string name="pref_camera_timer_title" msgid="3105232208281893389">"카운트다운 타이머"</string>
-  <plurals name="pref_camera_timer_entry">
-    <item quantity="one" msgid="1654523400981245448">"1초"</item>
-    <item quantity="other" msgid="6455381617076792481">"%d초"</item>
-  </plurals>
+    <plurals name="pref_camera_timer_entry">
+        <item msgid="1654523400981245448" quantity="one">"1초"</item>
+        <item msgid="6455381617076792481" quantity="other">"%d초"</item>
+    </plurals>
     <!-- no translation found for pref_camera_timer_sound_default (7066624532144402253) -->
     <skip />
     <string name="pref_camera_timer_sound_title" msgid="2469008631966169105">"카운트다운 신호음 켜기"</string>
@@ -424,8 +422,8 @@
     <string name="tab_albums" msgid="8079449907770685691">"앨범"</string>
     <string name="camera_menu_more_label" msgid="6868642182125198710">"옵션 더보기"</string>
     <string name="camera_menu_settings_label" msgid="875454962069404723">"설정"</string>
-  <plurals name="number_of_photos">
-    <item quantity="one" msgid="6949174783125614798">"사진 %1$d장"</item>
-    <item quantity="other" msgid="3813306834113858135">"사진 %1$d장"</item>
-  </plurals>
+    <plurals name="number_of_photos">
+        <item msgid="6949174783125614798" quantity="one">"사진 %1$d장"</item>
+        <item msgid="3813306834113858135" quantity="other">"사진 %1$d장"</item>
+    </plurals>
 </resources>

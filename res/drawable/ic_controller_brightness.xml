@@ -1,5 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?>
-<!--
+<?xml version="1.0" encoding="utf-8"?><!--
   Copyright (c) 2016, The Linux Foundation. All rights reserved.
 
   Redistribution and use in source and binary forms, with or without
@@ -29,11 +28,11 @@
 -->
 
 <vector xmlns:android="http://schemas.android.com/apk/res/android"
-        android:height="24dp"
-        android:width="24dp"
-        android:viewportHeight="108.0"
-        android:viewportWidth="108.0">
+    android:width="24dp"
+    android:height="24dp"
+    android:viewportWidth="108.0"
+    android:viewportHeight="108.0">
     <path
-            android:fillColor="#FFFFFFFF"
-            android:pathData="M87.94,39.94L87.94,20.06L68.06,20.06L54,6 39.94,20.06L20.06,20.06L20.06,39.94L6,54l14.06,14.06v19.88h19.88L54,102l14.06,-14.06h19.88L87.94,68.06L102,54ZM54,78a24,24 0,1 1,24 -24A24,24 0,0 1,54 78ZM54,36a18,18 0,1 0,18 18A18,18 0,0 0,54 36Z"/>
+        android:fillColor="#FFFFFFFF"
+        android:pathData="M87.94,39.94L87.94,20.06L68.06,20.06L54,6 39.94,20.06L20.06,20.06L20.06,39.94L6,54l14.06,14.06v19.88h19.88L54,102l14.06,-14.06h19.88L87.94,68.06L102,54ZM54,78a24,24 0,1 1,24 -24A24,24 0,0 1,54 78ZM54,36a18,18 0,1 0,18 18A18,18 0,0 0,54 36Z" />
 </vector>

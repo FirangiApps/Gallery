@@ -1,5 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?>
-<!--
+<?xml version="1.0" encoding="utf-8"?><!--
   Copyright (c) 2016, The Linux Foundation. All rights reserved.
 
   Redistribution and use in source and binary forms, with or without
@@ -29,11 +28,11 @@
 -->
 
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    android:theme="@android:style/Theme.DeviceDefault"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:background="@android:color/transparent"
-    android:orientation="vertical">
+    android:orientation="vertical"
+    android:theme="@android:style/Theme.DeviceDefault">
 
     <LinearLayout
         android:layout_width="match_parent"
@@ -48,24 +47,24 @@
             android:layout_height="match_parent"
             android:layout_weight="1"
             android:background="@android:color/transparent"
-            android:orientation="vertical" >
+            android:orientation="vertical">
 
             <ImageButton
                 android:id="@+id/leftButton"
                 android:layout_width="match_parent"
                 android:layout_height="@dimen/crop_icon_size"
-                android:scaleType="centerInside"
+                android:layout_marginTop="@dimen/crop_icon_margin_padding"
                 android:background="?android:attr/actionBarItemBackground"
-                android:layout_marginTop="@dimen/crop_icon_margin_padding" />
+                android:scaleType="centerInside" />
 
             <TextView
                 android:id="@+id/leftText"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:gravity="center"
-                android:clickable="true"
-                android:background="@android:color/transparent"
                 android:layout_marginTop="@dimen/crop_text_margin_padding"
+                android:background="@android:color/transparent"
+                android:clickable="true"
+                android:gravity="center"
                 android:textColor="#ffffff"
                 android:textSize="12sp" />
         </LinearLayout>
@@ -75,26 +74,26 @@
             android:layout_width="0dp"
             android:layout_height="match_parent"
             android:layout_weight="1"
-            android:clickable="true"
             android:background="@android:color/transparent"
+            android:clickable="true"
             android:orientation="vertical">
 
             <ImageButton
                 android:id="@+id/centerButton"
                 android:layout_width="match_parent"
                 android:layout_height="@dimen/crop_icon_size"
-                android:scaleType="centerInside"
+                android:layout_marginTop="@dimen/crop_icon_margin_padding"
                 android:background="?android:attr/actionBarItemBackground"
-                android:layout_marginTop="@dimen/crop_icon_margin_padding" />
+                android:scaleType="centerInside" />
 
             <TextView
                 android:id="@+id/centerText"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:gravity="center"
-                android:clickable="true"
-                android:background="@android:color/transparent"
                 android:layout_marginTop="@dimen/crop_text_margin_padding"
+                android:background="@android:color/transparent"
+                android:clickable="true"
+                android:gravity="center"
                 android:textColor="#ffffff"
                 android:textSize="12sp" />
         </LinearLayout>
@@ -104,26 +103,26 @@
             android:layout_width="0dp"
             android:layout_height="match_parent"
             android:layout_weight="1"
-            android:clickable="true"
             android:background="@android:color/transparent"
+            android:clickable="true"
             android:orientation="vertical">
 
             <ImageButton
                 android:id="@+id/rightButton"
                 android:layout_width="match_parent"
                 android:layout_height="@dimen/crop_icon_size"
-                android:scaleType="centerInside"
                 android:layout_marginTop="@dimen/crop_icon_margin_padding"
-                android:background="?android:attr/actionBarItemBackground" />
+                android:background="?android:attr/actionBarItemBackground"
+                android:scaleType="centerInside" />
 
             <TextView
                 android:id="@+id/rightText"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:gravity="center"
-                android:clickable="true"
-                android:background="@android:color/transparent"
                 android:layout_marginTop="@dimen/crop_text_margin_padding"
+                android:background="@android:color/transparent"
+                android:clickable="true"
+                android:gravity="center"
                 android:textColor="#ffffff"
                 android:textSize="12sp" />
         </LinearLayout>
@@ -148,16 +147,16 @@
             android:id="@+id/editor_name"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:textSize="16sp"
+            android:layout_gravity="center"
             android:textColor="#fff"
-            android:layout_gravity="center"/>
+            android:textSize="16sp" />
 
         <ImageButton
             android:id="@+id/done"
             android:layout_width="@dimen/category_actionbar_panel_height"
             android:layout_height="@dimen/category_actionbar_panel_height"
-            android:background="?android:attr/actionBarItemBackground"
             android:layout_gravity="right"
+            android:background="?android:attr/actionBarItemBackground"
             android:src="@drawable/done" />
     </FrameLayout>
 

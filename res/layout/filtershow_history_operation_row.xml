@@ -1,5 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?>
-<!-- Copyright (C) 2012 The Android Open Source Project
+<?xml version="1.0" encoding="utf-8"?><!-- Copyright (C) 2012 The Android Open Source Project
 
      Licensed under the Apache License, Version 2.0 (the "License");
      you may not use this file except in compliance with the License.
@@ -15,33 +14,29 @@
 -->
 
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="120dip"
+    android:background="@color/background_main_toolbar"
     android:gravity="center_horizontal"
     android:orientation="horizontal"
-    android:padding="0dip"
-    android:background="@color/background_main_toolbar">
+    android:padding="0dip">
 
     <ImageView
-            android:id="@+id/preview"
-            android:layout_width="180dip"
-            android:layout_height="120dip"
-            android:scaleType="centerCrop"
-            android:cropToPadding="true"
-            android:visibility="visible"
-            />
+        android:id="@+id/preview"
+        android:layout_width="180dip"
+        android:layout_height="120dip"
+        android:cropToPadding="true"
+        android:scaleType="centerCrop"
+        android:visibility="visible" />
 
-    <TextView
-            xmlns:android="http://schemas.android.com/apk/res/android"
-            android:id="@+id/rowTextView"
-            android:layout_width="wrap_content"
-            android:layout_height="match_parent"
-            android:layout_weight="1"
-            android:gravity="bottom|right"
-            android:padding="10dip"
-            android:textSize="16dip"
-            android:textStyle="bold">
-    </TextView>
+    <TextView xmlns:android="http://schemas.android.com/apk/res/android"
+        android:id="@+id/rowTextView"
+        android:layout_width="wrap_content"
+        android:layout_height="match_parent"
+        android:layout_weight="1"
+        android:gravity="bottom|right"
+        android:padding="10dip"
+        android:textSize="16dip"
+        android:textStyle="bold"></TextView>
 
 </LinearLayout>

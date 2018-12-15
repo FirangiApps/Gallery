@@ -28,11 +28,11 @@
 -->
 
 <vector xmlns:android="http://schemas.android.com/apk/res/android"
-        android:width="24dp"
-        android:height="24dp"
-        android:viewportWidth="24.0"
-        android:viewportHeight="24.0">
+    android:width="24dp"
+    android:height="24dp"
+    android:viewportWidth="24.0"
+    android:viewportHeight="24.0">
     <path
-        android:pathData="M2.989,18h18.022v-2H2.989V18zM2.989,13h18.022v-2H2.989V13zM2.989,6v2h18.022V6H2.989z"
-        android:fillColor="#FFFFFF"/>
+        android:fillColor="#FFFFFF"
+        android:pathData="M2.989,18h18.022v-2H2.989V18zM2.989,13h18.022v-2H2.989V13zM2.989,6v2h18.022V6H2.989z" />
 </vector>

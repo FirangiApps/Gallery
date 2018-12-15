@@ -38,8 +38,8 @@
         android:layout_height="match_parent"
         android:layout_alignParentRight="true"
         android:background="@android:color/transparent"
-        android:paddingEnd="16dp"
         android:paddingStart="16dp"
+        android:paddingEnd="16dp"
         android:src="@drawable/tp_bg_select" />
 
 </RelativeLayout>

@@ -1,5 +1,4 @@
-<?xml version="1.0" encoding="UTF-8"?>
-<!--
+<?xml version="1.0" encoding="UTF-8"?><!--
   Copyright (c) 2015, The Linux Foundation. All rights reserved.
 
   Redistribution and use in source and binary forms, with or without
@@ -28,8 +27,14 @@
   IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 -->
 
-<vector android:autoMirrored="true" android:height="12dp"
-    android:viewportHeight="12.0" android:viewportWidth="12.0"
-    android:width="12dp" xmlns:android="http://schemas.android.com/apk/res/android">
-    <path android:fillAlpha="0.3" android:fillColor="#FFFFFF" android:pathData="M12,3.7V12H3.7L12,3.7z"/>
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="12dp"
+    android:height="12dp"
+    android:autoMirrored="true"
+    android:viewportWidth="12.0"
+    android:viewportHeight="12.0">
+    <path
+        android:fillAlpha="0.3"
+        android:fillColor="#FFFFFF"
+        android:pathData="M12,3.7V12H3.7L12,3.7z" />
 </vector>

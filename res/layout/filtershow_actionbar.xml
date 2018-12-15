@@ -1,5 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?>
-<!--
+<?xml version="1.0" encoding="utf-8"?><!--
      Copyright (C) 2012 The Android Open Source Project
 
      Licensed under the Apache License, Version 2.0 (the "License");
@@ -15,31 +14,31 @@
      limitations under the License.
 -->
 <FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    android:theme="@android:style/Theme.DeviceDefault"
     android:layout_width="match_parent"
     android:layout_height="@dimen/toolbar_height"
-    android:orientation="horizontal">
+    android:orientation="horizontal"
+    android:theme="@android:style/Theme.DeviceDefault">
 
     <ImageButton
         android:id="@+id/filtershow_exit"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
+        android:layout_gravity="left|center_vertical"
+        android:layout_marginStart="@dimen/toolbar_exit_padding_left"
         android:background="?android:attr/actionBarItemBackground"
         android:scaleType="fitCenter"
-        android:src="@drawable/cancel"
-        android:layout_gravity="left|center_vertical"
-        android:layout_marginStart="@dimen/toolbar_exit_padding_left" />
+        android:src="@drawable/cancel" />
 
     <TextView
         android:id="@+id/filtershow_done"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:background="?android:attr/selectableItemBackgroundBorderless"
+        android:layout_gravity="center_vertical|right"
         android:layout_marginEnd="13dp"
-        android:textSize="17sp"
+        android:background="?android:attr/selectableItemBackgroundBorderless"
         android:text="@string/save"
         android:textAllCaps="true"
-        android:layout_gravity="center_vertical|right"
-        android:textColor="#ffffff" />
+        android:textColor="#ffffff"
+        android:textSize="17sp" />
 
 </FrameLayout>

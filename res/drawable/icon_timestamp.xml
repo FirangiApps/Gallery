@@ -1,5 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?>
-<!--
+<?xml version="1.0" encoding="utf-8"?><!--
   Copyright (c) 2016, The Linux Foundation. All rights reserved.
 
   Redistribution and use in source and binary forms, with or without
@@ -27,17 +26,28 @@
   OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN
   IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 -->
-<vector android:height="24dp" android:viewportHeight="360.0"
-    android:viewportWidth="360.0" android:width="24dp" xmlns:android="http://schemas.android.com/apk/res/android">
-    <path android:fillColor="#00000000"
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="24dp"
+    android:height="24dp"
+    android:viewportWidth="360.0"
+    android:viewportHeight="360.0">
+    <path
+        android:fillColor="#00000000"
         android:pathData="M180,183m-143.9,0a143.9,143.9 0,1 1,287.8 0a143.9,143.9 0,1 1,-287.8 0"
-        android:strokeColor="?attr/fillColorSelector" android:strokeWidth="19.0452"/>
-    <path android:fillColor="?attr/fillColorSelector" android:pathData="M180,65.2c65,0,117.8,52.9,117.8,117.8S245,300.8,180,300.8S62.2,248,62.2,183S115,65.2,180,65.2 M180,62.4
-			c-66.5,0-120.6,54.1-120.6,120.6S113.5,303.6,180,303.6S300.6,249.5,300.6,183S246.5,62.4,180,62.4"/>
-    <path android:fillColor="#00000000"
+        android:strokeWidth="19.0452"
+        android:strokeColor="?attr/fillColorSelector" />
+    <path
+        android:fillColor="?attr/fillColorSelector"
+        android:pathData="M180,65.2c65,0,117.8,52.9,117.8,117.8S245,300.8,180,300.8S62.2,248,62.2,183S115,65.2,180,65.2 M180,62.4
+			c-66.5,0-120.6,54.1-120.6,120.6S113.5,303.6,180,303.6S300.6,249.5,300.6,183S246.5,62.4,180,62.4" />
+    <path
+        android:fillColor="#00000000"
         android:pathData="M71.1,137.7L288.4,137.7"
-        android:strokeColor="?attr/fillColorSelector" android:strokeWidth="4.4394"/>
-    <path android:fillColor="#00000000"
+        android:strokeWidth="4.4394"
+        android:strokeColor="?attr/fillColorSelector" />
+    <path
+        android:fillColor="#00000000"
         android:pathData="M72.1,232.2L289.4,232.2"
-        android:strokeColor="?attr/fillColorSelector" android:strokeWidth="4.4394"/>
+        android:strokeWidth="4.4394"
+        android:strokeColor="?attr/fillColorSelector" />
 </vector>

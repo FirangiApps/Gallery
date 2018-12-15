@@ -45,7 +45,7 @@
         <item name="android:contentInsetStart">0dp</item>
     </style>
 
-    <style name="Theme.MovieActivity" parent="android:Theme.DeviceDefault.Light.DarkActionBar"/>
+    <style name="Theme.MovieActivity" parent="android:Theme.DeviceDefault.Light.DarkActionBar" />
 
     <style name="Theme.Crop" parent="Theme.GalleryBase">
         <item name="android:windowContentOverlay">@null</item>
@@ -66,16 +66,16 @@
         <item name="android:src">@drawable/icn_media_play</item>
     </style>
 
-    <style name="DialogPickerTheme" parent="Theme.Gallery"/>
+    <style name="DialogPickerTheme" parent="Theme.Gallery" />
 
-    <style name="Theme.ProxyLauncher" parent="@android:style/Theme.Translucent.NoTitleBar"/>
+    <style name="Theme.ProxyLauncher" parent="@android:style/Theme.Translucent.NoTitleBar" />
 
     <bool name="picker_is_dialog">false</bool>
     <color name="darker_transparent">#C1000000</color>
 
-    <style name="ActionBarTwoLinePrimary" parent="@android:style/TextAppearance.Holo.Widget.ActionBar.Title"/>
+    <style name="ActionBarTwoLinePrimary" parent="@android:style/TextAppearance.Holo.Widget.ActionBar.Title" />
 
-    <style name="ActionBarTwoLineSecondary" parent="@android:style/TextAppearance.Holo.Widget.ActionBar.Subtitle"/>
+    <style name="ActionBarTwoLineSecondary" parent="@android:style/TextAppearance.Holo.Widget.ActionBar.Subtitle" />
 
     <style name="ActionBarTwoLineItem">
         <item name="android:background">@drawable/action_bar_two_line_background</item>
