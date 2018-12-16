@@ -37,7 +37,7 @@
 
     <style name="Theme.FilterShow" parent="Theme.AppCompat.Light" />
 
-    <style name="Theme.MovieActivity" parent="android:Theme.DeviceDefault.Light.DarkActionBar" />
+    <style name="Theme.MovieActivity" parent="Theme.AppCompat.Light.DarkActionBar" />
 
     <style name="Theme.Crop" parent="AppTheme" />
 

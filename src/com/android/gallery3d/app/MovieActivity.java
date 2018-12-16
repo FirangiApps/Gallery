@@ -17,8 +17,6 @@
 package com.android.gallery3d.app;
 
 import android.annotation.TargetApi;
-import android.app.ActionBar;
-import android.app.ActionBar.OnMenuVisibilityListener;
 import android.app.AlertDialog;
 import android.app.KeyguardManager;
 import android.bluetooth.BluetoothAdapter;
@@ -63,9 +61,12 @@ import android.view.Window;
 import android.view.WindowManager;
 import android.widget.CompoundButton;
 import android.widget.ImageView;
-import android.widget.ShareActionProvider;
 import android.widget.Toast;
 import android.widget.ToggleButton;
+
+import androidx.appcompat.app.ActionBar;
+import androidx.appcompat.widget.ShareActionProvider;
+import androidx.core.view.MenuItemCompat;
 
 import com.android.gallery3d.common.ApiHelper;
 import com.android.gallery3d.common.Utils;
@@ -310,7 +311,7 @@ public class MovieActivity extends AbstractPermissionActivity {
     private void setActionBarLogoFromIntent(Intent intent) {
         Bitmap logo = intent.getParcelableExtra(KEY_LOGO_BITMAP);
         if (logo != null) {
-            getActionBar().setLogo(
+            getSupportActionBar().setLogo(
                     new BitmapDrawable(getResources(), logo));
         }
     }
@@ -321,7 +322,7 @@ public class MovieActivity extends AbstractPermissionActivity {
 
     private void initializeActionBar(Intent intent) {
         mUri = intent.getData();
-        final ActionBar actionBar = getActionBar();
+        final ActionBar actionBar = getSupportActionBar();
         if (actionBar == null) {
             return;
         }
@@ -331,7 +332,7 @@ public class MovieActivity extends AbstractPermissionActivity {
                 ActionBar.DISPLAY_HOME_AS_UP | ActionBar.DISPLAY_SHOW_TITLE);
         actionBar.setBackgroundDrawable(new ColorDrawable(Color.argb(66, 0, 0, 0)));
 
-        actionBar.addOnMenuVisibilityListener(new OnMenuVisibilityListener() {
+        actionBar.addOnMenuVisibilityListener(new ActionBar.OnMenuVisibilityListener() {
             @Override
             public void onMenuVisibilityChanged(boolean isVisible) {
                 if (mPlayer != null) {
@@ -380,7 +381,7 @@ public class MovieActivity extends AbstractPermissionActivity {
         getMenuInflater().inflate(R.menu.movie, menu);
         MenuItem shareMenu = menu.findItem(R.id.action_share);
         shareMenu.setVisible(false);
-        ShareActionProvider provider = (ShareActionProvider) shareMenu.getActionProvider();
+        ShareActionProvider provider = (ShareActionProvider) MenuItemCompat.getActionProvider(shareMenu);
         mShareProvider = provider;
         if (mShareProvider != null) {
             // share provider is singleton, we should refresh our history file.
@@ -854,7 +855,7 @@ public class MovieActivity extends AbstractPermissionActivity {
         if (LOG) {
             Log.v(TAG, "setActionBarTitle(" + title + ")");
         }
-        ActionBar actionBar = getActionBar();
+        ActionBar actionBar = getSupportActionBar();
         if (title != null && actionBar != null) {
             actionBar.setTitle(title);
         }
