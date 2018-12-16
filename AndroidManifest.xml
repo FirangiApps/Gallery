@@ -24,18 +24,18 @@
     android:versionCode="40030"
     android:versionName="1.1.40030">
 
-    <original-package android:name="com.android.gallery3d" />
+    <original-package android:name="org.codeaurora.gallery" />
 
     <permission
-        android:name="com.android.gallery3d.permission.GALLERY_PROVIDER"
+        android:name="org.codeaurora.gallery.permission.GALLERY_PROVIDER"
         android:protectionLevel="signatureOrSystem" />
 
     <permission
-        android:name="com.android.gallery3d.filtershow.permission.READ"
+        android:name="org.codeaurora.gallery.filtershow.permission.READ"
         android:protectionLevel="signature" />
 
     <permission
-        android:name="com.android.gallery3d.filtershow.permission.WRITE"
+        android:name="org.codeaurora.gallery.filtershow.permission.WRITE"
         android:protectionLevel="signature" />
 
     <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
