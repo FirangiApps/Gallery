@@ -28,6 +28,6 @@
 -->
 
 <selector xmlns:android="http://schemas.android.com/apk/res/android">
-    <item android:drawable="@drawable/crop" android:state_selected="false"></item>
-    <item android:drawable="@drawable/crop_select" android:state_selected="true"></item>
+    <item android:drawable="@drawable/ic_twotone_crop_24px" android:state_selected="false"></item>
+    <item android:drawable="@drawable/ic_twotone_crop_24px_select" android:state_selected="true"></item>
 </selector>

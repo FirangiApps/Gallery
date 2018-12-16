@@ -67,7 +67,7 @@ public class IconView extends View {
 
     private void setup(Context context) {
         Resources res = getResources();
-        mTextColor = res.getColor(R.color.filtershow_categoryview_text);
+        mTextColor = res.getColor(R.color.colorTextFilters);
         mBackgroundColor = res.getColor(android.R.color.transparent);
         mMargin = res.getDimensionPixelOffset(R.dimen.category_panel_margin);
         mTextSize = res.getDimensionPixelSize(R.dimen.category_panel_text_size);

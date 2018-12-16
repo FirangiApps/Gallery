@@ -620,7 +620,6 @@ public class AlbumPage extends ActivityState implements GalleryActionBar.Cluster
             MenuItem item = menu.findItem(R.id.action_view_type);
             updateMenuTitle(item);
             updateMenuTitle(menu.findItem(R.id.action_select));
-
         }
         //actionBar.setSubtitle(null);
         return true;

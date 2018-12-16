@@ -19,7 +19,7 @@
     android:id="@+id/mainView"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="@color/background_screen">
+    android:background="?android:attr/colorBackground">
 
     <FrameLayout
         android:layout_width="match_parent"
@@ -63,7 +63,6 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_gravity="center|bottom"
-            android:background="@android:color/transparent"
             android:orientation="vertical"
             custom:max_width="650dip">
 
@@ -76,11 +75,4 @@
                 android:background="@android:color/transparent" />
         </com.android.gallery3d.filtershow.CenteredLinearLayout>
     </FrameLayout>
-
-    <com.android.gallery3d.filtershow.category.CategorySelected
-        android:id="@+id/categorySelectedIndicator"
-        android:layout_width="@dimen/category_panel_icon_size"
-        android:layout_height="@dimen/category_panel_icon_size"
-        android:visibility="gone" />
-
 </FrameLayout>

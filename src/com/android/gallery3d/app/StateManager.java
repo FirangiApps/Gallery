@@ -16,6 +16,7 @@
 
 package com.android.gallery3d.app;
 
+
 import android.app.Activity;
 import android.content.Intent;
 import android.content.res.Configuration;

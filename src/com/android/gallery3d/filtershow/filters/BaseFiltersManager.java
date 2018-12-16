@@ -461,7 +461,7 @@ public abstract class BaseFiltersManager implements FiltersManagerInterface {
             mTools.add(geometry);
         }
 
-        //mTools.add(getRepresentation(ImageFilterRedEye.class));
+        mTools.add(getRepresentation(ImageFilterRedEye.class));
     }
 
     public void addWaterMarks(Context context) {

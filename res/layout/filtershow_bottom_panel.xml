@@ -32,15 +32,12 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:layout_gravity="center|bottom"
-    android:background="@color/bottom_panel_background_color"
-    android:orientation="vertical"
-    android:theme="@android:style/Theme.DeviceDefault">
+    android:orientation="vertical">
 
     <LinearLayout
         android:id="@+id/effectsContainer"
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:background="@android:color/transparent">
+        android:layout_height="match_parent">
 
         <ImageButton
             android:id="@+id/fxButton"
@@ -59,8 +56,7 @@
             android:background="?android:attr/actionBarItemBackground"
             android:padding="2dip"
             android:scaleType="centerInside"
-            android:src="@drawable/frames_background"
-            android:visibility="gone" />
+            android:src="@drawable/frames_background" />
 
         <ImageButton
             android:id="@+id/geometryButton"

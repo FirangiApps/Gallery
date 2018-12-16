@@ -86,9 +86,7 @@ public class EditorCropPanel extends BasicGeometryPanel {
             mEditorName.setText(R.string.crop);
             mBottomPanel.setVisibility(View.VISIBLE);
         }
-        mMainView.setBackgroundColor(getContext().getResources().getColor(
-                R.color.edit_actionbar_background));
-
+        mMainView.setBackgroundColor(getContext().getResources().getColor(R.color.colorPrimary));
         mBottomPanel.setVisibility(View.VISIBLE);
 
         if (mEditorCrop != null) {
@@ -161,8 +159,8 @@ public class EditorCropPanel extends BasicGeometryPanel {
         for (int i = 0; i < size; i++) {
             TextView view = mTextViews[i];
             view.setTextColor(index == i ?
-                    getResources().getColor(R.color.crop_text_color) :
-                    Color.WHITE);
+                    getResources().getColor(R.color.colorAccent) :
+                    getResources().getColor(R.color.colorTextFilters));
         }
     }
 

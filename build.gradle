@@ -93,7 +93,6 @@ dependencies {
     implementation "androidx.legacy:legacy-support-v13:${SUPPORT_LIBS_VERSION}"
     implementation "androidx.fragment:fragment:${SUPPORT_LIBS_VERSION}"
     implementation "androidx.legacy:legacy-support-core-utils:${SUPPORT_LIBS_VERSION}"
-    implementation "androidx.legacy:legacy-support-core-ui:${SUPPORT_LIBS_VERSION}"
 
     testImplementation 'junit:junit:4.12'
     androidTestImplementation 'androidx.test:runner:1.1.0'

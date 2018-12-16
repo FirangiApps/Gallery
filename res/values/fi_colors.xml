@@ -16,12 +16,13 @@
 
     <color name="colorPrimary">#FFFFFF</color>
     <color name="colorPrimaryDark">#F5F5F5</color>
-    <color name="colorAccent">#8e43e7</color>
+    <color name="colorAccent">#fc636b</color>
 
     <color name="colorBackground">#F5F5F5</color>
+    <color name="colorWhite">#FFFFFF</color>
+    <color name="colorBlack">#000000</color>
 
-    <color name="colorWhite">#fafafa</color>
-    <color name="colorBlack">#212121</color>
+    <color name="colorTextFilters">#545454</color>
 
     <color name="light_black">#424242</color>
 

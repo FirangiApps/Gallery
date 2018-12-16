@@ -17,7 +17,6 @@
 package com.android.gallery3d.ui;
 
 import android.annotation.TargetApi;
-import android.app.Activity;
 import android.app.AlertDialog;
 import android.content.Intent;
 import android.net.Uri;
@@ -29,10 +28,10 @@ import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
-import android.widget.Button;
 import android.widget.ShareActionProvider;
 import android.widget.ShareActionProvider.OnShareTargetSelectedListener;
-import android.widget.Toolbar;
+
+import androidx.appcompat.widget.Toolbar;
 
 import com.android.gallery3d.app.AbstractGalleryActivity;
 import com.android.gallery3d.common.ApiHelper;
@@ -97,18 +96,17 @@ public class ActionModeHandler implements Callback, PopupList.OnPopupItemClickLi
         mMenuExecutor = new MenuExecutor(activity, selectionManager);
         mMainHandler = new Handler(activity.getMainLooper());
         mNfcAdapter = NfcAdapter.getDefaultAdapter(mActivity.getAndroidContext());
-        mToolbar = mActivity.getToolbar();
+        mToolbar = mActivity.findViewById(R.id.toolbar);
+        mActivity.setSupportActionBar(mToolbar);
     }
 
     public void startActionMode() {
         mMenuExecutor.setLeaving(false);
-        Activity a = mActivity;
-//      mActionMode = a.startActionMode(this);
-        mActionMode = mActivity.getToolbar().startActionMode(this);
-        View customView = LayoutInflater.from(a).inflate(
-                R.layout.action_mode, null);
+        //mActionMode = a.startActionMode(this);
+        mActionMode = mToolbar.startActionMode(this);
+        View customView = LayoutInflater.from(mActivity).inflate(R.layout.action_mode, null);
         mActionMode.setCustomView(customView);
-        mSelectionMenu = new SelectionMenu(a,
+        mSelectionMenu = new SelectionMenu(mActivity,
                 customView.findViewById(R.id.selection_menu), this);
         updateSelectionMenu();
     }
@@ -207,17 +205,17 @@ public class ActionModeHandler implements Callback, PopupList.OnPopupItemClickLi
     @Override
     public boolean onCreateActionMode(ActionMode mode, Menu menu) {
         mode.getMenuInflater().inflate(R.menu.operation, menu);
-        mActivity.getToolbar().setVisibility(View.INVISIBLE);
+        mActivity.getSupportActionBar().hide();
 
         mMenu = menu;
-        mSharePanoramaMenuItem = menu.findItem(R.id.action_share_panorama);
+        /*mSharePanoramaMenuItem = menu.findItem(R.id.action_share_panorama);
         if (mSharePanoramaMenuItem != null) {
             mSharePanoramaActionProvider = (ShareActionProvider) mSharePanoramaMenuItem
                     .getActionProvider();
             mSharePanoramaActionProvider.setOnShareTargetSelectedListener(
                     mShareTargetSelectedListener);
             mSharePanoramaActionProvider.setShareHistoryFileName("panorama_share_history.xml");
-        }
+        }*/
         mShareMenuItem = menu.findItem(R.id.action_share);
         return true;
     }
@@ -225,8 +223,7 @@ public class ActionModeHandler implements Callback, PopupList.OnPopupItemClickLi
     @Override
     public void onDestroyActionMode(ActionMode mode) {
         mSelectionManager.leaveSelectionMode();
-        mActivity.getToolbar().setVisibility(View.VISIBLE);
-
+        mActivity.getSupportActionBar().show();
     }
 
     private ArrayList<MediaObject> getSelectedMediaObjects(JobContext jc) {

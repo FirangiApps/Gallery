@@ -17,9 +17,6 @@
 package com.android.gallery3d.app;
 
 import android.annotation.TargetApi;
-import android.app.ActionBar;
-import android.app.ActionBar.OnMenuVisibilityListener;
-import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
 import android.graphics.Color;
@@ -28,6 +25,8 @@ import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.widget.ShareActionProvider;
+
+import androidx.appcompat.app.ActionBar;
 
 import com.android.gallery3d.common.ApiHelper;
 
@@ -57,7 +56,7 @@ public class GalleryActionBar {
     private ArrayList<Integer> mActions;
     private Context mContext;
     private LayoutInflater mInflater;
-//    private ClusterAdapter mAdapter = new ClusterAdapter();
+    //    private ClusterAdapter mAdapter = new ClusterAdapter();
     private AbstractGalleryActivity mActivity;
     private ActionBar mActionBar;
     private int mCurrentIndex;
@@ -98,50 +97,50 @@ public class GalleryActionBar {
         }
     }*/
 
-       /*private class AlbumModeAdapter extends BaseAdapter {
-        @Override
-        public int getCount() {
-            return mAlbumModes.length;
-        }
+    /*private class AlbumModeAdapter extends BaseAdapter {
+     @Override
+     public int getCount() {
+         return mAlbumModes.length;
+     }
 
-        @Override
-        public Object getItem(int position) {
-            return mAlbumModes[position];
-        }
+     @Override
+     public Object getItem(int position) {
+         return mAlbumModes[position];
+     }
 
-        @Override
-        public long getItemId(int position) {
-            return position;
-        }
+     @Override
+     public long getItemId(int position) {
+         return position;
+     }
 
-        @Override
-        public View getView(int position, View convertView, ViewGroup parent) {
-            if (convertView == null) {
-                convertView = mInflater.inflate(R.layout.action_bar_two_line_text,
-                        parent, false);
-            }
-            TwoLineListItem view = (TwoLineListItem) convertView;
-            view.getText1().setText(mActionBar.getTitle());
-            view.getText2().setText((CharSequence) getItem(position));
-            return convertView;
-        }
+     @Override
+     public View getView(int position, View convertView, ViewGroup parent) {
+         if (convertView == null) {
+             convertView = mInflater.inflate(R.layout.action_bar_two_line_text,
+                     parent, false);
+         }
+         TwoLineListItem view = (TwoLineListItem) convertView;
+         view.getText1().setText(mActionBar.getTitle());
+         view.getText2().setText((CharSequence) getItem(position));
+         return convertView;
+     }
 
-        @Override
-        public View getDropDownView(int position, View convertView, ViewGroup parent) {
-            if (convertView == null) {
-                convertView = mInflater.inflate(R.layout.action_bar_text,
-                        parent, false);
-            }
-            TextView view = (TextView) convertView;
-            view.setText((CharSequence) getItem(position));
-            return convertView;
-        }
-    }*/
+     @Override
+     public View getDropDownView(int position, View convertView, ViewGroup parent) {
+         if (convertView == null) {
+             convertView = mInflater.inflate(R.layout.action_bar_text,
+                     parent, false);
+         }
+         TextView view = (TextView) convertView;
+         view.setText((CharSequence) getItem(position));
+         return convertView;
+     }
+ }*/
     private Intent mSharePanoramaIntent;
     private Intent mShareIntent;
 
     public GalleryActionBar(AbstractGalleryActivity activity) {
-        mActionBar = activity.getActionBar();
+        mActionBar = activity.getSupportActionBar();
         mContext = activity.getAndroidContext();
         mActivity = activity;
         mInflater = mActivity.getLayoutInflater();
@@ -357,11 +356,11 @@ public class GalleryActionBar {
 //        return false;
 //    }
 
-    public void addOnMenuVisibilityListener(OnMenuVisibilityListener listener) {
+    public void addOnMenuVisibilityListener(ActionBar.OnMenuVisibilityListener listener) {
         if (mActionBar != null) mActionBar.addOnMenuVisibilityListener(listener);
     }
 
-    public void removeOnMenuVisibilityListener(OnMenuVisibilityListener listener) {
+    public void removeOnMenuVisibilityListener(ActionBar.OnMenuVisibilityListener listener) {
         if (mActionBar != null) mActionBar.removeOnMenuVisibilityListener(listener);
     }
 
@@ -404,15 +403,6 @@ public class GalleryActionBar {
             mShareActionProvider.setOnShareTargetSelectedListener(
                     onShareListener);
         }
-    }
-
-    public void setBackGroundTransparent() {
-        mActionBar.setBackgroundDrawable(
-                new ColorDrawable(mContext.getResources().getColor(R.color.photo_page_action_bar)));
-    }
-
-    public void setBackGroundDefault() {
-        mActionBar.setBackgroundDrawable(new ColorDrawable(Color.parseColor("#e53935")));
     }
 
     public interface ClusterRunner {

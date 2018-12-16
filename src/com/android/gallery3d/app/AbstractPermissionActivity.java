@@ -29,14 +29,16 @@
 package com.android.gallery3d.app;
 
 import android.Manifest;
+import android.app.Activity;
 import android.content.pm.PackageManager;
 import android.os.Build;
 import android.os.Bundle;
-import androidx.fragment.app.FragmentActivity;
+
+import androidx.appcompat.app.AppCompatActivity;
 
 import java.util.ArrayList;
 
-public abstract class AbstractPermissionActivity extends FragmentActivity {
+public abstract class AbstractPermissionActivity extends AppCompatActivity {
 
     public static final int PERMISSION_REQUEST_STORAGE = 1;
     private boolean permissionGranted = false;

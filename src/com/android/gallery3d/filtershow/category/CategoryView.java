@@ -68,11 +68,11 @@ public class CategoryView extends IconView
         mSelectPaint = new Paint();
         mSelectPaint.setStyle(Paint.Style.FILL);
         mSelectionColor = res.getColor(R.color.filtershow_category_selection);
-        mSpacerColor = res.getColor(R.color.filtershow_categoryview_text);
+        mSpacerColor = res.getColor(R.color.filtershow_category_selection);
 
         mSelectPaint.setColor(mSelectionColor);
         mBorderPaint = new Paint(mSelectPaint);
-        mBorderPaint.setColor(res.getColor(R.color.filtershow_info_test));
+        mBorderPaint.setColor(res.getColor(R.color.colorBackground));
         mBorderStroke = mSelectionStroke / 3;
     }
 
@@ -253,12 +253,7 @@ public class CategoryView extends IconView
                     || filterRepresentation.getFilterType() == FilterRepresentation.TYPE_WATERMARK_CATEGORY) {
                 return;
             }
-            if (filterRepresentation.getFilterType() == FilterRepresentation.TYPE_FX) {
-                mPaint.setColor(getResources().getColor(filterRepresentation.getColorId()));
-            } else {
-                mPaint.setColor(
-                        getContext().getResources().getColor(R.color.iconview_bottom_color));
-            }
+            mPaint.setColor(getContext().getResources().getColor(R.color.colorBackground));
             mPaint.setStyle(Paint.Style.FILL);
             canvas.drawRect(getBitmapBounds().left,
                     getBitmapBounds().bottom - getBottomRectHeight(),

@@ -40,7 +40,7 @@
         android:layout_height="wrap_content"
         android:layout_gravity="center_horizontal"
         android:layout_weight="1"
-        android:background="@color/crop_panel_background_color"
+        android:background="?android:attr/colorBackground"
         android:paddingLeft="5dp"
         android:paddingRight="5dp"
         android:visibility="visible" />
@@ -51,5 +51,6 @@
         android:layout_height="@dimen/bottom_panel_height"
         android:layout_gravity="center_horizontal"
         android:layout_weight="1"
+        android:background="?android:attr/colorBackground"
         android:visibility="visible" />
 </LinearLayout>

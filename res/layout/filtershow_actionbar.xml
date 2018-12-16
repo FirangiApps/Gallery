@@ -17,13 +17,13 @@
     android:layout_width="match_parent"
     android:layout_height="@dimen/toolbar_height"
     android:orientation="horizontal"
-    android:theme="@android:style/Theme.DeviceDefault">
+    android:theme="@style/Widget.Toolbar">
 
     <ImageButton
         android:id="@+id/filtershow_exit"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_gravity="left|center_vertical"
+        android:layout_gravity="start|center"
         android:layout_marginStart="@dimen/toolbar_exit_padding_left"
         android:background="?android:attr/actionBarItemBackground"
         android:scaleType="fitCenter"
@@ -33,12 +33,11 @@
         android:id="@+id/filtershow_done"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_gravity="center_vertical|right"
+        android:layout_gravity="center|end"
         android:layout_marginEnd="13dp"
         android:background="?android:attr/selectableItemBackgroundBorderless"
         android:text="@string/save"
-        android:textAllCaps="true"
-        android:textColor="#ffffff"
-        android:textSize="17sp" />
+        android:textColor="?android:attr/colorForeground"
+        android:textSize="16sp" />
 
 </FrameLayout>

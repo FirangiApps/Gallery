@@ -16,8 +16,6 @@
 
 package com.android.gallery3d.filtershow.crop;
 
-import android.app.ActionBar;
-import android.app.Activity;
 import android.app.WallpaperManager;
 import android.content.Context;
 import android.content.Intent;
@@ -42,6 +40,9 @@ import android.view.View.OnClickListener;
 import android.view.WindowManager;
 import android.widget.Toast;
 
+import androidx.appcompat.app.ActionBar;
+import androidx.appcompat.app.AppCompatActivity;
+
 import com.android.gallery3d.common.Utils;
 import com.android.gallery3d.filtershow.cache.ImageLoader;
 import com.android.gallery3d.filtershow.tools.SaveImage;
@@ -58,7 +59,7 @@ import java.io.OutputStream;
 /**
  * Activity for cropping an image.
  */
-public class CropActivity extends Activity {
+public class CropActivity extends AppCompatActivity {
     public static final String CROP_ACTION = "com.android.camera.action.CROP";
     /**
      * The maximum bitmap size we allow to be returned through the intent.
@@ -172,7 +173,7 @@ public class CropActivity extends Activity {
         setContentView(R.layout.crop_activity);
         mCropView = findViewById(R.id.cropView);
 
-        ActionBar actionBar = getActionBar();
+        ActionBar actionBar = getSupportActionBar();
         if (actionBar != null) {
             actionBar.setDisplayOptions(ActionBar.DISPLAY_SHOW_CUSTOM);
             actionBar.setCustomView(R.layout.filtershow_actionbar);

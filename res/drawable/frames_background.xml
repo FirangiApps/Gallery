@@ -28,6 +28,6 @@
 -->
 
 <selector xmlns:android="http://schemas.android.com/apk/res/android">
-    <item android:drawable="@drawable/frames" android:state_selected="false"></item>
-    <item android:drawable="@drawable/frames_select" android:state_selected="true"></item>
+    <item android:drawable="@drawable/ic_twotone_filter_frames_24px" android:state_selected="false"></item>
+    <item android:drawable="@drawable/ic_twotone_filter_frames_24px_select" android:state_selected="true"></item>
 </selector>

@@ -16,7 +16,6 @@
 
 package com.android.gallery3d.filtershow;
 
-import android.app.ActionBar;
 import android.app.AlertDialog;
 import android.app.ProgressDialog;
 import android.content.BroadcastReceiver;
@@ -47,10 +46,6 @@ import android.os.Handler;
 import android.os.IBinder;
 import android.os.Message;
 import android.provider.MediaStore;
-import androidx.fragment.app.DialogFragment;
-import androidx.fragment.app.Fragment;
-import androidx.fragment.app.FragmentTransaction;
-import androidx.print.PrintHelper;
 import android.util.DisplayMetrics;
 import android.util.Log;
 import android.util.TypedValue;
@@ -74,9 +69,15 @@ import android.widget.ImageButton;
 import android.widget.LinearLayout;
 import android.widget.PopupMenu;
 import android.widget.RelativeLayout;
-import android.widget.ShareActionProvider;
-import android.widget.ShareActionProvider.OnShareTargetSelectedListener;
 import android.widget.Toast;
+
+import androidx.appcompat.app.ActionBar;
+import androidx.appcompat.widget.ShareActionProvider;
+import androidx.core.view.MenuItemCompat;
+import androidx.fragment.app.DialogFragment;
+import androidx.fragment.app.Fragment;
+import androidx.fragment.app.FragmentTransaction;
+import androidx.print.PrintHelper;
 
 import com.android.gallery3d.app.AbstractPermissionActivity;
 import com.android.gallery3d.app.PhotoPage;
@@ -160,7 +161,7 @@ import java.util.Locale;
 import java.util.Vector;
 
 public class FilterShowActivity extends AbstractPermissionActivity implements OnItemClickListener,
-        OnShareTargetSelectedListener, DialogInterface.OnShowListener,
+        ShareActionProvider.OnShareTargetSelectedListener, DialogInterface.OnShowListener,
         DialogInterface.OnDismissListener, PopupMenu.OnDismissListener {
 
     public static final String TINY_PLANET_ACTION = "com.android.camera.action.TINY_PLANET";
@@ -393,7 +394,7 @@ public class FilterShowActivity extends AbstractPermissionActivity implements On
         clearGalleryBitmapPool();
         registerFilter();
         doBindService();
-        getWindow().setBackgroundDrawable(new ColorDrawable(Color.GRAY));
+        getWindow().setBackgroundDrawable(new ColorDrawable(Color.WHITE));
         setContentView(R.layout.filtershow_splashscreen);
         Window win = getWindow();
         WindowManager.LayoutParams winParams = win.getAttributes();
@@ -675,14 +676,12 @@ public class FilterShowActivity extends AbstractPermissionActivity implements On
     }
 
     public void setActionBar() {
-        ActionBar actionBar = getActionBar();
+        ActionBar actionBar = getSupportActionBar();
         actionBar.setDisplayOptions(ActionBar.DISPLAY_SHOW_CUSTOM);
-        actionBar.setBackgroundDrawable(new ColorDrawable(getResources()
-                .getColor(R.color.edit_actionbar_background)));
         ActionBar.LayoutParams lp = new ActionBar.LayoutParams(
                 ActionBar.LayoutParams.MATCH_PARENT,
                 ActionBar.LayoutParams.MATCH_PARENT,
-                Gravity.CENTER);
+                Gravity.CENTER_VERTICAL);
         View customView = getLayoutInflater().inflate(R.layout.filtershow_actionbar, null);
         actionBar.setCustomView(customView, lp);
         mSaveButton = actionBar.getCustomView().findViewById(R.id.filtershow_done);
@@ -714,7 +713,7 @@ public class FilterShowActivity extends AbstractPermissionActivity implements On
     }
 
     public void setActionBarForEffects(final Editor currentEditor) {
-        ActionBar actionBar = getActionBar();
+        ActionBar actionBar = getSupportActionBar();
         actionBar.setDisplayOptions(ActionBar.DISPLAY_SHOW_CUSTOM);
         actionBar.setBackgroundDrawable(new ColorDrawable(getResources()
                 .getColor(R.color.edit_actionbar_background)));
@@ -759,7 +758,7 @@ public class FilterShowActivity extends AbstractPermissionActivity implements On
     }
 
     private void showActionBar(boolean show) {
-        ActionBar actionBar = getActionBar();
+        ActionBar actionBar = getSupportActionBar();
         if (actionBar != null) {
             if (show) {
                 if (!actionBar.isShowing()) {
@@ -1608,7 +1607,7 @@ public class FilterShowActivity extends AbstractPermissionActivity implements On
 
     public void onMediaPickerStarted() {
         toggleComparisonButtonVisibility();
-        ActionBar actionBar = getActionBar();
+        ActionBar actionBar = getSupportActionBar();
         actionBar.hide();
         if (mMediaPicker == null)
             mMediaPicker = MediaPickerFragment.newInstance(getApplicationContext());
@@ -1857,10 +1856,12 @@ public class FilterShowActivity extends AbstractPermissionActivity implements On
     public boolean onPrepareOptionsMenu(Menu menu) {
         menu.clear();
         getMenuInflater().inflate(R.menu.filtershow_activity_menu, menu);
-        mShareActionProvider = (ShareActionProvider) menu.findItem(
-                R.id.menu_share).getActionProvider();
-        mShareActionProvider.setShareIntent(getDefaultShareIntent());
-        mShareActionProvider.setOnShareTargetSelectedListener(this);
+        MenuItem item = menu.findItem(R.id.menu_share);
+        mShareActionProvider = (ShareActionProvider) MenuItemCompat.getActionProvider(item);
+        if (mShareActionProvider != null) {
+            mShareActionProvider.setShareIntent(getDefaultShareIntent());
+            mShareActionProvider.setOnShareTargetSelectedListener(this);
+        }
         mMenu = menu;
         setupMenu();
 

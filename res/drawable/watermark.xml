@@ -27,6 +27,6 @@
   IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 -->
 <selector xmlns:android="http://schemas.android.com/apk/res/android">
-    <item android:drawable="@drawable/ic_watermark_selected" android:state_selected="true" />
-    <item android:drawable="@drawable/ic_watermark" android:state_selected="false" />
+    <item android:drawable="@drawable/ic_twotone_watermark_24px" android:state_selected="false" />
+    <item android:drawable="@drawable/ic_twotone_watermark_24px_select" android:state_selected="true" />
 </selector>

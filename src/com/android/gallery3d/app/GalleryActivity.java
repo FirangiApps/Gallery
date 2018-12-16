@@ -31,8 +31,6 @@ import android.content.pm.PackageManager;
 import android.graphics.Color;
 import android.net.Uri;
 import android.os.Bundle;
-import com.google.android.material.bottomnavigation.BottomNavigationView;
-import androidx.drawerlayout.widget.DrawerLayout;
 import android.text.TextUtils;
 import android.util.Log;
 import android.view.InputDevice;
@@ -43,7 +41,9 @@ import android.view.WindowManager;
 import android.widget.ListView;
 import android.widget.RelativeLayout;
 import android.widget.Toast;
-import android.widget.Toolbar;
+
+import androidx.appcompat.widget.Toolbar;
+import androidx.drawerlayout.widget.DrawerLayout;
 
 import com.android.gallery3d.common.Utils;
 import com.android.gallery3d.data.DataManager;
@@ -52,6 +52,7 @@ import com.android.gallery3d.data.MediaSet;
 import com.android.gallery3d.data.Path;
 import com.android.gallery3d.picasasource.PicasaSource;
 import com.android.gallery3d.util.GalleryUtils;
+import com.google.android.material.bottomnavigation.BottomNavigationView;
 
 import org.codeaurora.gallery.R;
 
@@ -155,8 +156,7 @@ public final class GalleryActivity extends AbstractGalleryActivity implements On
 
     public void initView() {
         mToolbar = findViewById(R.id.toolbar);
-        setActionBar(mToolbar);
-        setToolbar(mToolbar);
+        setSupportActionBar(mToolbar);
 
         mGLParentLayout = findViewById(R.id.gl_parent_layout);
         params = (RelativeLayout.LayoutParams) mGLParentLayout.getLayoutParams();
@@ -369,7 +369,7 @@ public final class GalleryActivity extends AbstractGalleryActivity implements On
     private void startViewAction(Intent intent) {
         Boolean slideshow = intent.getBooleanExtra(EXTRA_SLIDESHOW, false);
         if (slideshow) {
-            getActionBar().hide();
+            getSupportActionBar().hide();
             DataManager manager = getDataManager();
             Path path = manager.findPathByUri(intent.getData(), intent.getType());
             if (path == null || manager.getMediaObject(path)

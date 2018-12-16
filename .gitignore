@@ -16,4 +16,6 @@ tests/stress/gen/
 local.properties
 gradle/
 build/
+release/
+debug/
 gradlew*

@@ -5,10 +5,9 @@
     android:layout_height="56dp"
     android:layout_alignParentBottom="true"
     android:layout_gravity="bottom"
-    android:background="@color/photo_page_bottom_panel"
+    android:background="?android:colorBackground"
     android:gravity="bottom"
     android:orientation="horizontal"
-    android:theme="@android:style/Theme.DeviceDefault"
     android:visibility="gone">
 
     <ImageButton
@@ -18,7 +17,7 @@
         android:layout_gravity="center_vertical"
         android:layout_weight="1"
         android:background="?android:attr/actionBarItemBackground"
-        android:src="@drawable/edit"
+        android:src="@drawable/ic_twotone_edit_24px"
         android:visibility="gone" />
 
     <ImageButton
@@ -28,7 +27,7 @@
         android:layout_gravity="center_vertical"
         android:layout_weight="1"
         android:background="?android:attr/actionBarItemBackground"
-        android:src="@drawable/share"
+        android:src="@drawable/ic_twotone_share_24px"
         android:visibility="gone" />
 
     <ImageButton
@@ -38,7 +37,7 @@
         android:layout_gravity="center_vertical"
         android:layout_weight="1"
         android:background="?android:attr/actionBarItemBackground"
-        android:src="@drawable/delete"
+        android:src="@drawable/ic_twotone_delete_24px"
         android:visibility="gone" />
 
 </LinearLayout>

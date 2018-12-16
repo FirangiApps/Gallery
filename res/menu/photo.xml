@@ -12,7 +12,8 @@
      See the License for the specific language governing permissions and
      limitations under the License.
 -->
-<menu xmlns:android="http://schemas.android.com/apk/res/android">
+<menu xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
     <!--     <item android:id="@+id/action_import" -->
     <!--             android:title="@string/Import" -->
     <!--             android:icon="@drawable/ic_menu_ptp_holo_light" -->
@@ -41,8 +42,8 @@
     <item
         android:id="@+id/action_slideshow"
         android:icon="@drawable/ic_menu_slideshow_holo_light"
-        android:showAsAction="never"
-        android:title="@string/slideshow" />
+        android:title="@string/slideshow"
+        app:showAsAction="never" />
     <!--     <item android:id="@+id/action_edit" -->
     <!--             android:title="@string/edit" -->
     <!--             android:showAsAction="never" -->
@@ -62,32 +63,32 @@
     <!--             android:showAsAction="never" /> -->
     <item
         android:id="@+id/action_trim"
-        android:showAsAction="never"
-        android:title="@string/trim_action" />
+        android:title="@string/trim_action"
+        app:showAsAction="never" />
     <item
         android:id="@+id/action_mute"
-        android:showAsAction="never"
-        android:title="@string/mute_action" />
+        android:title="@string/mute_action"
+        app:showAsAction="never" />
     <item
         android:id="@+id/action_setas"
-        android:showAsAction="never"
-        android:title="@string/set_image" />
+        android:title="@string/set_image"
+        app:showAsAction="never" />
     <item
         android:id="@+id/action_details"
-        android:showAsAction="never"
-        android:title="@string/details" />
+        android:title="@string/details"
+        app:showAsAction="never" />
     <item
         android:id="@+id/action_show_on_map"
-        android:showAsAction="never"
-        android:title="@string/show_on_map" />
+        android:title="@string/show_on_map"
+        app:showAsAction="never" />
     <item
         android:id="@+id/print"
-        android:showAsAction="never"
-        android:title="@string/print_image" />
+        android:title="@string/print_image"
+        app:showAsAction="never" />
     <item
         android:id="@+id/action_drm_info"
         android:enabled="true"
-        android:showAsAction="never"
         android:title="@string/drm_license_info"
-        android:visible="false" />
+        android:visible="false"
+        app:showAsAction="never" />
 </menu>

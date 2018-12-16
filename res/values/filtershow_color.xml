@@ -19,10 +19,10 @@
     <color name="red">#FF0000</color>
     <color name="blue">#0000FF</color>
     <color name="text_toolbar">#FFFFFF</color>
-    <color name="background_screen">#212121</color>
     <color name="background_toolbar">#363949</color>
-    <color name="background_main_toolbar">#232323</color>
     <color name="toolbar_separation_line">#333333</color>
+    <color name="background_screen">@color/colorPrimary</color>
+    <color name="background_main_toolbar">@color/colorPrimary</color>
     <color name="slider_dot_color">#646464</color>
     <color name="slider_line_color">#888888</color>
     <color name="state_panel_separation_line">#232323</color>
@@ -36,7 +36,7 @@
     <color name="filtershow_stateview_selected_text">#000000</color>
     <color name="filtershow_categoryview_background">#1a1a1a</color>
     <color name="filtershow_categoryview_text">#ffffff</color>
-    <color name="filtershow_category_selection">#4592F9</color>
+    <color name="filtershow_category_selection">#000</color>
     <color name="gradcontrol_point_center">#ffffffff</color>
     <color name="gradcontrol_point_edge">#ffffffff</color>
     <color name="gradcontrol_graypoint_center">#888888</color>
@@ -63,10 +63,7 @@
     <color name="filtershow_color_litho">#80000000</color>
     <color name="filtershow_color_xprocess">#80000000</color>
 
-    <color name="iconview_bottom_color">#80000000</color>
-    <color name="bottom_panel_background_color">#A5000000</color>
-    <color name="crop_panel_background_color">#A5000000</color>
-    <color name="crop_text_color">#4f92e9</color>
-    <color name="watermark_text_color">#80ffffff</color>
-    <color name="watermark_highlight_color">#4592F9</color>
+    <color name="crop_text_color">#545454</color>
+    <color name="watermark_text_color">#ffffff</color>
+    <color name="watermark_highlight_color">@color/colorAccent</color>
 </resources>

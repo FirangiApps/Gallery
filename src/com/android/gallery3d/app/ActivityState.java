@@ -16,7 +16,7 @@
 
 package com.android.gallery3d.app;
 
-import android.app.ActionBar;
+
 import android.app.Activity;
 import android.content.BroadcastReceiver;
 import android.content.Context;
@@ -31,6 +31,8 @@ import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.Window;
 import android.view.WindowManager;
+
+import androidx.appcompat.app.ActionBar;
 
 import com.android.gallery3d.anim.StateTransitionAnimation;
 import com.android.gallery3d.glrenderer.RawTexture;
@@ -192,7 +194,7 @@ abstract public class ActivityState {
     // should only be called by StateManager
     void resume() {
         AbstractGalleryActivity activity = mActivity;
-        ActionBar actionBar = activity.getActionBar();
+        ActionBar actionBar = activity.getSupportActionBar();
         if (actionBar != null) {
             if ((mFlags & FLAG_HIDE_ACTION_BAR) != 0) {
                 actionBar.hide();

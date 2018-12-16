@@ -28,6 +28,6 @@
 -->
 
 <selector xmlns:android="http://schemas.android.com/apk/res/android">
-    <item android:drawable="@drawable/exposure" android:state_selected="false"></item>
-    <item android:drawable="@drawable/exposure_select" android:state_selected="true"></item>
+    <item android:drawable="@drawable/ic_twotone_exposure_24px" android:state_selected="false"></item>
+    <item android:drawable="@drawable/ic_twotone_exposure_24px_select" android:state_selected="true"></item>
 </selector>

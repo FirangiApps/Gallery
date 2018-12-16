@@ -28,7 +28,7 @@
 -->
 
 <selector xmlns:android="http://schemas.android.com/apk/res/android">
-    <item android:drawable="@drawable/color" android:state_selected="false"></item>
-    <item android:drawable="@drawable/color_select" android:state_selected="true"></item>
+    <item android:drawable="@drawable/ic_twotone_color_lens_24px" android:state_selected="false"></item>
+    <item android:drawable="@drawable/ic_twotone_color_lens_24px_select" android:state_selected="true"></item>
 
 </selector>

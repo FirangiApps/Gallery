@@ -64,7 +64,7 @@
     </style>
 
     <style name="DefaultFillColor">
-        <item name="fillColorSelector">#FFFFFF</item>
+        <item name="fillColorSelector">@color/colorAccent</item>
     </style>
 
     <style name="SelectedFillColor">

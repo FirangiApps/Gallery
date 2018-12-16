@@ -17,7 +17,6 @@
 package com.android.gallery3d.app;
 
 import android.annotation.TargetApi;
-import android.app.ActionBar.OnMenuVisibilityListener;
 import android.app.Activity;
 import android.content.ActivityNotFoundException;
 import android.content.Context;
@@ -46,6 +45,8 @@ import android.widget.RelativeLayout;
 import android.widget.ShareActionProvider;
 import android.widget.Toast;
 import android.widget.Toolbar;
+
+import androidx.appcompat.app.ActionBar;
 
 import com.android.gallery3d.app.dualcam3d.ThreeDimensionalActivity;
 import com.android.gallery3d.common.ApiHelper;
@@ -286,7 +287,6 @@ public abstract class PhotoPage extends ActivityState implements
     public void onCreate(Bundle data, Bundle restoreState) {
         super.onCreate(data, restoreState);
         mActionBar = mActivity.getGalleryActionBar();
-        mActionBar.setBackGroundTransparent();
         mSelectionManager = new SelectionManager(mActivity, false);
         mMenuExecutor = new MenuExecutor(mActivity, mSelectionManager);
 
@@ -1033,7 +1033,6 @@ public abstract class PhotoPage extends ActivityState implements
                     MediaSet.setShowAlbumsetTimeTitle(true);
                 }
                 super.onBackPressed();
-                mActionBar.setBackGroundDefault();
                 int count = mActivity.getStateManager().getStateCount();
                 if (mIsFromVideoScreen || count == 1 || mIsFromTimelineScreen) {
                     ((GalleryActivity) mActivity).toggleNavBar(true);
@@ -1771,7 +1770,7 @@ public abstract class PhotoPage extends ActivityState implements
         void setCurrentPhoto(Path path, int indexHint);
     }
 
-    private class MyMenuVisibilityListener implements OnMenuVisibilityListener {
+    private class MyMenuVisibilityListener implements ActionBar.OnMenuVisibilityListener {
         @Override
         public void onMenuVisibilityChanged(boolean isVisible) {
             mIsMenuVisible = isVisible;

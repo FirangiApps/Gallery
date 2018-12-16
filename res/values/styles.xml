@@ -35,25 +35,11 @@
         <item name="android:logo">@android:color/transparent</item>
     </style>
 
-    <style name="Theme.FilterShow" parent="Theme.Gallery">
-        <item name="android:windowBackground">@null</item>
-        <item name="android:actionBarStyle">@style/FilterShowActionBar</item>
-        <item name="android:toolbarStyle">@style/FilterShowToolbar</item>
-    </style>
-
-    <style name="FilterShowToolbar" parent="@android:style/Widget.Toolbar">
-        <item name="android:contentInsetStart">0dp</item>
-    </style>
+    <style name="Theme.FilterShow" parent="Theme.AppCompat.Light" />
 
     <style name="Theme.MovieActivity" parent="android:Theme.DeviceDefault.Light.DarkActionBar" />
 
-    <style name="Theme.Crop" parent="Theme.GalleryBase">
-        <item name="android:windowContentOverlay">@null</item>
-        <item name="android:actionBarStyle">@style/Holo.ActionBar</item>
-        <item name="android:colorBackground">@null</item>
-        <item name="android:colorBackgroundCacheHint">@null</item>
-        <item name="android:windowBackground">@drawable/filtershow_tiled_background</item>
-    </style>
+    <style name="Theme.Crop" parent="AppTheme" />
 
     <style name="Holo.ActionBar" parent="android:Widget.Holo.ActionBar">
         <item name="android:displayOptions">useLogo|showHome</item>
@@ -82,7 +68,6 @@
     </style>
 
     <!-- Camera resources below -->
-
     <style name="Theme.Camera" parent="Theme.CameraBase">
         <item name="android:windowBackground">@android:color/black</item>
         <item name="android:colorBackground">@android:color/black</item>
@@ -350,7 +335,7 @@
         <item name="android:background">@drawable/bg_pressed</item>
     </style>
 
-    <style name="AppTheme" parent="Theme.AppCompat.Light">
+    <style name="AppTheme" parent="Theme.AppCompat.Light.NoActionBar">
         <item name="android:colorPrimary">@color/colorPrimary</item>
         <item name="android:colorAccent">@color/colorAccent</item>
         <item name="android:windowDisablePreview">true</item>
@@ -393,10 +378,5 @@
 
     <style name="WhiteOverflow" parent="@android:style/Widget.DeviceDefault.ActionButton">
         <item name="android:src">@drawable/more</item>
-    </style>
-
-    <style name="FilterShowActionBar" parent="@android:style/Widget.DeviceDefault.Light.ActionBar">
-        <item name="android:background">@color/edit_actionbar_background</item>
-        <item name="android:contentInsetStart">0dp</item>
     </style>
 </resources>
