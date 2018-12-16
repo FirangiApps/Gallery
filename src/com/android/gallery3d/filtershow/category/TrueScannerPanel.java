@@ -32,7 +32,7 @@ package com.android.gallery3d.filtershow.category;
 
 import android.app.Activity;
 import android.os.Bundle;
-import android.support.annotation.Nullable;
+import androidx.annotation.Nullable;
 import android.view.View;
 
 import com.android.gallery3d.filtershow.FilterShowActivity;
