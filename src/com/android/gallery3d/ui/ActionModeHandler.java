@@ -97,7 +97,7 @@ public class ActionModeHandler implements Callback, PopupList.OnPopupItemClickLi
         mMainHandler = new Handler(activity.getMainLooper());
         mNfcAdapter = NfcAdapter.getDefaultAdapter(mActivity.getAndroidContext());
         mToolbar = mActivity.findViewById(R.id.toolbar);
-        mActivity.setSupportActionBar(mToolbar);
+        /*mActivity.setSupportActionBar(mToolbar);*/
     }
 
     public void startActionMode() {
